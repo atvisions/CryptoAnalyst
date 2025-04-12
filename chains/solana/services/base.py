@@ -101,7 +101,11 @@ class SolanaRPCService:
                     'chain': 'SOL',
                     'address': address
                 }
-            raise Exception("获取余额失败")
+            return {
+                'balance': '0',
+                'chain': 'SOL',
+                'address': address
+            }
         except Exception as e:
             raise Exception(f"获取余额失败: {str(e)}")
             

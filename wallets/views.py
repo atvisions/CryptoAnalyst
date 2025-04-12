@@ -22,6 +22,7 @@ import random
 from django.conf import settings
 from chains.evm.services.base import EVMRPCService
 from chains.solana.services.base import SolanaRPCService
+from chains.solana.services.balance import SolanaBalanceService
 
 # Create your views here.
 
@@ -161,6 +162,12 @@ class WalletViewSet(viewsets.ModelViewSet):
         return context
     
     def get_queryset(self):
+        """获取查询集"""
+        # 如果是详情操作（如 get_balance），允许直接通过 ID 获取
+        if self.action in ['get_balance', 'get_token_balance', 'show_private_key', 'get_all_balances']:
+            return Wallet.objects.all()
+            
+        # 其他操作需要设备 ID
         device_id = self.request.query_params.get('device_id') or self.request.data.get('device_id')
         if device_id:
             device = get_or_create_device(device_id)
@@ -432,20 +439,23 @@ class WalletViewSet(viewsets.ModelViewSet):
         """获取钱包余额"""
         wallet = self.get_object()
         try:
-            if wallet.chain in EVM_CHAINS:
+            if wallet.chain == 'SOL':
+                balance_service = SolanaBalanceService()
+                balance = balance_service.get_balance(wallet.address)
+            else:
                 rpc_service = EVMRPCService(wallet.chain)
                 balance = rpc_service.get_balance(wallet.address)
-                return Response({'balance': balance})
-            elif wallet.chain == 'SOL':
-                rpc_service = SolanaRPCService()
-                balance = rpc_service.get_balance(wallet.address)
-                return Response({'balance': balance})
-            else:
-                return Response({'error': f'不支持的链类型: {wallet.chain}'}, 
-                              status=status.HTTP_400_BAD_REQUEST)
+            return Response(balance)
         except Exception as e:
-            return Response({'error': f'获取余额失败: {str(e)}'}, 
-                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            import traceback
+            error_detail = {
+                'error': str(e),
+                'traceback': traceback.format_exc(),
+                'wallet_id': pk,
+                'chain': wallet.chain,
+                'address': wallet.address
+            }
+            return Response(error_detail, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     @action(detail=True, methods=['get'])
     def get_token_balance(self, request, pk=None):
@@ -485,3 +495,39 @@ class WalletViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': f'获取代币余额失败: {str(e)}'}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'])
+    def get_all_balances(self, request, pk=None):
+        """获取钱包所有代币余额"""
+        wallet = self.get_object()
+        try:
+            if wallet.chain == 'SOL':
+                balance_service = SolanaBalanceService()
+                balances = balance_service.get_all_balances(wallet.address)
+            else:
+                # 对于 EVM 链，暂时只返回原生代币余额
+                rpc_service = EVMRPCService(wallet.chain)
+                balance = rpc_service.get_balance(wallet.address)
+                balances = {
+                    'total_value_usd': '0',
+                    'tokens': [{
+                        'token_address': 'native',
+                        'symbol': wallet.chain,
+                        'name': wallet.chain,
+                        'balance': str(balance),
+                        'balance_formatted': str(balance),
+                        'decimals': 18,
+                        'is_native': True
+                    }]
+                }
+            return Response(balances)
+        except Exception as e:
+            import traceback
+            error_detail = {
+                'error': str(e),
+                'traceback': traceback.format_exc(),
+                'wallet_id': pk,
+                'chain': wallet.chain,
+                'address': wallet.address
+            }
+            return Response(error_detail, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

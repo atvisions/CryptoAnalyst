@@ -161,3 +161,16 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
     ],
 }
+
+# Blockchain RPC settings
+SOLANA_RPC_URL = os.getenv('SOLANA_RPC_URL', 'https://api.mainnet-beta.solana.com')
+SOLANA_WS_URL = os.getenv('SOLANA_WS_URL', 'wss://api.mainnet-beta.solana.com')
+
+# EVM RPC settings
+ETH_RPC_URL = os.getenv('ETH_RPC_URL', 'https://mainnet.infura.io/v3/your-project-id')
+BSC_RPC_URL = os.getenv('BSC_RPC_URL', 'https://bsc-dataseed.binance.org')
+MATIC_RPC_URL = os.getenv('MATIC_RPC_URL', 'https://polygon-rpc.com')
+
+# Kadena settings
+KADENA_NETWORK_ID = os.getenv('KADENA_NETWORK_ID', 'mainnet01')
+KADENA_HOST = os.getenv('KADENA_HOST', 'https://api.chainweb.com')

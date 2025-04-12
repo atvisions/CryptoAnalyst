@@ -7,7 +7,6 @@ class Config:
     # API 密钥配置
     MORALIS_API_KEY = os.getenv("MORALIS_API_KEY", "")
     ALCHEMY_API_KEY = os.getenv("ALCHEMY_API_KEY", "")
-    HELIUS_API_KEY = os.getenv("HELIUS_API_KEY", "")
     
     # EVM 链配置
     EVM_CONFIGS: Dict[str, Dict[str, Any]] = {
@@ -84,13 +83,13 @@ class Config:
     # Solana 链配置
     SOLANA_CONFIGS: Dict[str, Dict[str, Any]] = {
         "SOL": {
-            "rpc_url": f"https://mainnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
+            "moralis_url": "https://solana-gateway.moralis.io"
         },
         "SOL_DEVNET": {
-            "rpc_url": f"https://devnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
+            "moralis_url": "https://solana-gateway.moralis.io"
         },
         "SOL_TESTNET": {
-            "rpc_url": f"https://testnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
+            "moralis_url": "https://solana-gateway.moralis.io"
         }
     }
     
