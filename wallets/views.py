@@ -338,7 +338,7 @@ class WalletViewSet(viewsets.ModelViewSet):
             'chain': {
                 'code': chain_obj.chain,
                 'name': chain_obj.name,
-                'logo': chain_obj.logo,
+                'logo': chain_obj.logo_url,
                 'is_active': chain_obj.is_active
             },
             'mnemonic': mnemonic
