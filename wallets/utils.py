@@ -9,8 +9,56 @@ import base58
 from kadena_sdk.kadena_sdk import KadenaSdk
 from kadena_sdk.key_pair import KeyPair
 import nacl.signing
+from typing import Tuple
+from web3 import Web3
+import warnings
 
-def generate_mnemonic():
+class ChainUtils:
+    """链工具类"""
+    
+    @staticmethod
+    def setup_chain_warnings():
+        """设置警告过滤"""
+        warnings.filterwarnings('ignore', category=UserWarning)
+    
+    @staticmethod
+    def register_additional_chains(web3: Web3):
+        """注册额外的区块链网络"""
+        # 注册 BSC 主网
+        web3.eth.account.enable_unaudited_hdwallet_features()
+        web3.eth.account.register_network(
+            "BSC",
+            chain_id=56,
+            slip44=714,
+            hrp="bnb",
+            symbol="BNB",
+            explorer="https://bscscan.com",
+            rpc_url="https://bsc-dataseed.binance.org/"
+        )
+        
+        # 注册 Polygon 主网
+        web3.eth.account.register_network(
+            "MATIC",
+            chain_id=137,
+            slip44=966,
+            hrp="matic",
+            symbol="MATIC",
+            explorer="https://polygonscan.com",
+            rpc_url="https://polygon-rpc.com"
+        )
+        
+        # 注册 Arbitrum 主网
+        web3.eth.account.register_network(
+            "ARB",
+            chain_id=42161,
+            slip44=9001,
+            hrp="arb",
+            symbol="ETH",
+            explorer="https://arbiscan.io",
+            rpc_url="https://arb1.arbitrum.io/rpc"
+        )
+
+def generate_mnemonic() -> str:
     """生成助记词"""
     mnemo = Mnemonic("english")
     return mnemo.generate()
@@ -23,79 +71,51 @@ def validate_mnemonic(mnemonic: str) -> bool:
     except Exception:
         return False
 
-def generate_wallet_from_mnemonic(mnemonic: str, chain: str) -> dict:
+def generate_wallet_from_mnemonic(mnemonic: str, chain: str) -> Tuple[str, str]:
     """从助记词生成钱包"""
-    try:
-        if chain in ['ETH', 'Ethereum']:
-            # 生成以太坊钱包
-            account = Account.create()
-            return {
-                'address': account.address,
-                'private_key': account.key.hex()
-            }
-            
-        elif chain in ['SOL', 'Solana']:
-            # 生成 Solana 钱包
-            mnemo = Mnemonic("english")
-            seed = mnemo.to_seed(mnemonic)
-            keypair = Keypair.from_seed(seed[:32])  # 使用前32字节作为种子
-            # 将私钥和公钥组合成64字节数组
-            private_key_bytes = keypair.secret()
-            public_key_bytes = bytes(keypair.pubkey())
-            full_keypair = private_key_bytes + public_key_bytes
-            # 使用 base58 编码
-            private_key = base58.b58encode(full_keypair).decode()
-            return {
-                'address': str(keypair.pubkey()),
-                'private_key': private_key
-            }
-            
-        elif chain in ['KDA', 'Kadena']:
-            # 生成 Kadena 钱包
-            # 生成新的密钥对
-            signing_key = nacl.signing.SigningKey.generate()
-            verify_key = signing_key.verify_key
-            
-            # 转换为十六进制格式
-            private_key = signing_key.encode().hex()
-            public_key = verify_key.encode().hex()
-            
-            # 确保公钥长度为64个字符
-            if len(public_key) < 64:
-                public_key = public_key.zfill(64)
-            elif len(public_key) > 64:
-                public_key = public_key[:64]
-                
-            # 添加 k: 前缀
-            address = f"k:{public_key}"
-            
-            return {
-                'address': address,
-                'private_key': private_key
-            }
-            
-        else:
-            raise ValueError(f"Unsupported chain: {chain}")
-            
-    except Exception as e:
-        raise Exception(f"Failed to generate wallet: {str(e)}")
+    if not validate_mnemonic(mnemonic):
+        raise ValueError("无效的助记词")
+    
+    if chain in ["ETH", "BSC", "MATIC", "ARB", "OP", "AVAX", "BASE"]:
+        # 生成 EVM 钱包
+        mnemo = Mnemonic("english")
+        seed = mnemo.to_seed(mnemonic)
+        account = Account.create()
+        return account.address, account.key.hex()
+    elif chain == "SOL":
+        # 生成 Solana 钱包
+        mnemo = Mnemonic("english")
+        seed = mnemo.to_seed(mnemonic)
+        keypair = Keypair.from_seed(seed[:32])  # 使用前32字节作为种子
+        return str(keypair.pubkey()), str(keypair)
+    elif chain == "KDA":
+        # 生成 Kadena 钱包
+        mnemo = Mnemonic("english")
+        seed = mnemo.to_seed(mnemonic)
+        signing_key = nacl.signing.SigningKey(seed[:32])  # 使用前32字节作为种子
+        verify_key = signing_key.verify_key
+        private_key = signing_key.encode().hex()
+        public_key = verify_key.encode().hex()
+        address = f"k:{public_key}"
+        return address, private_key
+    else:
+        raise ValueError(f"不支持的链类型: {chain}")
 
-def encrypt_private_key(private_key: str, password: str) -> str:
+def encrypt_private_key(private_key: str, payment_password: str) -> str:
     """加密私钥"""
     # 使用支付密码生成密钥
-    key = base64.urlsafe_b64encode(hashlib.sha256(password.encode()).digest())
-    f = Fernet(key)
-    
-    # 加密私钥
-    encrypted_private_key = f.encrypt(private_key.encode()).decode()
-    return encrypted_private_key
+    key = hashlib.sha256(payment_password.encode()).digest()
+    f = Fernet(base64.urlsafe_b64encode(key))
+    encrypted = f.encrypt(private_key.encode())
+    return encrypted.decode()
 
-def decrypt_private_key(encrypted_private_key, payment_password):
+def decrypt_private_key(encrypted_key: str, payment_password: str) -> str:
     """解密私钥"""
-    # 使用支付密码生成密钥
-    key = base64.urlsafe_b64encode(hashlib.sha256(payment_password.encode()).digest())
-    f = Fernet(key)
-    
-    # 解密私钥
-    decrypted_private_key = f.decrypt(encrypted_private_key.encode()).decode()
-    return decrypted_private_key 
+    try:
+        # 使用支付密码生成密钥
+        key = hashlib.sha256(payment_password.encode()).digest()
+        f = Fernet(base64.urlsafe_b64encode(key))
+        decrypted = f.decrypt(encrypted_key.encode())
+        return decrypted.decode()
+    except:
+        raise ValueError("解密失败，请检查支付密码是否正确") 

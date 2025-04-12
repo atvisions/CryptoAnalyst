@@ -3,114 +3,100 @@
         {
             "code": "ETH",
             "name": "Ethereum",
-            "logo": "chains/eth.png",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/eth.png"
         },
         {
             "code": "BSC",
             "name": "BNB Chain",
-            "logo": "chains/bnb.png",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/bnb.png"
         },
         {
             "code": "MATIC",
             "name": "Polygon",
-            "logo": "chains/polygon.jpeg",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/polygon.jpeg"
         },
         {
             "code": "AVAX",
             "name": "Avalanche",
-            "logo": "chains/avax.png",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/avax.png"
         },
         {
             "code": "BASE",
             "name": "Base",
-            "logo": "chains/base.png",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/base.png"
         },
         {
             "code": "OP",
             "name": "Optimism",
-            "logo": "chains/op.png",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/op.png"
         },
         {
             "code": "ARB",
             "name": "Arbitrum",
-            "logo": "chains/arb.jpeg",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/arb.jpeg"
         },
         {
             "code": "FTM",
             "name": "Fantom",
-            "logo": "chains/ftm.png",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/ftm.png"
         },
         {
             "code": "CRO",
             "name": "Cronos",
-            "logo": "chains/cro.jpeg",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/cro.jpeg"
         },
         {
             "code": "ZKSYNC",
             "name": "zkSync Era",
-            "logo": "chains/zksync.jpeg",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/zksync.jpeg"
         },
         {
             "code": "LINEA",
             "name": "Linea",
-            "logo": "chains/linea.png",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/linea.png"
         },
         {
             "code": "MANTA",
             "name": "Manta",
-            "logo": "chains/manta.jpeg",
             "type": "evm",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/manta.jpeg"
         },
         {
             "code": "SOL",
             "name": "Solana",
-            "logo": "chains/sol.png",
             "type": "solana",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/sol.png"
         },
         {
             "code": "KDA",
             "name": "Kadena",
-            "logo": "chains/kda.jpg",
             "type": "kadena",
             "is_active": true,
-            "is_testnet": false
+            "logo": "chain_logos/kda.jpg"
         }
     ]
 } 

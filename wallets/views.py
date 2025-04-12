@@ -20,6 +20,8 @@ from .utils import validate_mnemonic, generate_wallet_from_mnemonic, generate_mn
 import os
 import random
 from django.conf import settings
+from chains.evm.services.base import EVMRPCService
+from chains.solana.services.base import SolanaRPCService
 
 # Create your views here.
 
@@ -277,16 +279,39 @@ class WalletViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        # 获取验证后的数据
+        chain = serializer.validated_data['chain']
+        address = serializer.validated_data['address']
+        
+        # 检查钱包是否已存在
+        existing_wallet = Wallet.objects.filter(
+            device=device,
+            chain=chain,
+            address=address
+        ).first()
+        
+        if existing_wallet:
+            if existing_wallet.is_active:
+                return Response({
+                    'error': '钱包已存在',
+                    'wallet': WalletSerializer(existing_wallet).data
+                }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                # 激活已存在的钱包
+                existing_wallet.is_active = True
+                existing_wallet.save()
+                return Response(WalletSerializer(existing_wallet).data)
+        
         # 加密私钥
         private_key = request.data.get('private_key')
         payment_password = request.data.get('payment_password')
         encrypted_private_key = encrypt_private_key(private_key, payment_password)
         
-        # 创建钱包
+        # 创建新钱包
         wallet = Wallet.objects.create(
             device=device,
-            chain=request.data.get('chain'),
-            address=serializer.validated_data['address'],
+            chain=chain,
+            address=address,
             private_key=encrypted_private_key,
             name=request.data.get('name', f'My Wallet {Wallet.objects.filter(device=device).count() + 1:02d}'),
             avatar=f'face/face-{random.randint(1, 10):02d}.png'
@@ -363,10 +388,10 @@ class WalletViewSet(viewsets.ModelViewSet):
             device = get_or_create_device(device_id)
             
             # 生成钱包
-            wallet_data = generate_wallet_from_mnemonic(mnemonic, chain)
+            address, private_key = generate_wallet_from_mnemonic(mnemonic, chain)
             
             # 加密私钥
-            encrypted_private_key = encrypt_private_key(wallet_data['private_key'], payment_password)
+            encrypted_private_key = encrypt_private_key(private_key, payment_password)
             
             # 获取用户的钱包数量
             wallet_count = Wallet.objects.filter(device=device).count()
@@ -381,7 +406,7 @@ class WalletViewSet(viewsets.ModelViewSet):
             # 创建钱包
             wallet = Wallet.objects.create(
                 device=device,
-                address=wallet_data['address'],
+                address=address,
                 private_key=encrypted_private_key,
                 chain=chain,
                 name=wallet_name,
@@ -401,3 +426,62 @@ class WalletViewSet(viewsets.ModelViewSet):
             
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'])
+    def get_balance(self, request, pk=None):
+        """获取钱包余额"""
+        wallet = self.get_object()
+        try:
+            if wallet.chain in EVM_CHAINS:
+                rpc_service = EVMRPCService(wallet.chain)
+                balance = rpc_service.get_balance(wallet.address)
+                return Response({'balance': balance})
+            elif wallet.chain == 'SOL':
+                rpc_service = SolanaRPCService()
+                balance = rpc_service.get_balance(wallet.address)
+                return Response({'balance': balance})
+            else:
+                return Response({'error': f'不支持的链类型: {wallet.chain}'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f'获取余额失败: {str(e)}'}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    @action(detail=True, methods=['get'])
+    def get_token_balance(self, request, pk=None):
+        """获取代币余额"""
+        wallet = self.get_object()
+        token_address = request.query_params.get('token_address')
+        if not token_address:
+            return Response({'error': '需要提供代币地址'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            if wallet.chain in EVM_CHAINS:
+                from chains.evm.services.token import EVMTokenService
+                token_service = EVMTokenService(wallet.chain)
+                balance = token_service.get_token_balance(token_address, wallet.address)
+                decimals = token_service.get_token_decimals(token_address)
+                symbol = token_service.get_token_symbol(token_address)
+                return Response({
+                    'balance': balance,
+                    'decimals': decimals,
+                    'symbol': symbol
+                })
+            elif wallet.chain == 'SOL':
+                from chains.solana.services.token import SolanaTokenService
+                token_service = SolanaTokenService()
+                balance = token_service.get_token_balance(token_address, wallet.address)
+                decimals = token_service.get_token_decimals(token_address)
+                symbol = token_service.get_token_symbol(token_address)
+                return Response({
+                    'balance': balance,
+                    'decimals': decimals,
+                    'symbol': symbol
+                })
+            else:
+                return Response({'error': f'不支持的链类型: {wallet.chain}'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': f'获取代币余额失败: {str(e)}'}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)

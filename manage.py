@@ -2,9 +2,13 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import warnings
 
 # 添加项目根目录到 Python 路径
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# 过滤 eth_utils 的网络警告
+warnings.filterwarnings("ignore", message="Network .* does not have a valid ChainId")
 
 def main():
     """Run administrative tasks."""

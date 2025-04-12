@@ -58,6 +58,7 @@ class Wallet(models.Model):
     chain = models.CharField(max_length=32, choices=CHAIN_CHOICES)
     name = models.CharField(max_length=64, default="")
     is_watch_only = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)  # 添加激活状态字段
     avatar = models.ImageField(upload_to='face/', null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)

@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'wallets',
+    'chains.evm',
+    'chains.solana',
+    'chains.kadena',
 ]
 
 MIDDLEWARE = [

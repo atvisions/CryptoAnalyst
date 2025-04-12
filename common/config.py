@@ -1,16 +1,16 @@
 from typing import Dict, Any
+import os
 
 class Config:
     """配置管理类"""
     
     # API 密钥配置
-    MORALIS_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjZiNGRlNzlkLTc3YzctNGM1Ny04MDE4LTNmYzk1OGUxOTBiYSIsIm9yZ0lkIjoiNDI4MzE0IiwidXNlcklkIjoiNDQwNTc1IiwidHlwZUlkIjoiNDE4MjdjY2UtYmNhMi00YjZiLTgzMmUtMDE1ZWNmZGMwODZkIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MzgyNDY2NDYsImV4cCI6NDg5NDAwNjY0Nn0.fj9LXbkQcSLMLIjoeD6IXkLLVigPQx3wNaSiUzfQkl8"
-    ALCHEMY_API_KEY = "Dwhp-JulbzNpZrEHruaBSD7RRx4Eeukb"
-    HELIUS_API_KEY = "87466c84-da3e-42be-b346-a4e837da857f"
+    MORALIS_API_KEY = os.getenv("MORALIS_API_KEY", "")
+    ALCHEMY_API_KEY = os.getenv("ALCHEMY_API_KEY", "")
+    HELIUS_API_KEY = os.getenv("HELIUS_API_KEY", "")
     
-    # RPC 节点配置
-    RPC_CONFIGS: Dict[str, Dict[str, Any]] = {
-        # EVM 兼容链
+    # EVM 链配置
+    EVM_CONFIGS: Dict[str, Dict[str, Any]] = {
         "ETH": {
             "rpc_url": f"https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
@@ -78,9 +78,11 @@ class Config:
         "CRO_TESTNET": {
             "rpc_url": "https://evm-t3.cronos.org",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
-        },
-        
-        # 非 EVM 链
+        }
+    }
+    
+    # Solana 链配置
+    SOLANA_CONFIGS: Dict[str, Dict[str, Any]] = {
         "SOL": {
             "rpc_url": f"https://mainnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
         },
@@ -89,7 +91,11 @@ class Config:
         },
         "SOL_TESTNET": {
             "rpc_url": f"https://testnet.helius-rpc.com/?api-key={HELIUS_API_KEY}"
-        },
+        }
+    }
+    
+    # Kadena 链配置
+    KADENA_CONFIGS: Dict[str, Dict[str, Any]] = {
         "KDA": {
             "rpc_url": "https://api.chainweb.com/openapi",
             "chain_id": "mainnet01",
@@ -119,28 +125,22 @@ class Config:
     }
     
     @classmethod
-    def get_rpc_url(cls, chain: str) -> str:
-        """获取指定链的 RPC URL"""
-        if chain not in cls.RPC_CONFIGS:
-            raise ValueError(f"不支持的链类型: {chain}")
-        return cls.RPC_CONFIGS[chain]["rpc_url"]
+    def get_evm_config(cls, chain: str) -> Dict[str, Any]:
+        """获取 EVM 链配置"""
+        if chain not in cls.EVM_CONFIGS:
+            raise ValueError(f"不支持的 EVM 链类型: {chain}")
+        return cls.EVM_CONFIGS[chain]
     
     @classmethod
-    def get_moralis_url(cls, chain: str) -> str:
-        """获取指定链的 Moralis URL"""
-        if chain not in cls.RPC_CONFIGS or "moralis_url" not in cls.RPC_CONFIGS[chain]:
-            raise ValueError(f"不支持的链类型或该链不支持 Moralis: {chain}")
-        return cls.RPC_CONFIGS[chain]["moralis_url"]
+    def get_solana_config(cls, chain: str) -> Dict[str, Any]:
+        """获取 Solana 链配置"""
+        if chain not in cls.SOLANA_CONFIGS:
+            raise ValueError(f"不支持的 Solana 链类型: {chain}")
+        return cls.SOLANA_CONFIGS[chain]
     
     @classmethod
     def get_kadena_config(cls, chain: str) -> Dict[str, Any]:
-        """获取 Kadena 链的配置"""
-        if chain not in ["KDA", "KDA_TESTNET"]:
+        """获取 Kadena 链配置"""
+        if chain not in cls.KADENA_CONFIGS:
             raise ValueError(f"不支持的 Kadena 链类型: {chain}")
-        return {
-            "rpc_url": cls.RPC_CONFIGS[chain]["rpc_url"],
-            "chain_id": cls.RPC_CONFIGS[chain]["chain_id"],
-            "network_id": cls.RPC_CONFIGS[chain]["network_id"],
-            "api_version": cls.RPC_CONFIGS[chain]["api_version"],
-            "nodes": cls.RPC_CONFIGS[chain]["nodes"]
-        } 
+        return cls.KADENA_CONFIGS[chain] 
