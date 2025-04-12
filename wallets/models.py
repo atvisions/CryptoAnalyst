@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.conf import settings
 import os
 import random
+from .constants import CHAIN_NAMES, CHAIN_CHOICES, CHAIN_TYPES, CHAIN_LOGOS
 
 class Device(models.Model):
     device_id = models.CharField(max_length=64, unique=True)
@@ -25,53 +26,32 @@ class PaymentPassword(models.Model):
         return f"Payment password for {self.device.device_id}"
 
 class Chain(models.Model):
-    device = models.ForeignKey(Device, on_delete=models.CASCADE)
-    chain = models.CharField(max_length=32)  # ETH, SOL, KDA
-    is_selected = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
+    chain = models.CharField(max_length=50, unique=True)
+    is_active = models.BooleanField(default=True)
+    logo = models.ImageField(upload_to='chain_logos/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = ('device', 'chain')
-
     def __str__(self):
-        return f"{self.chain} chain for {self.device.device_id}"
+        return self.chain
+
+    @property
+    def name(self):
+        return CHAIN_NAMES.get(self.chain, self.chain)
+
+    @property
+    def logo_url(self):
+        """返回 logo URL，如果上传了自定义 logo 则使用自定义的，否则使用默认的"""
+        if self.logo:
+            return self.logo.url if hasattr(self.logo, 'url') else None
+        # 如果没有上传 logo，使用默认的
+        default_logo = CHAIN_LOGOS.get(self.chain)
+        if default_logo:
+            return default_logo
+        return None
 
 class Wallet(models.Model):
     """钱包模型"""
-    CHAIN_CHOICES = [
-        ('ETH', 'Ethereum'),
-        ('BSC', 'BNB Chain'),
-        ('MATIC', 'Polygon'),
-        ('AVAX', 'Avalanche'),
-        ('OP', 'Optimism'),
-        ('ARB', 'Arbitrum'),
-        ('SOL', 'Solana'),
-        ('KDA', 'Kadena'),
-    ]
-
-    CHAIN_LOGOS = {
-        'ETH': 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-        'BSC': 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
-        'MATIC': 'https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png',
-        'AVAX': 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png',
-        'OP': 'https://assets.coingecko.com/coins/images/25244/large/Optimism.png',
-        'ARB': 'https://assets.coingecko.com/coins/images/16547/large/photo_2023-03-29_21.47.00.jpeg',
-        'SOL': 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
-        'KDA': 'https://assets.coingecko.com/coins/images/12240/large/kadena.png',
-    }
-
-    CHAIN_TYPES = {
-        'ETH': 'EVM',
-        'BSC': 'EVM',
-        'MATIC': 'EVM',
-        'AVAX': 'EVM',
-        'OP': 'EVM',
-        'ARB': 'EVM',
-        'SOL': 'Solana',
-        'KDA': 'Kadena',
-    }
-
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     address = models.CharField(max_length=128)
     private_key = models.CharField(max_length=256)  # 加密后的私钥

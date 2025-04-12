@@ -6,6 +6,9 @@ import hashlib
 from cryptography.fernet import Fernet
 import base64
 import base58
+from kadena_sdk.kadena_sdk import KadenaSdk
+from kadena_sdk.key_pair import KeyPair
+import nacl.signing
 
 def generate_mnemonic():
     """生成助记词"""
@@ -44,6 +47,30 @@ def generate_wallet_from_mnemonic(mnemonic: str, chain: str) -> dict:
             private_key = base58.b58encode(full_keypair).decode()
             return {
                 'address': str(keypair.pubkey()),
+                'private_key': private_key
+            }
+            
+        elif chain in ['KDA', 'Kadena']:
+            # 生成 Kadena 钱包
+            # 生成新的密钥对
+            signing_key = nacl.signing.SigningKey.generate()
+            verify_key = signing_key.verify_key
+            
+            # 转换为十六进制格式
+            private_key = signing_key.encode().hex()
+            public_key = verify_key.encode().hex()
+            
+            # 确保公钥长度为64个字符
+            if len(public_key) < 64:
+                public_key = public_key.zfill(64)
+            elif len(public_key) > 64:
+                public_key = public_key[:64]
+                
+            # 添加 k: 前缀
+            address = f"k:{public_key}"
+            
+            return {
+                'address': address,
                 'private_key': private_key
             }
             

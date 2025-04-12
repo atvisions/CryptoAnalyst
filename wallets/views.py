@@ -13,6 +13,7 @@ from .serializers import (
     WalletImportSerializer,
     WatchOnlyWalletSerializer
 )
+from .constants import EVM_CHAINS  # 从 constants.py 导入
 import uuid
 import hashlib
 from .utils import validate_mnemonic, generate_wallet_from_mnemonic, generate_mnemonic, encrypt_private_key
@@ -23,6 +24,12 @@ from django.conf import settings
 # Create your views here.
 
 def get_or_create_device(device_id):
+    """
+    获取或创建设备，如果设备已存在则返回现有设备
+    """
+    if not device_id:
+        raise ValidationError({'error': 'Device ID is required'})
+        
     device, created = Device.objects.get_or_create(device_id=device_id)
     return device
 
@@ -31,7 +38,12 @@ class DeviceViewSet(viewsets.ModelViewSet):
     serializer_class = DeviceSerializer
     
     def create(self, request, *args, **kwargs):
-        device = Device.objects.create()
+        device_id = request.data.get('device_id')
+        if not device_id:
+            return Response({'error': 'Device ID is required'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        device = Device.objects.create(device_id=device_id)
         serializer = self.get_serializer(device)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -150,7 +162,7 @@ class WalletViewSet(viewsets.ModelViewSet):
         device_id = self.request.query_params.get('device_id') or self.request.data.get('device_id')
         if device_id:
             device = get_or_create_device(device_id)
-            return Wallet.objects.filter(device=device)
+            return Wallet.objects.filter(device=device).order_by('-created_at')
         return Wallet.objects.none()
     
     def get_serializer_class(self):
@@ -173,17 +185,20 @@ class WalletViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def get_supported_chains(self, request):
-        chains = []
-        for code, name in Wallet.CHAIN_CHOICES:
-            chain_info = {
-                'code': code,
-                'name': name,
-                'logo': Wallet.CHAIN_LOGOS.get(code, ''),
-                'type': Wallet.CHAIN_TYPES.get(code, ''),
-                'is_testnet': False,  # 默认为主网
-            }
-            chains.append(chain_info)
-        return Response(chains)
+        """获取支持的链列表"""
+        chains = Chain.objects.filter(is_active=True)
+        
+        chain_list = []
+        for chain in chains:
+            chain_list.append({
+                'chain': chain.chain,
+                'name': chain.name,
+                'logo': request.build_absolute_uri(chain.logo_url) if chain.logo_url else None,
+                'type': 'EVM' if chain.chain in EVM_CHAINS else 'NON_EVM',
+                'is_testnet': False
+            })
+        
+        return Response(chain_list)
     
     @action(detail=True, methods=['post'])
     def rename_wallet(self, request, pk=None):
@@ -305,25 +320,27 @@ class WalletViewSet(viewsets.ModelViewSet):
         device = get_or_create_device(device_id)
         
         # 验证链是否支持
-        valid_chains = [code for code, _ in Wallet.CHAIN_CHOICES]
-        if chain not in valid_chains:
+        if chain not in EVM_CHAINS and chain not in ['SOL', 'KDA']:
             return Response({'error': 'Unsupported chain'}, 
                           status=status.HTTP_400_BAD_REQUEST)
         
-        # 更新或创建链选择
-        Chain.objects.update_or_create(
-            device=device,
-            defaults={'chain': chain, 'is_selected': True}
+        # 更新或创建链
+        chain_obj, created = Chain.objects.update_or_create(
+            chain=chain,
+            defaults={'is_active': True}
         )
-        
-        # 将其他链设置为未选中
-        Chain.objects.filter(device=device).exclude(chain=chain).update(is_selected=False)
         
         # 生成助记词
         mnemonic = generate_mnemonic()
         
         return Response({
             'message': f'Chain {chain} selected successfully',
+            'chain': {
+                'code': chain_obj.chain,
+                'name': chain_obj.name,
+                'logo': chain_obj.logo,
+                'is_active': chain_obj.is_active
+            },
             'mnemonic': mnemonic
         })
     
@@ -343,7 +360,7 @@ class WalletViewSet(viewsets.ModelViewSet):
 
         try:
             # 获取或创建设备
-            device, _ = Device.objects.get_or_create(device_id=device_id)
+            device = get_or_create_device(device_id)
             
             # 生成钱包
             wallet_data = generate_wallet_from_mnemonic(mnemonic, chain)

@@ -1,0 +1,116 @@
+{
+    "chains": [
+        {
+            "code": "ETH",
+            "name": "Ethereum",
+            "logo": "chains/eth.png",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "BSC",
+            "name": "BNB Chain",
+            "logo": "chains/bnb.png",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "MATIC",
+            "name": "Polygon",
+            "logo": "chains/polygon.jpeg",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "AVAX",
+            "name": "Avalanche",
+            "logo": "chains/avax.png",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "BASE",
+            "name": "Base",
+            "logo": "chains/base.png",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "OP",
+            "name": "Optimism",
+            "logo": "chains/op.png",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "ARB",
+            "name": "Arbitrum",
+            "logo": "chains/arb.jpeg",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "FTM",
+            "name": "Fantom",
+            "logo": "chains/ftm.png",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "CRO",
+            "name": "Cronos",
+            "logo": "chains/cro.jpeg",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "ZKSYNC",
+            "name": "zkSync Era",
+            "logo": "chains/zksync.jpeg",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "LINEA",
+            "name": "Linea",
+            "logo": "chains/linea.png",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "MANTA",
+            "name": "Manta",
+            "logo": "chains/manta.jpeg",
+            "type": "evm",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "SOL",
+            "name": "Solana",
+            "logo": "chains/sol.png",
+            "type": "solana",
+            "is_active": true,
+            "is_testnet": false
+        },
+        {
+            "code": "KDA",
+            "name": "Kadena",
+            "logo": "chains/kda.jpg",
+            "type": "kadena",
+            "is_active": true,
+            "is_testnet": false
+        }
+    ]
+} 

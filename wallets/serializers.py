@@ -5,6 +5,7 @@ import hashlib
 import base58
 from solders.keypair import Keypair
 from eth_account import Account
+from .constants import EVM_CHAINS  # 从 constants.py 导入
 
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -106,12 +107,20 @@ class WalletImportSerializer(serializers.ModelSerializer):
                 data['address'] = str(keypair.pubkey())
             except Exception as e:
                 raise ValidationError(f"Invalid Solana private key: {str(e)}")
-        elif chain in ['ETH', 'Ethereum']:
+        elif chain in EVM_CHAINS:  # 支持所有 EVM 链
             try:
                 account = Account.from_key(private_key)
                 data['address'] = account.address
             except Exception as e:
-                raise ValidationError(f"Invalid Ethereum private key: {str(e)}")
+                raise ValidationError(f"Invalid EVM private key: {str(e)}")
+        elif chain == 'KDA':
+            try:
+                # Kadena 的私钥格式是以 'k:' 开头的字符串
+                if not private_key.startswith('k:'):
+                    private_key = f'k:{private_key}'
+                data['address'] = private_key  # Kadena 使用私钥作为地址
+            except Exception as e:
+                raise ValidationError(f"Invalid Kadena private key: {str(e)}")
         else:
             raise ValidationError(f"Unsupported chain: {chain}")
         
