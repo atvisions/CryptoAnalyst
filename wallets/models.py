@@ -52,9 +52,9 @@ class Chain(models.Model):
 
 class Wallet(models.Model):
     """钱包模型"""
-    device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='wallets')
     address = models.CharField(max_length=128)
-    private_key = models.CharField(max_length=256)  # 加密后的私钥
+    private_key = models.CharField(max_length=256, null=True, blank=True)  # 加密后的私钥
     chain = models.CharField(max_length=32, choices=CHAIN_CHOICES)
     name = models.CharField(max_length=64, default="")
     is_watch_only = models.BooleanField(default=False)
@@ -63,9 +63,12 @@ class Wallet(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        unique_together = ('device', 'chain')
+
     def __str__(self):
         return f"{self.name} ({self.chain}) - {self.address}"
-    
+
     def save(self, *args, **kwargs):
         if not self.avatar:
             if os.path.exists(os.path.join(settings.MEDIA_ROOT, 'face')):
@@ -74,8 +77,23 @@ class Wallet(models.Model):
                     random_face = random.choice(faces)
                     self.avatar = f'face/{random_face}'
         super().save(*args, **kwargs)
-    
+
     def decrypt_private_key(self, payment_password=None):
         """解密私钥"""
         from .utils import decrypt_private_key
         return decrypt_private_key(self.private_key, payment_password)
+
+class TokenVisibility(models.Model):
+    """代币可见性模型"""
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='token_visibility')
+    token_address = models.CharField(max_length=255)
+    is_visible = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['wallet', 'token_address']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.wallet.address} - {self.token_address} ({'Visible' if self.is_visible else 'Hidden'})"
