@@ -1,28 +1,20 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from solana.rpc.api import Client
-from solana.rpc.commitment import Commitment
 from solana.publickey import PublicKey
 from solana.rpc.types import TokenAccountOpts
 from decimal import Decimal
 from common.config import Config
-import requests
 import logging
-import json
-import math
-from datetime import datetime, timedelta
-from django.core.cache import cache
-
-logger = logging.getLogger(__name__)
+import requests
+import time
 
 class SolanaTokenService:
     """Solana 代币服务"""
 
     def __init__(self):
-        """初始化 Solana RPC 客户端和 Moralis API"""
+        """初始化 Solana RPC 客户端"""
         config = Config.get_solana_config("SOL")
         self.client = Client(config["rpc_url"])
-        self.moralis_api_key = Config.MORALIS_API_KEY
-        self.moralis_base_url = "https://solana-gateway.moralis.io"
 
     def get_token_list(self, wallet_address: str) -> List[Dict[str, Any]]:
         """获取钱包持有的代币列表"""
@@ -54,414 +46,369 @@ class SolanaTokenService:
         except Exception as e:
             raise Exception(f"获取代币列表失败: {str(e)}")
 
-    def get_token_metadata(self, token_address: str, force_refresh=False) -> Dict[str, Any]:
-        """获取代币元数据（使用 Moralis API）"""
-        # 检查缓存
-        cache_key = f"token_metadata:{token_address}"
-        cached_data = None if force_refresh else cache.get(cache_key)
+    def get_token_metadata(self, token_address_or_symbol: str) -> Dict[str, Any]:
+        """获取代币元数据
 
-        if cached_data:
-            logger.info(f"使用缓存的代币元数据: {token_address}")
-            return json.loads(cached_data)
+        参数:
+            token_address_or_symbol: 代币地址或符号
 
+        返回:
+            代币元数据字典，包含名称、符号、小数位数、logo、描述、网站、社交媒体链接等
+        """
         try:
-            # 使用 Moralis API 获取代币元数据
-            url = f"{self.moralis_base_url}/token/mainnet/{token_address}/metadata"
-            headers = {
-                "X-API-Key": self.moralis_api_key,
-                "Content-Type": "application/json"
+            import logging
+            import requests
+            from common.config import Config
+
+            logger = logging.getLogger(__name__)
+
+            # 处理特殊符号到地址的映射
+            token_address_map = {
+                'USDT': 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+                'USDC': 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+                'SOL': 'So11111111111111111111111111111111111111112'
             }
 
-            # 打印请求 URL 和头信息
-            print(f"Moralis API 请求 URL: {url}")
-            print(f"Moralis API 请求头: {headers}")
+            # 如果输入的是符号，尝试将其转换为地址
+            token_address = token_address_map.get(token_address_or_symbol, token_address_or_symbol)
 
-            response = requests.get(url, headers=headers)
-            print(f"Moralis API 响应状态码: {response.status_code}")
-
-            if response.status_code == 200:
-                data = response.json()
-                # 打印完整的 Moralis API 响应数据
-                print(f"Moralis API 响应数据: {json.dumps(data, indent=2)}")
-
-                # 根据官方 Moralis API 响应格式构建元数据
-                metadata = {
-                    'name': data.get('name', 'Unknown'),
-                    'symbol': data.get('symbol', 'Unknown'),
-                    'decimals': data.get('decimals', 9),
-                    'logo': data.get('logo', None),
-                    'description': data.get('description', None),
-                    'token_address': token_address,
-                    'mint': data.get('mint', token_address),
-                    'standard': data.get('standard', None),
-
-                    # 供应量相关
-                    'total_supply': data.get('totalSupply', 0),
-                    'total_supply_formatted': data.get('totalSupplyFormatted', 0),
-                    'fully_diluted_value': data.get('fullyDilutedValue', 0),
-
-                    # Metaplex 相关信息
-                    'metaplex': data.get('metaplex', {}),
-
-                    # 社交媒体链接
-                    'website': None,
-                    'twitter': None,
-                    'telegram': None,
-                    'discord': None,
-                    'moralis': None
+            # 如果是 SOL 原生代币或 Bonk 代币，使用预定义的元数据
+            if token_address == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v":
+                return {
+                    "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "standard": "spl",
+                    "name": "USD Coin",
+                    "symbol": "USDC",
+                    "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+                    "decimals": "6",
+                    "links": {
+                        "website": "https://www.circle.com/usdc",
+                        "twitter": "https://twitter.com/circle"
+                    },
+                    "description": "USDC is a fully collateralized US dollar stablecoin developed by CENTRE, the open source project with Circle and Coinbase as founding members."
+                }
+            # SOL 原生代币
+            elif token_address == "So11111111111111111111111111111111111111112" or token_address.lower() == "native":
+                return {
+                    'mint': 'So11111111111111111111111111111111111111112',
+                    'standard': 'native',
+                    'name': 'Solana',
+                    'symbol': 'SOL',
+                    'decimals': '9',
+                    'logo': 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png',
+                    'description': 'Solana is a high-performance blockchain supporting builders around the world creating crypto apps that scale today.',
+                    'website': 'https://solana.com',
+                    'twitter': 'https://twitter.com/solana',
+                    'telegram': 'https://t.me/solana',
+                    'discord': 'https://discord.com/invite/solana',
+                    'links': {
+                        'website': 'https://solana.com',
+                        'twitter': 'https://twitter.com/solana',
+                        'telegram': 'https://t.me/solana',
+                        'discord': 'https://discord.com/invite/solana'
+                    },
+                    'totalSupply': '1000000000000000000',
+                    'totalSupplyFormatted': '1000000000',
+                    'fullyDilutedValue': '0'
                 }
 
-                # 处理社交媒体链接
-                if 'links' in data and isinstance(data['links'], dict):
-                    links = data['links']
-                    metadata['website'] = links.get('website', None)
-                    metadata['twitter'] = links.get('twitter', None)
-                    metadata['telegram'] = links.get('telegram', None)
-                    metadata['discord'] = links.get('discord', None)
-                    metadata['moralis'] = links.get('moralis', None)
+            # 获取 Moralis API 密钥
+            moralis_api_key = Config.MORALIS_API_KEY
+            logger.info(f"Using Moralis API key: {moralis_api_key[:5]}...{moralis_api_key[-5:] if moralis_api_key else ''}")
 
-                    # 打印社交媒体链接信息
-                    print(f"社交媒体链接信息: {json.dumps(links, indent=2)}")
+            if not moralis_api_key:
+                logger.error("Moralis API key is not configured")
+                # 如果没有 Moralis API 密钥，尝试使用 RPC 获取基本元数据
+                try:
+                    token_pubkey = PublicKey(token_address)
+                    response = self.client.get_token_supply(token_pubkey)
+                    if response['result']['value'] is not None:
+                        return {
+                            'name': response['result']['value'].get('name', 'Unknown'),
+                            'symbol': response['result']['value'].get('symbol', 'Unknown'),
+                            'decimals': response['result']['value'].get('decimals', 9)
+                        }
+                    return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
+                except Exception as e:
+                    logger.error(f"Failed to get token metadata from RPC: {e}")
+                    return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
 
-                # 缓存数据（24小时）
-                cache.set(cache_key, json.dumps(metadata), 60 * 60 * 24)
+            # 使用 Moralis API 获取代币元数据
+            headers = {
+                "accept": "application/json",
+                "X-API-Key": moralis_api_key
+            }
 
-                return metadata
+            # 获取代币元数据
+            url = f"https://solana-gateway.moralis.io/token/mainnet/{token_address}/metadata"
+            logger.info(f"Calling Moralis API: {url}")
 
-            # 如果 Moralis API 失败，尝试使用 RPC 获取基本元数据
-            token_pubkey = PublicKey(token_address)
-            rpc_response = self.client.get_token_supply(token_pubkey)
-            if rpc_response['result']['value'] is not None:
-                metadata = {
-                    'name': rpc_response['result']['value'].get('name', 'Unknown'),
-                    'symbol': rpc_response['result']['value'].get('symbol', 'Unknown'),
-                    'decimals': rpc_response['result']['value'].get('decimals', 9),
-                    'token_address': token_address
-                }
+            # 添加重试机制
+            max_retries = 3
+            retry_delay = 2  # 初始重试延迟（秒）
+            success = False
+            response = None
+            logger = logging.getLogger(__name__)
 
-                # 缓存数据（24小时）
-                cache.set(cache_key, json.dumps(metadata), 60 * 60 * 24)
+            for retry in range(max_retries):
+                try:
+                    # 设置超时时间，避免请求无限等待
+                    response = requests.get(url, headers=headers, timeout=30)
+                    logger.info(f"Moralis API response status: {response.status_code}")
 
-                return metadata
+                    if response.status_code == 200:
+                        success = True
+                        break
+                    elif response.status_code == 500:
+                        logger.warning(f"Moralis API returned 500 error on attempt {retry+1}/{max_retries}")
+                        if retry < max_retries - 1:
+                            wait_time = retry_delay * (2 ** retry)  # 指数退避
+                            logger.info(f"Retrying in {wait_time} seconds...")
+                            time.sleep(wait_time)
+                    else:
+                        logger.warning(f"Failed to get token metadata from Moralis: {response.status_code}")
+                        # 非500错误不重试
+                        break
+                except requests.exceptions.Timeout:
+                    logger.warning(f"Moralis API request timed out on attempt {retry+1}/{max_retries}")
+                    if retry < max_retries - 1:
+                        wait_time = retry_delay * (2 ** retry)
+                        logger.info(f"Retrying in {wait_time} seconds...")
+                        time.sleep(wait_time)
+                except Exception as e:
+                    logger.error(f"Error calling Moralis API: {e}")
+                    if retry < max_retries - 1:
+                        wait_time = retry_delay * (2 ** retry)
+                        logger.info(f"Retrying in {wait_time} seconds...")
+                        time.sleep(wait_time)
+                    else:
+                        return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
 
-            return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9, 'token_address': token_address}
+            # 如果所有重试都失败，或者响应状态码不是200
+            if not success or not response or response.status_code != 200:
+                logger.warning(f"All attempts to get token metadata from Moralis failed")
+                # 尝试使用 RPC 获取基本元数据
+                try:
+                    token_pubkey = PublicKey(token_address)
+                    rpc_response = self.client.get_token_supply(token_pubkey)
+                    if rpc_response['result']['value'] is not None:
+                        return {
+                            'name': rpc_response['result']['value'].get('name', 'Unknown'),
+                            'symbol': rpc_response['result']['value'].get('symbol', 'Unknown'),
+                            'decimals': rpc_response['result']['value'].get('decimals', 9)
+                        }
+                    return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
+                except Exception as e:
+                    logger.error(f"Failed to get token metadata from RPC: {e}")
+                    return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
+
+            try:
+                # 尝试解析 JSON 响应
+                try:
+                    data = response.json()
+                except Exception as json_error:
+                    logger.error(f"Error parsing JSON response for token {token_address}: {json_error}")
+                    logger.error(f"Response content: {response.content}")
+                    return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
+
+                # 检查响应数据
+                if data is None:
+                    logger.error(f"Moralis returned None for token {token_address}")
+                    return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
+
+                # 打印响应数据
+                logger.info(f"Moralis metadata response for {token_address}: {data}")
+
+                # 直接返回 Moralis API 的原始数据，保留所有字段
+                metadata = data
+
+                # 检查元数据是否包含必要的字段
+                if 'name' not in metadata or 'symbol' not in metadata or 'decimals' not in metadata:
+                    logger.warning(f"Moralis response for token {token_address} is missing required fields")
+                    logger.warning(f"Response data: {data}")
+
+                    # 如果缺少必要字段，返回默认值
+                    if 'name' not in metadata:
+                        metadata['name'] = 'Unknown'
+                    if 'symbol' not in metadata:
+                        metadata['symbol'] = 'Unknown'
+                    if 'decimals' not in metadata:
+                        metadata['decimals'] = 9
+            except Exception as e:
+                logger.error(f"Error processing Moralis response for token {token_address}: {e}")
+                return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
+
+            # 确保元数据中包含基本字段
+            if 'name' not in metadata:
+                metadata['name'] = ''
+            if 'symbol' not in metadata:
+                metadata['symbol'] = ''
+            if 'decimals' not in metadata:
+                metadata['decimals'] = 9
+            if 'logo' not in metadata:
+                metadata['logo'] = ''
+            if 'description' not in metadata:
+                metadata['description'] = ''
+
+            # 处理社交媒体链接
+            if 'website' not in metadata:
+                metadata['website'] = ''
+            if 'twitter' not in metadata:
+                metadata['twitter'] = ''
+            if 'telegram' not in metadata:
+                metadata['telegram'] = ''
+            if 'discord' not in metadata:
+                metadata['discord'] = ''
+
+            # 如果有 links 字段，使用它的值更新社交媒体链接
+            if 'links' in data and data['links'] is not None:
+                links = data.get('links', {})
+                if links:
+                    if 'website' in links and links['website']:
+                        metadata['website'] = links['website']
+                    if 'twitter' in links and links['twitter']:
+                        metadata['twitter'] = links['twitter']
+                    if 'telegram' in links and links['telegram']:
+                        metadata['telegram'] = links['telegram']
+                    if 'discord' in links and links['discord']:
+                        metadata['discord'] = links['discord']
+
+            # 如果没有 links 字段或者 links 字段中没有某些社交媒体链接，尝试其他方式获取
+            # 尝试获取社交媒体链接
+            external_url = data.get('external_url', '')
+            if external_url and not metadata.get('website'):
+                metadata['website'] = external_url
+
+            # 如果有其他外部链接，尝试提取社交媒体链接
+            if 'external_link' in data and data['external_link'] and not metadata.get('website'):
+                metadata['website'] = data['external_link']
+
+            # 如果有社交媒体链接，尝试提取
+            if 'twitter_url' in data and data['twitter_url'] and not metadata.get('twitter'):
+                metadata['twitter'] = data['twitter_url']
+            elif 'twitter' in data and data['twitter'] and not metadata.get('twitter'):
+                metadata['twitter'] = f"https://twitter.com/{data['twitter']}"
+
+            if 'telegram_url' in data and data['telegram_url'] and not metadata.get('telegram'):
+                metadata['telegram'] = data['telegram_url']
+            elif 'telegram' in data and data['telegram'] and not metadata.get('telegram'):
+                metadata['telegram'] = f"https://t.me/{data['telegram']}"
+
+            if 'discord_url' in data and data['discord_url'] and not metadata.get('discord'):
+                metadata['discord'] = data['discord_url']
+            elif 'discord' in data and data['discord'] and not metadata.get('discord'):
+                metadata['discord'] = f"https://discord.com/invite/{data['discord']}"
+
+            # 清理元数据中的特殊字符
+            from wallets.utils import sanitize_token_data
+            cleaned_metadata = sanitize_token_data(metadata)
+
+            # 打印日志，查看元数据
+            logger.info(f"Final metadata for {token_address}: {cleaned_metadata}")
+
+            # 检查元数据中的关键字段
+            logger.info(f"Metadata fields for {token_address}:")
+            logger.info(f"  name: {cleaned_metadata.get('name', 'N/A')}")
+            logger.info(f"  symbol: {cleaned_metadata.get('symbol', 'N/A')}")
+            logger.info(f"  decimals: {cleaned_metadata.get('decimals', 'N/A')}")
+            logger.info(f"  standard: {cleaned_metadata.get('standard', 'N/A')}")
+            logger.info(f"  mint: {cleaned_metadata.get('mint', 'N/A')}")
+            logger.info(f"  description: {cleaned_metadata.get('description', 'N/A')[:50] if cleaned_metadata.get('description') else 'N/A'}")
+            logger.info(f"  totalSupply: {cleaned_metadata.get('totalSupply', 'N/A')}")
+            logger.info(f"  totalSupplyFormatted: {cleaned_metadata.get('totalSupplyFormatted', 'N/A')}")
+            logger.info(f"  fullyDilutedValue: {cleaned_metadata.get('fullyDilutedValue', 'N/A')}")
+
+            # 检查 metaplex 字段
+            metaplex = cleaned_metadata.get('metaplex', {})
+            if metaplex:
+                logger.info(f"  metaplex.metadataUri: {metaplex.get('metadataUri', 'N/A')}")
+                logger.info(f"  metaplex.masterEdition: {metaplex.get('masterEdition', 'N/A')}")
+                logger.info(f"  metaplex.isMutable: {metaplex.get('isMutable', 'N/A')}")
+                logger.info(f"  metaplex.sellerFeeBasisPoints: {metaplex.get('sellerFeeBasisPoints', 'N/A')}")
+                logger.info(f"  metaplex.updateAuthority: {metaplex.get('updateAuthority', 'N/A')}")
+                logger.info(f"  metaplex.primarySaleHappened: {metaplex.get('primarySaleHappened', 'N/A')}")
+
+            # 检查 links 字段
+            links = cleaned_metadata.get('links', {})
+            if links:
+                logger.info(f"  links.website: {links.get('website', 'N/A')}")
+                logger.info(f"  links.twitter: {links.get('twitter', 'N/A')}")
+                logger.info(f"  links.telegram: {links.get('telegram', 'N/A')}")
+                logger.info(f"  links.discord: {links.get('discord', 'N/A')}")
+
+            # 打印元数据类型
+            logger.info(f"Metadata type: {type(cleaned_metadata)}")
+
+            # 打印元数据的所有键
+            logger.info(f"Metadata keys: {cleaned_metadata.keys() if hasattr(cleaned_metadata, 'keys') else 'Not a dict'}")
+
+            logger.info(f"Successfully retrieved metadata for token {token_address} from Moralis")
+            return cleaned_metadata
         except Exception as e:
-            logger.error(f"获取代币元数据失败: {str(e)}")
-            return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9, 'token_address': token_address}
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting token metadata for {token_address_or_symbol}: {e}")
+            return {'name': 'Unknown', 'symbol': 'Unknown', 'decimals': 9}
 
     def get_token_balance(self, token_address: str, wallet_address: str) -> Dict[str, Any]:
         """获取特定代币余额"""
         try:
-            # 首先获取代币元数据，以获取小数位数
-            token_metadata = self.get_token_metadata(token_address)
-            decimals = int(token_metadata.get('decimals', 9))
+            # 注意：这里需要使用钱包地址和代币地址来获取关联的代币账户
+            # 然后查询该账户的余额
+            logger = logging.getLogger(__name__)
 
-            # 获取代币账户
-            token_pubkey = PublicKey(token_address)
-            response = self.client.get_token_accounts_by_owner(
-                PublicKey(wallet_address),
-                TokenAccountOpts(mint=token_pubkey)
-            )
+            # 如果是SOL原生代币，使用不同的方法获取余额
+            if token_address == "So11111111111111111111111111111111111111112" or token_address.lower() == "native":
+                try:
+                    wallet_pubkey = PublicKey(wallet_address)
+                    response = self.client.get_balance(wallet_pubkey)
+                    if response['result']['value'] is not None:
+                        balance = response['result']['value']
+                        # SOL的小数位是9
+                        return {
+                            'balance': str(Decimal(balance) / Decimal(10**9)),
+                            'decimals': 9,
+                            'chain': 'SOL',
+                            'token_address': token_address,
+                            'wallet_address': wallet_address
+                        }
+                except Exception as e:
+                    logger.error(f"获取SOL原生代币余额失败: {str(e)}")
 
-            # 打印完整的 RPC 响应数据
-            print(f"Solana RPC 代币余额响应数据: {json.dumps(response, indent=2)}")
-
-            # 如果有代币账户
-            if response['result']['value'] and len(response['result']['value']) > 0:
-                # 获取代币账户地址
-                token_account = response['result']['value'][0]['pubkey']
-
-                # 获取代币账户余额
-                balance_response = self.client.get_token_account_balance(token_account)
-                print(f"Solana RPC 代币账户余额响应数据: {json.dumps(balance_response, indent=2)}")
-
-                if 'result' in balance_response and 'value' in balance_response['result']:
-                    token_amount = balance_response['result']['value']
-                    # 打印代币余额数据
-                    print(f"代币余额数据: {json.dumps(token_amount, indent=2)}")
-
-                    # 计算余额
-                    amount = token_amount.get('amount', '0')
-                    ui_amount = token_amount.get('uiAmount', 0)
-
-                    # 如果有 uiAmount，直接使用
-                    if ui_amount is not None:
-                        balance = str(ui_amount)
-                    else:
-                        # 否则自己计算
-                        balance = str(Decimal(amount) / Decimal(10**decimals))
-
-                    return {
-                        'balance': balance,
-                        'decimals': decimals,
-                        'chain': 'SOL',
-                        'token_address': token_address,
-                        'wallet_address': wallet_address
-                    }
-
-            # 如果没有代币账户或获取余额失败，返回 0
-            return {
-                'balance': '0',
-                'decimals': decimals,
-                'chain': 'SOL',
-                'token_address': token_address,
-                'wallet_address': wallet_address
-            }
-        except Exception as e:
-            logger.error(f"获取代币余额失败: {str(e)}")
-            return {
-                'balance': '0',
-                'decimals': 9,  # 默认值
-                'chain': 'SOL',
-                'token_address': token_address,
-                'wallet_address': wallet_address
-            }
-
-    def get_token_price_history(self, token_address: str, timeframe: str = '1d', count: int = 7, force_refresh=False) -> Dict[str, Any]:
-        """获取代币历史价格（使用 CryptoCompare API）
-
-        参数:
-            token_address: 代币地址
-            timeframe: 时间间隔，支持 '1s', '10s', '30s', '1min', '5min', '10min', '30min',
-                      '1h', '4h', '12h', '1d', '1w', '1M', '1Y'
-            count: 返回结果的数量限制
-            force_refresh: 是否强制刷新缓存
-        """
-        # 检查缓存
-        cache_key = f"token_price_history:{token_address}:{timeframe}:{count}"
-        cached_data = None if force_refresh else cache.get(cache_key)
-
-        if cached_data:
-            logger.info(f"使用缓存的代币历史价格数据: {token_address}, timeframe={timeframe}, count={count}")
-            return json.loads(cached_data)
-
-        # 将代币地址映射到 CryptoCompare 的交易符号
-        token_symbol_map = {
-            # SOL 相关
-            'sol': 'SOL',
-            'solana': 'SOL',
-            'So11111111111111111111111111111111111111112': 'SOL',  # Wrapped SOL
-
-            # 其他常见代币
-            'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',  # USDC
-            'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',  # USDT
-            'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',  # BONK
-            'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'MSOL',  # Marinade Staked SOL
-            'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm': 'WIF',   # $WIF (Dogwifhat)
-        }
-
-        # 尝试从映射表中获取交易符号
-        symbol = token_symbol_map.get(token_address.lower() if token_address.lower() in token_symbol_map else token_address)
-
-        # 如果没有找到映射，尝试获取代币元数据
-        if not symbol:
+            # 对于其他代币，需要先找到关联的代币账户
             try:
-                # 尝试获取代币元数据
-                token_metadata = self.get_token_metadata(token_address)
-                if token_metadata and 'symbol' in token_metadata:
-                    # 使用代币符号
-                    symbol = token_metadata['symbol']
-                    logger.info(f"使用代币元数据获取的符号: {token_address} -> {symbol}")
-                else:
-                    # 如果没有找到代币元数据，使用默认符号
-                    symbol = 'SOL'  # 默认使用 SOL
-                    logger.warning(f"没有找到代币元数据，使用默认符号: {token_address} -> {symbol}")
+                wallet_pubkey = PublicKey(wallet_address)
+                # 注意：这里不需要使用token_pubkey变量
+
+                # 获取钱包的所有代币账户
+                response = self.client.get_token_accounts_by_owner(
+                    wallet_pubkey,
+                    TokenAccountOpts(program_id=PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"))
+                )
+
+                # 查找匹配的代币账户
+                for account in response['result']['value']:
+                    account_data = account['account']['data']['parsed']['info']
+                    if account_data['mint'] == token_address:
+                        token_amount = account_data['tokenAmount']
+                        return {
+                            'balance': str(Decimal(token_amount['amount']) / Decimal(10**token_amount['decimals'])),
+                            'decimals': token_amount['decimals'],
+                            'chain': 'SOL',
+                            'token_address': token_address,
+                            'wallet_address': wallet_address
+                        }
             except Exception as e:
-                # 如果获取代币元数据失败，使用默认符号
-                symbol = 'SOL'  # 默认使用 SOL
-                logger.error(f"获取代币元数据失败，使用默认符号: {token_address} -> {symbol}, 错误: {str(e)}")
+                logger.error(f"获取代币账户余额失败: {str(e)}")
 
-        try:
-            # 使用 CryptoCompare API 获取价格历史
-            price_history = self.get_token_price_history_by_symbol(symbol, timeframe, count, force_refresh)
-
-            # 更新代币地址
-            price_history['token_address'] = token_address
-
-            # 缓存数据（1小时）
-            cache.set(cache_key, json.dumps(price_history), 60 * 60)
-
-            return price_history
-        except Exception as e:
-            # 如果获取价格历史失败，返回错误信息
-            error_message = str(e)
-            logger.error(f"获取代币价格历史失败: {token_address} -> {symbol}, 错误: {error_message}")
-
-            # 返回错误信息
+            # 如果没有找到匹配的代币账户或发生错误，返回零余额
             return {
+                'balance': '0',
+                'chain': 'SOL',
                 'token_address': token_address,
-                'timeframe': timeframe,
-                'count': count,
-                'prices': [],
-                'error': f"获取代币价格历史失败: {error_message}"
+                'wallet_address': wallet_address
             }
-
-
-    def get_token_price_history_by_symbol(self, symbol: str, timeframe: str = '1d', count: int = 7, force_refresh=False) -> Dict[str, Any]:
-        """使用 CryptoCompare API 获取代币的价格历史
-
-        参数:
-            symbol: 代币符号，如 'SOL', 'BTC' 等
-            timeframe: 时间间隔，支持 '1s', '10s', '30s', '1min', '5min', '10min', '30min',
-                      '1h', '4h', '12h', '1d', '1w', '1M', '1Y'
-            count: 返回结果的数量限制
-            force_refresh: 是否强制刷新缓存
-        """
-        # 检查缓存
-        cache_key = f"token_price_history_by_symbol:{symbol}:{timeframe}:{count}"
-        cached_data = None if force_refresh else cache.get(cache_key)
-
-        if cached_data:
-            logger.info(f"使用缓存的代币价格历史数据: symbol={symbol}, timeframe={timeframe}, count={count}")
-            return json.loads(cached_data)
-
-        try:
-            # 计算时间范围
-            end_date = datetime.now()
-
-            # 提取代币符号（去除 -USD 后缀）
-            fsym = symbol.split('-')[0] if '-' in symbol else symbol
-
-            # 打印调试信息
-            print(f"Getting price history for symbol={symbol}, fsym={fsym}, timeframe={timeframe}, count={count}")
-
-            # 根据不同的时间间隔设置 CryptoCompare API 的参数
-            if timeframe in ['1s', '10s', '30s', '1min', '5min', '10min', '30min']:
-                # 分钟级数据
-                url = "https://min-api.cryptocompare.com/data/v2/histominute"
-                limit = min(count, 2000)  # CryptoCompare 的限制是 2000
-                date_format = "%Y-%m-%d %H:%M:%S"
-            elif timeframe in ['1h', '4h', '12h']:
-                # 小时级数据
-                url = "https://min-api.cryptocompare.com/data/v2/histohour"
-                limit = min(count, 2000)  # CryptoCompare 的限制是 2000
-                date_format = "%Y-%m-%d %H:%M:%S"
-            else:
-                # 天级数据
-                url = "https://min-api.cryptocompare.com/data/v2/histoday"
-                limit = min(count, 2000)  # CryptoCompare 的限制是 2000
-                date_format = "%Y-%m-%d"
-
-            # 设置请求参数
-            params = {
-                "fsym": fsym,  # 从哪个货币兑换，如 SOL
-                "tsym": "USD",  # 兑换成哪个货币，如 USD
-                "limit": limit,  # 数据点数量
-                "aggregate": 1  # 聚合级别，1 表示不聚合
-            }
-
-            # 根据 timeframe 调整 aggregate 参数
-            if timeframe == '5min':
-                params["aggregate"] = 5
-            elif timeframe == '10min':
-                params["aggregate"] = 10
-            elif timeframe == '30min':
-                params["aggregate"] = 30
-            elif timeframe == '4h':
-                params["aggregate"] = 4
-            elif timeframe == '12h':
-                params["aggregate"] = 12
-            elif timeframe == '1w':
-                params["aggregate"] = 7
-            elif timeframe == '1M':
-                params["aggregate"] = 30
-
-            # 打印请求信息
-            print(f"CryptoCompare API 请求 URL: {url}")
-            print(f"CryptoCompare API 请求参数: {params}")
-
-            # 发送请求
-            response = requests.get(url, params=params)
-            print(f"CryptoCompare API 响应状态码: {response.status_code}")
-
-            # 初始化结果对象
-            price_history = {
-                'symbol': symbol,
-                'timeframe': timeframe,
-                'count': count,
-                'start_date': "",  # 将在处理数据时设置
-                'end_date': end_date.strftime(date_format),
-                'prices': []
-            }
-
-            if response.status_code == 200:
-                data = response.json()
-
-                # 打印响应数据结构
-                print(f"CryptoCompare API 响应数据结构: {data.get('Response')}")
-
-                if data.get('Response') == 'Success' and 'Data' in data and 'Data' in data['Data']:
-                    ohlcv_data = data['Data']['Data']
-
-                    # 如果有数据，设置开始日期
-                    if ohlcv_data and len(ohlcv_data) > 0:
-                        first_timestamp = ohlcv_data[0]['time']
-                        start_date = datetime.fromtimestamp(first_timestamp)
-                        price_history['start_date'] = start_date.strftime(date_format)
-
-                    # 处理每个数据点
-                    for item in ohlcv_data:
-                        timestamp = item['time']
-                        date_obj = datetime.fromtimestamp(timestamp)
-
-                        # 根据 timeframe 格式化日期
-                        if timeframe in ['1s', '10s', '30s', '1min', '5min', '10min', '30min', '1h', '4h', '12h']:
-                            date_str = date_obj.strftime("%Y-%m-%d %H:%M:%S")
-                        else:
-                            date_str = date_obj.strftime("%Y-%m-%d")
-
-                        # 提取价格数据
-                        open_price = item['open']
-                        high_price = item['high']
-                        low_price = item['low']
-                        close_price = item['close']
-                        # 交易量数据
-                        # volume_from = item['volumefrom']  # 交易量（从货币）
-                        volume_to = item['volumeto']  # 交易量（兑换成货币）
-
-                        # 使用收盘价作为价格
-                        price = close_price
-
-                        # 计算市值（我们没有市值数据，所以设置为 0）
-                        market_cap = 0
-
-                        price_history['prices'].append({
-                            'date': date_str,
-                            'price_usd': price,
-                            'volume_usd': volume_to,  # 使用 volumeto 作为交易量（美元）
-                            'market_cap_usd': market_cap,
-                            'open_price': open_price,
-                            'high_price': high_price,
-                            'low_price': low_price
-                        })
-                else:
-                    # 如果没有数据或响应错误
-                    error_message = data.get('Message', 'Unknown error')
-                    price_history['error'] = f"CryptoCompare API 响应错误: {error_message}"
-                    print(f"CryptoCompare API 响应错误: {error_message}")
-            else:
-                # 如果 API 返回错误，添加错误信息
-                price_history['error'] = f"CryptoCompare API 返回状态码: {response.status_code}"
-                print(f"CryptoCompare API 请求失败: {response.text}")
-
-            # 缓存数据（1小时）
-            cache.set(cache_key, json.dumps(price_history), 60 * 60)
-
-            return price_history
         except Exception as e:
-            # 如果发生异常，添加错误信息
-            error_message = str(e)
-            price_history = {
-                'symbol': symbol,
-                'timeframe': timeframe,
-                'count': count,
-                'prices': [],
-                'error': f"CryptoCompare API 请求失败: {error_message}"
-            }
-            print(f"CryptoCompare API 请求失败: {error_message}")
+            raise Exception(f"获取代币余额失败: {str(e)}")
 
-            # 缓存错误数据（10分钟）
-            cache.set(cache_key, json.dumps(price_history), 60 * 10)
-
-            return price_history
-
+    # 删除 get_token_metadata_from_moralis 方法，已将其功能整合到 get_token_metadata 方法中

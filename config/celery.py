@@ -1,32 +1,34 @@
 import os
 from celery import Celery
+from django.conf import settings
 
 # 设置默认的Django设置模块
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 app = Celery('wallet')
 
-# 使用 Redis 作为消息代理和结果后端
-app.conf.broker_url = 'redis://localhost:6379/0'
-app.conf.result_backend = 'redis://localhost:6379/0'
-
-# 使用字符串，这样worker不用序列化配置对象
+# 使用字符串表示，这样worker不用序列化配置对象
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # 从所有已注册的Django应用中加载任务模块
-app.autodiscover_tasks()
+app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 # 配置定时任务
 app.conf.beat_schedule = {
-    # 每15分钟刷新代币价格
-    'refresh-token-prices-every-15-minutes': {
-        'task': 'wallets.tasks.refresh_token_prices',
-        'schedule': 60.0 * 15,  # 15分钟
+    'update-token-prices-hourly': {
+        'task': 'wallets.tasks.update_token_prices',
+        'schedule': 3600.0,  # 每小时执行一次
+        'args': (),
     },
-    # 每5分钟刷新钱包余额缓存
-    'refresh-wallet-balances-every-5-minutes': {
-        'task': 'wallets.tasks.refresh_wallet_balances',
-        'schedule': 60.0 * 5,  # 5分钟
+    'update-wallet-balances-daily': {
+        'task': 'wallets.tasks.update_wallet_balances',
+        'schedule': 86400.0,  # 每天执行一次
+        'args': (),
+    },
+    'update-token-metadata-weekly': {
+        'task': 'wallets.tasks.update_token_metadata',
+        'schedule': 604800.0,  # 每周执行一次
+        'args': (),
     },
 }
 

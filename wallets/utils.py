@@ -9,18 +9,22 @@ import base58
 from kadena_sdk.kadena_sdk import KadenaSdk
 from kadena_sdk.key_pair import KeyPair
 import nacl.signing
-from typing import Tuple
+from typing import Tuple, Dict, Any
 from web3 import Web3
 import warnings
+import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ChainUtils:
     """链工具类"""
-    
+
     @staticmethod
     def setup_chain_warnings():
         """设置警告过滤"""
         warnings.filterwarnings('ignore', category=UserWarning)
-    
+
     @staticmethod
     def register_additional_chains(web3: Web3):
         """注册额外的区块链网络"""
@@ -35,7 +39,7 @@ class ChainUtils:
             explorer="https://bscscan.com",
             rpc_url="https://bsc-dataseed.binance.org/"
         )
-        
+
         # 注册 Polygon 主网
         web3.eth.account.register_network(
             "MATIC",
@@ -46,7 +50,7 @@ class ChainUtils:
             explorer="https://polygonscan.com",
             rpc_url="https://polygon-rpc.com"
         )
-        
+
         # 注册 Arbitrum 主网
         web3.eth.account.register_network(
             "ARB",
@@ -75,7 +79,7 @@ def generate_wallet_from_mnemonic(mnemonic: str, chain: str) -> Tuple[str, str]:
     """从助记词生成钱包"""
     if not validate_mnemonic(mnemonic):
         raise ValueError("无效的助记词")
-    
+
     if chain in ["ETH", "BSC", "MATIC", "ARB", "OP", "AVAX", "BASE"]:
         # 生成 EVM 钱包
         mnemo = Mnemonic("english")
@@ -118,4 +122,39 @@ def decrypt_private_key(encrypted_key: str, payment_password: str) -> str:
         decrypted = f.decrypt(encrypted_key.encode())
         return decrypted.decode()
     except:
-        raise ValueError("解密失败，请检查支付密码是否正确") 
+        raise ValueError("解密失败，请检查支付密码是否正确")
+
+def sanitize_token_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    清理代币数据，移除或替换不兼容的字符
+
+    参数:
+        data: 代币元数据字典
+
+    返回:
+        清理后的代币元数据字典
+    """
+    if not data:
+        return data
+
+    # 创建一个新的字典来存储清理后的数据
+    cleaned_data = {}
+
+    for key, value in data.items():
+        # 如果值是字符串，清理它
+        if isinstance(value, str):
+            # 移除表情符号和其他特殊Unicode字符
+            # 这里使用一个简单的正则表达式来保留基本的ASCII字符和一些常见的Unicode字符
+            cleaned_value = re.sub(r'[^\x00-\x7F\u00A0-\u00FF\u0100-\u017F\u0180-\u024F]', '', value)
+            cleaned_data[key] = cleaned_value
+        elif isinstance(value, dict):
+            # 如果值是字典，递归清理
+            cleaned_data[key] = sanitize_token_data(value)
+        elif isinstance(value, list):
+            # 如果值是列表，递归清理每个元素
+            cleaned_data[key] = [sanitize_token_data(item) if isinstance(item, dict) else item for item in value]
+        else:
+            # 其他类型的值直接复制
+            cleaned_data[key] = value
+
+    return cleaned_data

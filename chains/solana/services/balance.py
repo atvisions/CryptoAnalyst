@@ -7,7 +7,7 @@ from moralis import sol_api
 import asyncio
 import aiohttp
 from datetime import datetime, timedelta
-from wallets.models import TokenVisibility, Wallet
+from wallets.models import WalletToken, Wallet
 
 logger = logging.getLogger(__name__)
 
@@ -36,108 +36,90 @@ class SolanaBalanceService:
             return {}
 
     async def _get_token_prices(self, token_addresses: List[str]) -> Dict[str, Dict]:
-        """批量获取代币价格和24小时变化，使用缓存"""
-        from django.core.cache import cache
-        import json
-
-        prices = {}
-        uncached_tokens = []
-
-        # 检查缓存中是否有数据
-        for token_address in token_addresses:
-            cache_key = f"token_price:{token_address}"
-            cached_data = cache.get(cache_key)
-
-            if cached_data:
-                # 使用缓存数据
-                prices[token_address] = json.loads(cached_data)
-                print(f"使用缓存的代币价格数据: {token_address}")
-            else:
-                # 记录未缓存的代币
-                uncached_tokens.append(token_address)
-
-        # 如果有未缓存的代币，从API获取
-        if uncached_tokens:
-            print(f"从API获取未缓存的代币价格: {uncached_tokens}")
-            api_prices = await self._fetch_token_prices_from_api(uncached_tokens)
-
-            # 更新缓存
-            for token_address, price_data in api_prices.items():
-                cache_key = f"token_price:{token_address}"
-                # 缓存15分钟
-                cache.set(cache_key, json.dumps(price_data), 60 * 15)
-                prices[token_address] = price_data
-
-        return prices
-
-    async def _fetch_token_prices_from_api(self, token_addresses: List[str]) -> Dict[str, Dict]:
-        """从API获取代币价格（原来的_get_token_prices逻辑）"""
+        """批量获取代币价格和24小时变化，使用分批处理避免请求过大"""
         try:
-            # 准备请求数据
-            payload = {
-                "addresses": token_addresses
-            }
+            # 设置每批处理的代币数量，减小批次大小
+            batch_size = 20  # 从50减小到20
+            all_prices = {}
             headers = {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
                 "X-API-Key": self.api_key
             }
 
-            # 发送批量请求
-            async with aiohttp.ClientSession() as session:
-                url = f"{self.base_url}/token/mainnet/prices"
-                async with session.post(url, json=payload, headers=headers) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        print(f"获取到的价格数据: {data}")  # 添加日志
+            # 分批处理代币地址
+            for i in range(0, len(token_addresses), batch_size):
+                batch = token_addresses[i:i+batch_size]
+                batch_num = i//batch_size + 1
+                total_batches = (len(token_addresses) + batch_size - 1)//batch_size
+                logger.info(f"处理代币价格批次 {batch_num}/{total_batches}，包含 {len(batch)} 个代币")
 
-                        prices = {}
-                        for token_data in data:
-                            token_address = token_data["tokenAddress"]
-                            try:
-                                current_price = float(token_data["usdPrice"])
-                                price_change_24h = float(token_data["usdPrice24hrPercentChange"]) if token_data.get("usdPrice24hrPercentChange") is not None else 0.0
+                # 准备请求数据
+                payload = {
+                    "addresses": batch
+                }
 
-                                prices[token_address] = {
-                                    "current_price": current_price,
-                                    "price_change_24h": price_change_24h
-                                }
-                                print(f"代币 {token_address} 当前价格: {current_price}, 24小时变化: {price_change_24h}%")
-                            except (ValueError, TypeError) as e:
-                                print(f"处理代币 {token_address} 价格数据时出错: {e}")
-                                prices[token_address] = {
-                                    "current_price": 0.0,
-                                    "price_change_24h": 0.0
-                                }
-                        return prices
-                    else:
-                        print(f"获取代币价格失败: {response.status}")
-                        return {}
+                # 添加重试机制
+                max_retries = 3
+                retry_delay = 2  # 重试间隔时间（秒）
+                success = False
+
+                for retry in range(max_retries):
+                    try:
+                        # 发送批量请求
+                        async with aiohttp.ClientSession() as session:
+                            url = f"{self.base_url}/token/mainnet/prices"
+                            # 增加超时设置
+                            async with session.post(url, json=payload, headers=headers, timeout=30) as response:
+                                if response.status == 200:
+                                    data = await response.json()
+                                    logger.info(f"成功获取批次 {batch_num} 的价格数据，共 {len(data)} 条记录")
+
+                                    for token_data in data:
+                                        token_address = token_data["tokenAddress"]
+                                        try:
+                                            current_price = float(token_data["usdPrice"])
+                                            price_change_24h = float(token_data["usdPrice24hrPercentChange"]) if token_data.get("usdPrice24hrPercentChange") is not None else 0.0
+
+                                            all_prices[token_address] = {
+                                                "current_price": current_price,
+                                                "price_change_24h": price_change_24h
+                                            }
+                                            logger.debug(f"代币 {token_address} 当前价格: {current_price}, 24小时变化: {price_change_24h}%")
+                                        except (ValueError, TypeError) as e:
+                                            logger.error(f"处理代币 {token_address} 价格数据时出错: {e}")
+                                            all_prices[token_address] = {
+                                                "current_price": 0.0,
+                                                "price_change_24h": 0.0
+                                            }
+                                    success = True
+                                    break  # 成功获取数据，跳出重试循环
+                                else:
+                                    error_text = await response.text()
+                                    logger.error(f"获取代币价格批次 {batch_num} 失败: {response.status}, 错误信息: {error_text}")
+                                    if retry < max_retries - 1:  # 如果还有重试机会
+                                        logger.info(f"将在 {retry_delay} 秒后重试（第 {retry+1} 次）")
+                                        await asyncio.sleep(retry_delay)
+                                        retry_delay *= 2  # 指数退避策略
+                    except Exception as e:
+                        logger.error(f"处理批次 {batch_num} 时发生异常: {str(e)}")
+                        if retry < max_retries - 1:  # 如果还有重试机会
+                            logger.info(f"将在 {retry_delay} 秒后重试（第 {retry+1} 次）")
+                            await asyncio.sleep(retry_delay)
+                            retry_delay *= 2  # 指数退避策略
+
+                if not success:
+                    logger.warning(f"批次 {batch_num} 在多次重试后仍然失败，跳过该批次")
+
+                # 增加批次间的等待时间，避免API限制
+                await asyncio.sleep(1.5)  # 从0.5秒增加到1.5秒
+
+            logger.info(f"完成所有代币价格获取，共处理 {len(all_prices)} 个代币")
+            return all_prices
 
         except Exception as e:
-            print(f"获取代币价格时出错: {e}")
+            logger.error(f"获取代币价格时出错: {e}")
             return {}
-
-    def _get_cached_token_price(self, token_address: str) -> Dict:
-        """从缓存获取代币价格，如果缓存不存在则从API获取"""
-        from django.core.cache import cache
-        import json
-
-        cache_key = f"token_price:{token_address}"
-        cached_data = cache.get(cache_key)
-
-        if cached_data:
-            # 使用缓存数据
-            return json.loads(cached_data)
-        else:
-            # 从API获取并缓存
-            price_data = asyncio.run(self._fetch_token_prices_from_api([token_address]))
-            if token_address in price_data:
-                # 缓存15分钟
-                cache.set(cache_key, json.dumps(price_data[token_address]), 60 * 15)
-                return price_data[token_address]
-
-        return None
 
     def _make_moralis_request(self, endpoint: str, params: Dict = None) -> Dict:
         """向 Moralis API 发送请求"""
@@ -186,25 +168,13 @@ class SolanaBalanceService:
             print(f"请求 Moralis API 时出错: {e}")
             return {}
 
-    def get_native_balance(self, address: str) -> Dict[str, Any]:
-        """获取原生 SOL 余额，使用缓存"""
-        from django.core.cache import cache
-        import json
-
-        cache_key = f"native_balance:{address}"
-        cached_data = cache.get(cache_key)
-
-        if cached_data:
-            # 使用缓存数据
-            print(f"使用缓存的原生代币余额数据: {address}")
-            return json.loads(cached_data)
-
-        # 从 API 获取数据
+    def get_native_balance(self, address: str, wallet_id: int = None) -> Dict[str, Any]:
+        """获取原生 SOL 余额并更新数据库"""
         try:
             data = self._make_moralis_request("/account/mainnet/{address}/balance", {"address": address})
             if not data or 'lamports' not in data:
                 logger.warning(f"No balance data found for address {address}")
-                balance_data = {
+                return {
                     "token_address": "native",
                     "symbol": "SOL",
                     "name": "Solana",
@@ -212,56 +182,259 @@ class SolanaBalanceService:
                     "decimals": 9,
                     "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
                 }
-            else:
-                # 将 lamports 转换为 SOL
-                lamports = Decimal(str(data['lamports']))
-                sol_balance = lamports / Decimal('1000000000')
-                logger.info(f"SOL balance for {address}: {sol_balance}")
 
-                balance_data = {
-                    "token_address": "native",
-                    "symbol": "SOL",
-                    "name": "Solana",
-                    "balance": str(sol_balance),
-                    "decimals": 9,
-                    "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
-                }
+            # 将 lamports 转换为 SOL
+            lamports = Decimal(str(data['lamports']))
+            sol_balance = lamports / Decimal('1000000000')
+            logger.info(f"SOL balance for {address}: {sol_balance}")
 
-            # 缓存数据（30秒）
-            cache.set(cache_key, json.dumps(balance_data), 30)
+            # 如果提供了 wallet_id，更新数据库
+            if wallet_id:
+                try:
+                    from wallets.models import Chain, Token, Wallet, WalletToken
+                    wallet = Wallet.objects.get(id=wallet_id)
 
-            return balance_data
+                    # 获取或创建 SOL 代币的 Token 记录
+                    chain_obj = Chain.objects.get(chain='SOL')
+                    token_obj = Token.objects.filter(chain=chain_obj, address="So11111111111111111111111111111111111111112").first()
+
+                    # 获取 SOL 价格
+                    try:
+                        # 尝试使用 CryptoCompare API 获取 SOL 价格
+                        import requests
+                        response = requests.get("https://min-api.cryptocompare.com/data/price?fsym=SOL&tsyms=USD")
+                        if response.status_code == 200:
+                            data = response.json()
+                            current_price_usd = data.get('USD', 0)
+
+                            # 获取 24 小时价格变化
+                            response_24h = requests.get("https://min-api.cryptocompare.com/data/v2/histohour?fsym=SOL&tsym=USD&limit=24")
+                            if response_24h.status_code == 200:
+                                data_24h = response_24h.json()
+                                if data_24h.get('Response') == 'Success' and data_24h.get('Data') and data_24h['Data'].get('Data'):
+                                    price_24h_ago = data_24h['Data']['Data'][0]['close']
+                                    if price_24h_ago > 0:
+                                        price_change_24h = ((current_price_usd - price_24h_ago) / price_24h_ago) * 100
+                                    else:
+                                        price_change_24h = 0
+                                else:
+                                    price_change_24h = 0
+                            else:
+                                price_change_24h = 0
+                        else:
+                            # 如果 CryptoCompare 失败，尝试 CoinGecko
+                            response = requests.get("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_24hr_change=true")
+                            if response.status_code == 200:
+                                data = response.json()
+                                sol_price = data.get('solana', {})
+                                current_price_usd = sol_price.get('usd', 0)
+                                price_change_24h = sol_price.get('usd_24h_change', 0)
+                            else:
+                                current_price_usd = 0
+                                price_change_24h = 0
+                    except Exception as e:
+                        logger.error(f"Error getting SOL price: {e}")
+                        current_price_usd = 0
+                        price_change_24h = 0
+
+                    logger.info(f"SOL price: {current_price_usd}, 24h change: {price_change_24h}%")
+
+                    if not token_obj:
+                        # 创建新的 Token 记录
+                        token_obj = Token.objects.create(
+                            chain=chain_obj,
+                            address="So11111111111111111111111111111111111111112",  # SOL 的合约地址
+                            symbol='SOL',
+                            name='Solana',
+                            decimals=9,
+                            logo_url='https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png',
+                            current_price_usd=current_price_usd,
+                            price_change_24h=price_change_24h
+                        )
+                        logger.info("Created new Token record for SOL")
+
+                        # 使用 token.py 中的方法获取 SOL 详细元数据
+                        try:
+                            from chains.solana.services.token import SolanaTokenService
+                            token_service = SolanaTokenService()
+                            metadata = token_service.get_token_metadata("So11111111111111111111111111111111111111112")
+
+                            if metadata:
+                                # 更新基本元数据
+                                token_obj.description = metadata.get('description', '')
+                                token_obj.website = metadata.get('website', '')
+                                token_obj.twitter = metadata.get('twitter', '')
+                                token_obj.telegram = metadata.get('telegram', '')
+                                token_obj.discord = metadata.get('discord', '')
+
+                                # 更新供应信息
+                                if 'totalSupply' in metadata:
+                                    try:
+                                        token_obj.total_supply = metadata.get('totalSupply', 0)
+                                    except Exception as e:
+                                        logger.error(f"Error setting total_supply: {e}")
+                                        # 尝试将字符串转换为数字
+                                        try:
+                                            token_obj.total_supply = float(metadata.get('totalSupply', 0))
+                                        except:
+                                            token_obj.total_supply = 0
+
+                                if 'totalSupplyFormatted' in metadata:
+                                    token_obj.total_supply_formatted = str(metadata.get('totalSupplyFormatted', ''))
+
+                                if 'fullyDilutedValue' in metadata:
+                                    try:
+                                        token_obj.fully_diluted_value = metadata.get('fullyDilutedValue', 0)
+                                    except Exception as e:
+                                        logger.error(f"Error setting fully_diluted_value: {e}")
+                                        # 尝试将字符串转换为数字
+                                        try:
+                                            token_obj.fully_diluted_value = float(metadata.get('fullyDilutedValue', 0))
+                                        except:
+                                            token_obj.fully_diluted_value = 0
+
+                                # 更新标准信息
+                                if 'standard' in metadata:
+                                    token_obj.standard = metadata.get('standard', '')
+                                if 'mint' in metadata:
+                                    token_obj.mint = metadata.get('mint', '')
+
+                                # 更新 Metaplex 元数据
+                                metaplex = metadata.get('metaplex', {})
+                                if metaplex:
+                                    if 'metadataUri' in metaplex:
+                                        token_obj.metadata_uri = metaplex.get('metadataUri', '')
+                                    if 'masterEdition' in metaplex:
+                                        token_obj.is_master_edition = metaplex.get('masterEdition', False)
+                                    if 'isMutable' in metaplex:
+                                        token_obj.is_mutable = metaplex.get('isMutable', True)
+                                    if 'sellerFeeBasisPoints' in metaplex:
+                                        token_obj.seller_fee_basis_points = metaplex.get('sellerFeeBasisPoints', 0)
+                                    if 'updateAuthority' in metaplex:
+                                        token_obj.update_authority = metaplex.get('updateAuthority', '')
+                                    if 'primarySaleHappened' in metaplex:
+                                        # primarySaleHappened 可能是数字或布尔值
+                                        primary_sale = metaplex.get('primarySaleHappened', 0)
+                                        if isinstance(primary_sale, bool):
+                                            token_obj.primary_sale_happened = primary_sale
+                                        else:
+                                            token_obj.primary_sale_happened = bool(primary_sale)
+
+                                token_obj.save()
+                                logger.info("Updated SOL token metadata")
+                        except Exception as e:
+                            logger.error(f"Error getting SOL metadata: {e}")
+                    else:
+                        # 更新现有 Token 记录
+                        token_obj.current_price_usd = current_price_usd
+                        token_obj.price_change_24h = price_change_24h
+                        token_obj.save()
+                        logger.info("Updated Token record for SOL")
+
+                        # 强制更新 SOL 代币的元数据
+                        # 如果元数据为空或者强制更新
+                        if True:  # 始终更新元数据
+                            try:
+                                from chains.solana.services.token import SolanaTokenService
+                                token_service = SolanaTokenService()
+                                metadata = token_service.get_token_metadata("So11111111111111111111111111111111111111112")
+
+                                if metadata:
+                                    # 更新基本元数据
+                                    token_obj.description = metadata.get('description', '')
+                                    token_obj.website = metadata.get('website', '')
+                                    token_obj.twitter = metadata.get('twitter', '')
+                                    token_obj.telegram = metadata.get('telegram', '')
+                                    token_obj.discord = metadata.get('discord', '')
+
+                                    # 更新供应信息
+                                    if 'totalSupply' in metadata:
+                                        token_obj.total_supply = metadata.get('totalSupply', 0)
+                                    if 'totalSupplyFormatted' in metadata:
+                                        token_obj.total_supply_formatted = metadata.get('totalSupplyFormatted', '')
+                                    if 'fullyDilutedValue' in metadata:
+                                        token_obj.fully_diluted_value = metadata.get('fullyDilutedValue', 0)
+
+                                    # 更新标准信息
+                                    if 'standard' in metadata:
+                                        token_obj.standard = metadata.get('standard', '')
+                                    if 'mint' in metadata:
+                                        token_obj.mint = metadata.get('mint', '')
+
+                                    token_obj.save()
+                                    logger.info("Updated SOL token metadata")
+                            except Exception as e:
+                                logger.error(f"Error getting SOL metadata: {e}")
+
+                    # 更新或创建 WalletToken 记录
+                    wallet_token, created = WalletToken.objects.update_or_create(
+                        wallet=wallet,
+                        token_address="So11111111111111111111111111111111111111112",
+                        defaults={
+                            'token': token_obj,
+                            'chain': 'SOL',
+                            'balance': str(lamports),
+                            'balance_formatted': str(sol_balance),
+                            'is_visible': True
+                        }
+                    )
+
+                    if created:
+                        logger.info(f"Created new WalletToken record for SOL")
+                    else:
+                        logger.info(f"Updated WalletToken record for SOL")
+
+                except Exception as e:
+                    logger.error(f"Error updating database for SOL: {e}")
+
+            return {
+                "token_address": "native",
+                "symbol": "SOL",
+                "name": "Solana",
+                "balance": str(sol_balance),
+                "balance_formatted": str(sol_balance),
+                "decimals": 9,
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+                "current_price_usd": current_price_usd,
+                "price_change_24h": price_change_24h
+            }
         except Exception as e:
             logger.error(f"Error getting native balance: {e}")
-            balance_data = {
+            return {
                 "token_address": "native",
                 "symbol": "SOL",
                 "name": "Solana",
                 "balance": "0",
+                "balance_formatted": "0",
                 "decimals": 9,
-                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
+                "logo": "https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png",
+                "current_price_usd": 0,
+                "price_change_24h": 0
             }
 
-            # 缓存错误数据（30秒）
-            cache.set(cache_key, json.dumps(balance_data), 30)
-
-            return balance_data
-
-    def get_all_token_balances(self, address: str) -> List[Dict[str, Any]]:
-        """获取所有代币余额，使用缓存"""
-        from django.core.cache import cache
-        import json
-
-        cache_key = f"token_balances:{address}"
-        cached_data = cache.get(cache_key)
-
-        if cached_data:
-            # 使用缓存数据
-            print(f"使用缓存的代币列表数据: {address}")
-            return json.loads(cached_data)
-
-        # 从 API 获取数据
+    def get_token_info(self, token_address: str) -> Dict[str, Any]:
+        """获取代币信息"""
         try:
+            # 使用 Moralis API 获取代币信息
+            data = self._make_moralis_request("/token/mainnet/{address}", {"address": token_address})
+            if not data:
+                logger.warning(f"No token info found for address {token_address}")
+                return {}
+
+            return {
+                'symbol': data.get('symbol', ''),
+                'name': data.get('name', ''),
+                'logo': data.get('logo', ''),
+                'decimals': data.get('decimals', 9)
+            }
+        except Exception as e:
+            logger.error(f"Error getting token info: {e}")
+            return {}
+
+    def get_all_token_balances(self, address: str, wallet_id: int = None) -> List[Dict[str, Any]]:
+        """获取所有代币余额并更新数据库"""
+        try:
+            logger.info(f"Getting all token balances for address {address}")
             data = self._make_moralis_request("/account/mainnet/{address}/tokens", {"address": address})
             if not data:
                 logger.warning(f"No token data found for address {address}")
@@ -271,7 +444,10 @@ class SolanaBalanceService:
             token_addresses = []
 
             # 首先收集所有代币地址
-            for token in data:
+            total_tokens = len(data)
+            logger.info(f"Processing {total_tokens} tokens for address {address}")
+
+            for index, token in enumerate(data):
                 try:
                     # 跳过 NFT（decimals = 0）
                     if int(token.get("decimals", 9)) == 0:
@@ -291,7 +467,10 @@ class SolanaBalanceService:
             prices = asyncio.run(self._get_token_prices(token_addresses))
 
             # 处理代币余额
-            for token in data:
+            logger.info(f"Starting to process token balances for {total_tokens} tokens")
+
+            for index, token in enumerate(data):
+                logger.info(f"Processing token balance {index+1}/{total_tokens}: {token.get('mint', 'unknown')}")
                 try:
                     # 跳过 NFT（decimals = 0）
                     if int(token.get("decimals", 9)) == 0:
@@ -338,6 +517,213 @@ class SolanaBalanceService:
                     token_balances.append(token_info)
                     logger.info(f"Added token {token_info['symbol']} with balance {balance_formatted}")
 
+                    # 如果提供了 wallet_id，更新数据库
+                    if wallet_id:
+                        try:
+                            wallet = Wallet.objects.get(id=wallet_id)
+
+                            # 尝试获取或创建 Token 对象
+                            token_obj = None
+                            try:
+                                from wallets.models import Chain, Token
+                                chain_obj = Chain.objects.get(chain='SOL')
+                                token_obj = Token.objects.filter(chain=chain_obj, address=token["mint"]).first()
+
+                                # 如果 Token 对象不存在，创建它
+                                if not token_obj:
+                                    # 获取代币价格信息
+                                    price_data = prices.get(token["mint"], {})
+                                    current_price_usd = price_data.get("current_price", 0)
+                                    price_change_24h = price_data.get("price_change_24h", 0)
+
+                                    # 清理代币数据中的特殊字符
+                                    from wallets.utils import sanitize_token_data
+                                    cleaned_token = sanitize_token_data(token)
+
+                                    # 创建新的 Token 对象
+                                    token_obj = Token.objects.create(
+                                        chain=chain_obj,
+                                        address=cleaned_token["mint"],
+                                        symbol=cleaned_token.get("symbol", ""),
+                                        name=cleaned_token.get("name", ""),
+                                        decimals=cleaned_token.get("decimals", 9),
+                                        logo_url=cleaned_token.get("logo", ""),
+                                        current_price_usd=current_price_usd,
+                                        price_change_24h=price_change_24h
+                                    )
+                                    logger.info(f"Created new Token record for {token.get('symbol', '')}: {token['mint']}")
+
+                                    # 使用 token.py 中的方法获取代币详细元数据
+                                    try:
+                                        from chains.solana.services.token import SolanaTokenService
+                                        token_service = SolanaTokenService()
+
+                                        # 如果是 Bonk 代币，打印详细日志
+                                        if token["mint"] == "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263":
+                                            logger.info(f"Processing Bonk token: {token}")
+                                            logger.info(f"Bonk token details: name={token.get('name', 'N/A')}, symbol={token.get('symbol', 'N/A')}, decimals={token.get('decimals', 'N/A')}")
+
+                                            # 检查数据库中是否已存在 Bonk 代币
+                                            existing_bonk = Token.objects.filter(address="DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263").first()
+                                            if existing_bonk:
+                                                logger.info(f"Existing Bonk token in database: {existing_bonk.__dict__}")
+                                            else:
+                                                logger.info("Bonk token not found in database")
+
+                                        metadata = token_service.get_token_metadata(token["mint"])
+
+                                        # 如果是 Bonk 代币，打印获取到的元数据
+                                        if token["mint"] == "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263":
+                                            logger.info(f"Bonk metadata from Moralis: {metadata}")
+
+                                        if metadata:
+                                            # 更新基本元数据
+                                            token_obj.description = metadata.get('description', '')
+                                            token_obj.website = metadata.get('website', '')
+                                            token_obj.twitter = metadata.get('twitter', '')
+                                            token_obj.telegram = metadata.get('telegram', '')
+                                            token_obj.discord = metadata.get('discord', '')
+
+                                            # 更新供应信息
+                                            if 'totalSupply' in metadata:
+                                                token_obj.total_supply = metadata.get('totalSupply', 0)
+                                            if 'totalSupplyFormatted' in metadata:
+                                                token_obj.total_supply_formatted = metadata.get('totalSupplyFormatted', '')
+                                            if 'fullyDilutedValue' in metadata:
+                                                token_obj.fully_diluted_value = metadata.get('fullyDilutedValue', 0)
+
+                                            # 更新标准信息
+                                            if 'standard' in metadata:
+                                                token_obj.standard = metadata.get('standard', '')
+                                            if 'mint' in metadata:
+                                                token_obj.mint = metadata.get('mint', '')
+
+                                            # 更新 Metaplex 元数据
+                                            metaplex = metadata.get('metaplex', {})
+                                            if metaplex:
+                                                if 'metadataUri' in metaplex:
+                                                    token_obj.metadata_uri = metaplex.get('metadataUri', '')
+                                                if 'masterEdition' in metaplex:
+                                                    token_obj.is_master_edition = metaplex.get('masterEdition', False)
+                                                if 'isMutable' in metaplex:
+                                                    token_obj.is_mutable = metaplex.get('isMutable', True)
+                                                if 'sellerFeeBasisPoints' in metaplex:
+                                                    token_obj.seller_fee_basis_points = metaplex.get('sellerFeeBasisPoints', 0)
+                                                if 'updateAuthority' in metaplex:
+                                                    token_obj.update_authority = metaplex.get('updateAuthority', '')
+                                                if 'primarySaleHappened' in metaplex:
+                                                    token_obj.primary_sale_happened = metaplex.get('primarySaleHappened', False)
+
+                                            token_obj.save()
+                                            logger.info(f"Updated Token metadata for {token.get('symbol', '')}: {token['mint']} using Moralis")
+                                    except Exception as e:
+                                        logger.error(f"Error getting token metadata: {e}")
+                                else:
+                                    # 更新现有 Token 对象的信息
+                                    price_data = prices.get(token["mint"], {})
+                                    if price_data:
+                                        token_obj.current_price_usd = price_data.get("current_price", token_obj.current_price_usd)
+                                        token_obj.price_change_24h = price_data.get("price_change_24h", token_obj.price_change_24h)
+                                        token_obj.save()
+                                        logger.info(f"Updated Token price for {token.get('symbol', '')}: {token['mint']}")
+
+                                    # 强制更新所有代币的元数据
+                                    # 如果元数据为空或者强制更新
+                                    if True:  # 始终更新元数据
+                                        try:
+                                            from chains.solana.services.token import SolanaTokenService
+                                            token_service = SolanaTokenService()
+                                            metadata = token_service.get_token_metadata(token["mint"])
+
+                                            if metadata:
+                                                # 更新基本元数据
+                                                token_obj.description = metadata.get('description', '')
+                                                token_obj.website = metadata.get('website', '')
+                                                token_obj.twitter = metadata.get('twitter', '')
+                                                token_obj.telegram = metadata.get('telegram', '')
+                                                token_obj.discord = metadata.get('discord', '')
+
+                                                # 更新供应信息
+                                                if 'totalSupply' in metadata:
+                                                    try:
+                                                        token_obj.total_supply = metadata.get('totalSupply', 0)
+                                                    except Exception as e:
+                                                        logger.error(f"Error setting total_supply: {e}")
+                                                        # 尝试将字符串转换为数字
+                                                        try:
+                                                            token_obj.total_supply = float(metadata.get('totalSupply', 0))
+                                                        except:
+                                                            token_obj.total_supply = 0
+
+                                                if 'totalSupplyFormatted' in metadata:
+                                                    token_obj.total_supply_formatted = str(metadata.get('totalSupplyFormatted', ''))
+
+                                                if 'fullyDilutedValue' in metadata:
+                                                    try:
+                                                        token_obj.fully_diluted_value = metadata.get('fullyDilutedValue', 0)
+                                                    except Exception as e:
+                                                        logger.error(f"Error setting fully_diluted_value: {e}")
+                                                        # 尝试将字符串转换为数字
+                                                        try:
+                                                            token_obj.fully_diluted_value = float(metadata.get('fullyDilutedValue', 0))
+                                                        except:
+                                                            token_obj.fully_diluted_value = 0
+
+                                                # 更新标准信息
+                                                if 'standard' in metadata:
+                                                    token_obj.standard = metadata.get('standard', '')
+                                                if 'mint' in metadata:
+                                                    token_obj.mint = metadata.get('mint', '')
+
+                                                # 更新 Metaplex 元数据
+                                                metaplex = metadata.get('metaplex', {})
+                                                if metaplex:
+                                                    if 'metadataUri' in metaplex:
+                                                        token_obj.metadata_uri = metaplex.get('metadataUri', '')
+                                                    if 'masterEdition' in metaplex:
+                                                        token_obj.is_master_edition = metaplex.get('masterEdition', False)
+                                                    if 'isMutable' in metaplex:
+                                                        token_obj.is_mutable = metaplex.get('isMutable', True)
+                                                    if 'sellerFeeBasisPoints' in metaplex:
+                                                        token_obj.seller_fee_basis_points = metaplex.get('sellerFeeBasisPoints', 0)
+                                                    if 'updateAuthority' in metaplex:
+                                                        token_obj.update_authority = metaplex.get('updateAuthority', '')
+                                                    if 'primarySaleHappened' in metaplex:
+                                                        # primarySaleHappened 可能是数字或布尔值
+                                                        primary_sale = metaplex.get('primarySaleHappened', 0)
+                                                        if isinstance(primary_sale, bool):
+                                                            token_obj.primary_sale_happened = primary_sale
+                                                        else:
+                                                            token_obj.primary_sale_happened = bool(primary_sale)
+
+                                                token_obj.save()
+                                                logger.info(f"Updated Token metadata for {token.get('symbol', '')}: {token['mint']} using Moralis")
+                                        except Exception as e:
+                                            logger.error(f"Error getting token metadata: {e}")
+                            except Exception as e:
+                                logger.error(f"Error getting or creating token object: {e}")
+
+                            # 更新或创建 WalletToken 记录
+                            wallet_token, created = WalletToken.objects.update_or_create(
+                                wallet=wallet,
+                                token_address=token["mint"],
+                                defaults={
+                                    'token': token_obj,
+                                    'chain': 'SOL',
+                                    'balance': raw_amount,
+                                    'balance_formatted': balance_formatted,
+                                    'is_visible': True
+                                }
+                            )
+
+                            if created:
+                                logger.info(f"Created new WalletToken record for {token_info['symbol']}")
+                            else:
+                                logger.info(f"Updated WalletToken record for {token_info['symbol']}")
+
+                        except Exception as e:
+                            logger.error(f"Error updating database for token {token_info['symbol']}: {e}")
+
                 except Exception as e:
                     logger.error(f"Error processing token {token.get('mint', 'unknown')}: {e}")
                     continue
@@ -346,8 +732,8 @@ class SolanaBalanceService:
             token_balances.sort(key=lambda x: float(x.get("value_usd", 0)), reverse=True)
             logger.info(f"Found {len(token_balances)} tokens with non-zero balance")
 
-            # 缓存数据（30秒）
-            cache.set(cache_key, json.dumps(token_balances), 30)
+            # 添加刷新完成的标志
+            logger.info(f"Refresh completed for address {address}")
 
             return token_balances
 
@@ -355,8 +741,8 @@ class SolanaBalanceService:
             logger.error(f"Error getting token balances: {e}")
             return []
 
-    def get_all_balances(self, address: str, wallet_id: int = None) -> dict:
-        """获取所有代币余额，支持缓存"""
+    def get_all_balances(self, address: str) -> dict:
+        """获取所有代币余额"""
         try:
             # 获取原生 SOL 余额
             native_balance = self.get_native_balance(address)
@@ -364,38 +750,11 @@ class SolanaBalanceService:
             # 获取所有代币余额
             token_balances = self.get_all_token_balances(address)
 
-            # 获取隐藏的代币列表（使用缓存）
-            hidden_tokens = []
-
-            # 如果提供了钱包ID，尝试使用缓存
-            if wallet_id:
-                from django.core.cache import cache
-                import json
-
-                cache_key = f"token_visibility:{wallet_id}"
-                cached_visibility = cache.get(cache_key)
-
-                if cached_visibility:
-                    # 使用缓存数据
-                    hidden_tokens = json.loads(cached_visibility)
-                    print(f"使用缓存的代币可见性数据: {wallet_id}")
-                else:
-                    # 从数据库获取并缓存
-                    hidden_tokens_queryset = TokenVisibility.objects.filter(
-                        wallet_id=wallet_id,
-                        is_visible=False
-                    ).values_list('token_address', flat=True)
-
-                    hidden_tokens = list(hidden_tokens_queryset)
-                    # 缓存1小时
-                    cache.set(cache_key, json.dumps(hidden_tokens), 60 * 60)
-                    print(f"缓存代币可见性数据: {wallet_id}, {hidden_tokens}")
-            else:
-                # 如果没有钱包ID，直接从数据库获取
-                hidden_tokens = list(TokenVisibility.objects.filter(
-                    wallet__address=address,
-                    is_visible=False
-                ).values_list('token_address', flat=True))
+            # 获取隐藏的代币列表
+            hidden_tokens = WalletToken.objects.filter(
+                wallet__address=address,
+                is_visible=False
+            ).values_list('token_address', flat=True)
 
             # 过滤掉隐藏的代币
             visible_tokens = [
@@ -407,14 +766,14 @@ class SolanaBalanceService:
             total_value_usd = Decimal('0')
             total_value_change_24h = Decimal('0')
 
-            # 添加原生代币（如果不在隐藏列表中）
-            if native_balance and native_balance['token_address'] not in hidden_tokens:
-                # 获取 SOL 价格（使用缓存）
-                sol_price_data = self._get_cached_token_price("So11111111111111111111111111111111111111112")
-
-                if sol_price_data:
-                    price = sol_price_data["current_price"]
-                    price_change_24h = sol_price_data["price_change_24h"]
+            # 添加原生代币
+            if native_balance:
+                # 获取 SOL 价格和24小时变化
+                sol_price_data = asyncio.run(self._get_token_prices(["So11111111111111111111111111111111111111112"]))
+                if sol_price_data and "So11111111111111111111111111111111111111112" in sol_price_data:
+                    price_data = sol_price_data["So11111111111111111111111111111111111111112"]
+                    price = price_data["current_price"]
+                    price_change_24h = price_data["price_change_24h"]
                     native_balance["price_usd"] = str(price)
                     native_balance["price_change_24h"] = str(price_change_24h)
                     native_balance["value_usd"] = str(float(native_balance["balance"]) * price)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Device, Wallet, PaymentPassword, TokenVisibility
+from .models import Device, Wallet, PaymentPassword, WalletToken, Token
 from django.core.exceptions import ValidationError
 import hashlib
 import base58
@@ -135,15 +135,127 @@ class WatchOnlyWalletSerializer(serializers.ModelSerializer):
         validated_data['is_watch_only'] = True
         return super().create(validated_data)
 
-class TokenVisibilitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TokenVisibility
-        fields = ['token_address', 'is_visible']
-        read_only_fields = ['created_at', 'updated_at']
 
 class TokenManagementSerializer(serializers.ModelSerializer):
     """代币管理序列化器"""
+    symbol = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    logo = serializers.SerializerMethodField()
+    current_price_usd = serializers.SerializerMethodField()
+    price_change_24h = serializers.SerializerMethodField()
+
     class Meta:
-        model = TokenVisibility
-        fields = ['id', 'token_address', 'is_visible']
-        read_only_fields = ['id', 'token_address']
+        model = WalletToken
+        fields = ['id', 'token_address', 'symbol', 'name', 'logo', 'is_visible', 'balance', 'balance_formatted', 'current_price_usd', 'price_change_24h']
+        read_only_fields = ['id', 'token_address', 'symbol', 'name', 'logo', 'balance', 'balance_formatted', 'current_price_usd', 'price_change_24h']
+
+    def get_symbol(self, obj):
+        if obj.token:
+            return obj.token.symbol
+
+        # 如果没有关联的 Token 对象，尝试从链上获取代币信息
+        try:
+            if obj.chain == 'SOL':
+                # 对于常见代币，直接返回符号
+                if obj.token_address == 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':
+                    return 'USDC'
+                elif obj.token_address == 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':
+                    return 'USDT'
+                elif obj.token_address == 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263':
+                    return 'BONK'
+                elif obj.token_address == 'JCYgnRRyM1ABMiZzRB9Ep3zLk1HZjk3B3yug9ebMmLsi':
+                    return 'MPLX'
+                elif obj.token_address == '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr':
+                    return 'PYTH'
+                elif obj.token_address == 'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm':
+                    return 'RENDER'
+
+                # 如果不是常见代币，尝试从 API 获取
+                from chains.solana.services.balance import SolanaBalanceService
+                balance_service = SolanaBalanceService()
+                token_info = balance_service.get_token_info(obj.token_address)
+                if token_info and 'symbol' in token_info:
+                    return token_info['symbol']
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting token symbol: {str(e)}")
+        return ""
+
+    def get_name(self, obj):
+        if obj.token:
+            return obj.token.name
+
+        # 如果没有关联的 Token 对象，尝试从链上获取代币信息
+        try:
+            if obj.chain == 'SOL':
+                # 对于常见代币，直接返回名称
+                if obj.token_address == 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':
+                    return 'USD Coin'
+                elif obj.token_address == 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':
+                    return 'USDT'
+                elif obj.token_address == 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263':
+                    return 'Bonk'
+                elif obj.token_address == 'JCYgnRRyM1ABMiZzRB9Ep3zLk1HZjk3B3yug9ebMmLsi':
+                    return 'Metaplex'
+                elif obj.token_address == '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr':
+                    return 'Pyth Network'
+                elif obj.token_address == 'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm':
+                    return 'Render Token'
+
+                # 如果不是常见代币，尝试从 API 获取
+                from chains.solana.services.balance import SolanaBalanceService
+                balance_service = SolanaBalanceService()
+                token_info = balance_service.get_token_info(obj.token_address)
+                if token_info and 'name' in token_info:
+                    return token_info['name']
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting token name: {str(e)}")
+        return ""
+
+    def get_logo(self, obj):
+        if obj.token:
+            return obj.token.logo_url
+
+        # 如果没有关联的 Token 对象，尝试从链上获取代币信息
+        try:
+            if obj.chain == 'SOL':
+                # 对于常见代币，直接返回 logo URL
+                if obj.token_address == 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':
+                    return 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png'
+                elif obj.token_address == 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB':
+                    return 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.svg'
+                elif obj.token_address == 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263':
+                    return 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263/logo.png'
+                elif obj.token_address == 'JCYgnRRyM1ABMiZzRB9Ep3zLk1HZjk3B3yug9ebMmLsi':
+                    return 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/JCYgnRRyM1ABMiZzRB9Ep3zLk1HZjk3B3yug9ebMmLsi/logo.png'
+                elif obj.token_address == '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr':
+                    return 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr/logo.png'
+                elif obj.token_address == 'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm':
+                    return 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm/logo.png'
+
+                # 如果不是常见代币，尝试从 API 获取
+                from chains.solana.services.balance import SolanaBalanceService
+                balance_service = SolanaBalanceService()
+                token_info = balance_service.get_token_info(obj.token_address)
+                if token_info and 'logo' in token_info:
+                    return token_info['logo']
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting token logo: {str(e)}")
+        return ""
+
+    def get_current_price_usd(self, obj):
+        """获取代币当前价格"""
+        if obj.token:
+            return obj.token.current_price_usd
+        return 0
+
+    def get_price_change_24h(self, obj):
+        """获取代币 24 小时价格变化"""
+        if obj.token:
+            return obj.token.price_change_24h
+        return 0

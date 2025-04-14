@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Device, Wallet, PaymentPassword, Chain
+from .models import Device, Wallet, PaymentPassword, Chain, Token, WalletToken
 from .constants import CHAIN_NAMES
 
 @admin.register(Chain)
@@ -10,7 +10,7 @@ class ChainAdmin(admin.ModelAdmin):
     search_fields = ('chain',)
     list_editable = ('is_active',)
     ordering = ('chain',)
-    
+
     fieldsets = (
         ('基本信息', {
             'fields': ('chain', 'is_active')
@@ -23,7 +23,7 @@ class ChainAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
-    
+
     readonly_fields = ('created_at', 'updated_at')
 
     def logo_img(self, obj):
@@ -31,7 +31,7 @@ class ChainAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" style="width: 32px; height: 32px; border-radius: 50%;" />', obj.logo_url)
         return '-'
     logo_img.short_description = 'Logo'
-    
+
     def name_display(self, obj):
         return obj.name
     name_display.short_description = '名称'
@@ -55,3 +55,32 @@ class WalletAdmin(admin.ModelAdmin):
     search_fields = ('name', 'address', 'device__device_id')
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
+
+@admin.register(Token)
+class TokenAdmin(admin.ModelAdmin):
+    list_display = ('symbol', 'name', 'chain', 'address', 'logo_img', 'created_at')
+    list_filter = ('chain', 'created_at')
+    search_fields = ('symbol', 'name', 'address')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('symbol',)
+
+    def logo_img(self, obj):
+        if obj.logo_url:
+            return format_html('<img src="{}" style="width: 32px; height: 32px; border-radius: 50%;" />', obj.logo_url)
+        return '-'
+    logo_img.short_description = 'Logo'
+
+@admin.register(WalletToken)
+class WalletTokenAdmin(admin.ModelAdmin):
+    list_display = ('wallet', 'token_display', 'token_address', 'balance_formatted', 'is_visible', 'created_at')
+    list_filter = ('wallet__chain', 'is_visible', 'created_at')
+    search_fields = ('wallet__address', 'token_address', 'wallet__name')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('-created_at',)
+    list_editable = ('is_visible',)
+
+    def token_display(self, obj):
+        if obj.token:
+            return f"{obj.token.symbol} ({obj.token.name})"
+        return obj.token_address
+    token_display.short_description = '代币'

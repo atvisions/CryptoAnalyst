@@ -64,7 +64,8 @@ class Wallet(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('device', 'chain')
+        # 移除 unique_together 约束，允许一个设备有多个相同链类型的钱包
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.name} ({self.chain}) - {self.address}"
@@ -83,17 +84,107 @@ class Wallet(models.Model):
         from .utils import decrypt_private_key
         return decrypt_private_key(self.private_key, payment_password)
 
-class TokenVisibility(models.Model):
-    """代币可见性模型"""
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='token_visibility')
+class Token(models.Model):
+    """代币模型"""
+    chain = models.ForeignKey(Chain, on_delete=models.CASCADE, related_name='tokens')
+    address = models.CharField(max_length=255)
+    symbol = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
+    decimals = models.IntegerField(default=18)
+    logo_url = models.CharField(max_length=255, blank=True, null=True)
+    current_price_usd = models.DecimalField(max_digits=30, decimal_places=18, default=0)
+    price_change_24h = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # 百分比
+    market_cap_usd = models.DecimalField(max_digits=30, decimal_places=2, default=0)
+    volume_24h_usd = models.DecimalField(max_digits=30, decimal_places=2, default=0)
+    fully_diluted_value = models.DecimalField(max_digits=30, decimal_places=2, null=True, blank=True, default=0)
+    total_supply = models.DecimalField(max_digits=40, decimal_places=18, default=0)
+    total_supply_formatted = models.CharField(max_length=50, blank=True, null=True)
+    standard = models.CharField(max_length=20, blank=True, null=True)  # ERC20, SPL 等
+    mint = models.CharField(max_length=255, blank=True, null=True)  # Solana 的 mint address
+    description = models.TextField(blank=True, null=True)
+    website = models.CharField(max_length=255, blank=True, null=True)
+    twitter = models.CharField(max_length=255, blank=True, null=True)
+    telegram = models.CharField(max_length=255, blank=True, null=True)
+    discord = models.CharField(max_length=255, blank=True, null=True)
+    # Metaplex 元数据
+    metadata_uri = models.CharField(max_length=255, blank=True, null=True)
+    is_master_edition = models.BooleanField(default=False)
+    is_mutable = models.BooleanField(default=True)
+    seller_fee_basis_points = models.IntegerField(default=0)
+    update_authority = models.CharField(max_length=255, blank=True, null=True)
+    primary_sale_happened = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_updated = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ['chain', 'address']
+        ordering = ['-current_price_usd']
+
+    def __str__(self):
+        return f"{self.symbol} ({self.chain.chain})"
+
+class WalletToken(models.Model):
+    """钱包代币模型"""
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='wallet_tokens')
+    token = models.ForeignKey(Token, on_delete=models.SET_NULL, null=True, blank=True, related_name='wallet_tokens')
     token_address = models.CharField(max_length=255)
+    chain = models.CharField(max_length=20, choices=CHAIN_CHOICES, default='SOL')
+    balance = models.DecimalField(max_digits=40, decimal_places=18, default=0)
+    balance_formatted = models.CharField(max_length=50, blank=True, null=True)
     is_visible = models.BooleanField(default=True)
+    last_synced = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ['wallet', 'token_address']
-        ordering = ['-created_at']
+        ordering = ['-balance']
 
     def __str__(self):
-        return f"{self.wallet.address} - {self.token_address} ({'Visible' if self.is_visible else 'Hidden'})"
+        return f"{self.token_address} ({self.wallet.address})"
+
+    @property
+    def symbol(self):
+        """返回代币符号"""
+        if self.token:
+            return self.token.symbol
+        return ""
+
+    @property
+    def name(self):
+        """返回代币名称"""
+        if self.token:
+            return self.token.name
+        return ""
+
+    @property
+    def logo(self):
+        """返回代币图标"""
+        if self.token:
+            return self.token.logo_url
+        return ""
+
+    @property
+    def decimals(self):
+        """返回代币精度"""
+        if self.token:
+            return self.token.decimals
+        return 18
+
+    @property
+    def price_usd(self):
+        """返回代币价格"""
+        if self.token:
+            return self.token.current_price_usd
+        return 0
+
+    @property
+    def value_usd(self):
+        """返回代币价值"""
+        if self.token:
+            return self.balance * self.token.current_price_usd
+        return 0
+
+
