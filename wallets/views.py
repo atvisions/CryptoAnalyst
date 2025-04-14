@@ -24,8 +24,10 @@ from django.conf import settings
 from chains.evm.services.base import EVMRPCService
 from chains.solana.services.base import SolanaRPCService
 from chains.solana.services.balance import SolanaBalanceService
+from chains.solana.services.token import SolanaTokenService
 from rest_framework.permissions import IsAuthenticated
 import logging
+import json
 
 # Create your views here.
 
@@ -168,6 +170,10 @@ class WalletViewSet(viewsets.ModelViewSet):
         """获取查询集"""
         # 如果是详情操作（如 get_balance），允许直接通过 ID 获取
         if self.action in ['get_balance', 'get_token_balance', 'show_private_key', 'get_all_balances', 'token_management', 'set_token_visibility']:
+            return Wallet.objects.all()
+
+        # 如果是我们的新接口，使用钱包 ID 作为路径参数
+        if self.action in ['token_metadata', 'token_price_history']:
             return Wallet.objects.all()
 
         # 其他操作需要设备 ID
@@ -654,5 +660,149 @@ class WalletViewSet(viewsets.ModelViewSet):
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Error setting token visibility: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def get_token_metadata(self, request):
+        """获取代币元数据（不需要钱包 ID）"""
+        try:
+            token_address = request.query_params.get('token_address')
+            if not token_address:
+                return Response({'error': '代币地址是必需的'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 创建 Solana 代币服务
+            token_service = SolanaTokenService()
+
+            # 获取代币元数据
+            metadata = token_service.get_token_metadata(token_address)
+
+            return Response(metadata)
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting token metadata: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # 删除不带钱包 ID 的接口
+
+    @action(detail=True, methods=['get'])
+    def token_metadata(self, request, pk=None):
+        """获取代币元数据，使用钱包 ID 作为路径参数"""
+        try:
+            # 获取钱包对象
+            wallet = self.get_object()
+
+            token_address = request.query_params.get('token_address')
+            if not token_address:
+                return Response({'error': '代币地址是必需的'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 如果是 SOL 原生代币，使用 Wrapped SOL 的地址
+            if token_address.lower() in ['sol', 'solana']:
+                # Wrapped SOL 的地址
+                token_address = 'So11111111111111111111111111111111111111112'
+
+            # 创建 Solana 代币服务
+            token_service = SolanaTokenService()
+
+            # 获取代币元数据，强制刷新缓存
+            metadata = token_service.get_token_metadata(token_address, force_refresh=True)
+
+            # 打印元数据信息
+            print(f"代币元数据: {json.dumps(metadata, indent=2)}")
+
+            # 添加钱包相关信息
+            metadata['wallet_id'] = wallet.id
+            metadata['wallet_address'] = wallet.address
+            metadata['wallet_name'] = wallet.name
+
+            # 获取钱包中该代币的余额（如果是 Solana 钱包）
+            if wallet.chain == 'SOL':
+                try:
+                    # 使用已创建的 token_service 获取代币余额
+                    token_balance = token_service.get_token_balance(token_address, wallet.address)
+                    metadata['balance'] = token_balance.get('balance', '0')
+                except Exception as e:
+                    logger.error(f"Error getting token balance: {str(e)}")
+                    metadata['balance'] = '0'
+
+            return Response(metadata)
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting token metadata: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'])
+    def token_price_history(self, request, pk=None):
+        """获取代币历史价格，使用钱包 ID 作为路径参数"""
+        try:
+            # 获取钱包对象
+            wallet = self.get_object()
+
+            token_address = request.query_params.get('token_address')
+            timeframe = request.query_params.get('timeframe', '1d')
+            count = request.query_params.get('count', 7)
+
+            # 尝试将 count 转换为整数
+            try:
+                count = int(count)
+            except (ValueError, TypeError):
+                count = 7  # 默认值
+
+            # 如果是 SOL 原生代币，使用 Wrapped SOL 的地址
+            if token_address and token_address.lower() in ['sol', 'solana']:
+                # Wrapped SOL 的地址
+                token_address = 'So11111111111111111111111111111111111111112'
+
+            # 验证时间间隔类型
+            valid_timeframes = ['1s', '10s', '30s', '1min', '5min', '10min', '30min',
+                              '1h', '4h', '12h', '1d', '1w', '1M', '1Y']
+            if timeframe not in valid_timeframes:
+                return Response({'error': f'无效的时间间隔，支持的类型有: {valid_timeframes}'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # 尝试将 count 转换为整数
+            try:
+                count = int(count)
+                if count <= 0:
+                    count = 7  # 默认值
+            except ValueError:
+                count = 7  # 默认值
+
+            if not token_address:
+                return Response({'error': '代币地址是必需的'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 创建 Solana 代币服务
+            token_service = SolanaTokenService()
+
+            # 获取代币历史价格，强制刷新缓存
+            # 使用统一的接口，不区分原生代币和其他代币
+            price_history = token_service.get_token_price_history(
+                token_address=token_address,
+                timeframe=timeframe,
+                count=count,
+                force_refresh=True
+            )
+
+            # 打印价格历史信息
+            print(f"代币价格历史: {json.dumps(price_history, indent=2)}")
+
+            # 添加钱包相关信息
+            price_history['wallet_id'] = wallet.id
+            price_history['wallet_address'] = wallet.address
+            price_history['wallet_name'] = wallet.name
+
+            # 获取钱包中该代币的余额（如果是 Solana 钱包）
+            if wallet.chain == 'SOL':
+                try:
+                    # 使用已创建的 token_service 获取代币余额
+                    token_balance = token_service.get_token_balance(token_address, wallet.address)
+                    price_history['balance'] = token_balance.get('balance', '0')
+                except Exception as e:
+                    logger.error(f"Error getting token balance: {str(e)}")
+                    price_history['balance'] = '0'
+
+            return Response(price_history)
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error getting token price history: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

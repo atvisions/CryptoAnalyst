@@ -25,6 +25,11 @@ urlpatterns = [
     path('<int:pk>/get_all_balances/', WalletViewSet.as_view({'get': 'get_all_balances'})),
     path('<int:pk>/token-management/', WalletViewSet.as_view({'get': 'token_management'})),
     path('<int:pk>/set-token-visibility/', WalletViewSet.as_view({'post': 'set_token_visibility'})),
+
+    # 代币元数据和历史价格接口（使用钱包 ID）
+    path('<int:pk>/token_metadata/', WalletViewSet.as_view({'get': 'token_metadata'})),
+    path('<int:pk>/token_price_history/', WalletViewSet.as_view({'get': 'token_price_history'})),
+
     path('get_supported_chains/', WalletViewSet.as_view({'get': 'get_supported_chains'})),
 
     # 包含路由器的 URL

@@ -3,11 +3,11 @@ import os
 
 class Config:
     """配置管理类"""
-    
+
     # API 密钥配置
     MORALIS_API_KEY = os.getenv("MORALIS_API_KEY", "")
     ALCHEMY_API_KEY = os.getenv("ALCHEMY_API_KEY", "")
-    
+
     # EVM 链配置
     EVM_CONFIGS: Dict[str, Dict[str, Any]] = {
         "ETH": {
@@ -79,20 +79,23 @@ class Config:
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         }
     }
-    
+
     # Solana 链配置
     SOLANA_CONFIGS: Dict[str, Dict[str, Any]] = {
         "SOL": {
+            "rpc_url": "https://api.mainnet-beta.solana.com",
             "moralis_url": "https://solana-gateway.moralis.io"
         },
         "SOL_DEVNET": {
+            "rpc_url": "https://api.devnet.solana.com",
             "moralis_url": "https://solana-gateway.moralis.io"
         },
         "SOL_TESTNET": {
+            "rpc_url": "https://api.testnet.solana.com",
             "moralis_url": "https://solana-gateway.moralis.io"
         }
     }
-    
+
     # Kadena 链配置
     KADENA_CONFIGS: Dict[str, Dict[str, Any]] = {
         "KDA": {
@@ -122,24 +125,24 @@ class Config:
             ]
         }
     }
-    
+
     @classmethod
     def get_evm_config(cls, chain: str) -> Dict[str, Any]:
         """获取 EVM 链配置"""
         if chain not in cls.EVM_CONFIGS:
             raise ValueError(f"不支持的 EVM 链类型: {chain}")
         return cls.EVM_CONFIGS[chain]
-    
+
     @classmethod
     def get_solana_config(cls, chain: str) -> Dict[str, Any]:
         """获取 Solana 链配置"""
         if chain not in cls.SOLANA_CONFIGS:
             raise ValueError(f"不支持的 Solana 链类型: {chain}")
         return cls.SOLANA_CONFIGS[chain]
-    
+
     @classmethod
     def get_kadena_config(cls, chain: str) -> Dict[str, Any]:
         """获取 Kadena 链配置"""
         if chain not in cls.KADENA_CONFIGS:
             raise ValueError(f"不支持的 Kadena 链类型: {chain}")
-        return cls.KADENA_CONFIGS[chain] 
+        return cls.KADENA_CONFIGS[chain]
