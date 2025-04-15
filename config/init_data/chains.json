@@ -5,98 +5,240 @@
             "name": "Ethereum",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/eth.png"
+            "logo": "chain_logos/eth.png",
+            "is_testnet": false
+        },
+        {
+            "code": "ETH_GOERLI",
+            "name": "Ethereum Goerli",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/eth.png",
+            "is_testnet": true
+        },
+        {
+            "code": "ETH_SEPOLIA",
+            "name": "Ethereum Sepolia",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/eth.png",
+            "is_testnet": true
         },
         {
             "code": "BSC",
             "name": "BNB Chain",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/bnb.png"
+            "logo": "chain_logos/bnb.png",
+            "is_testnet": false
+        },
+        {
+            "code": "BSC_TESTNET",
+            "name": "BNB Chain Testnet",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/bnb.png",
+            "is_testnet": true
         },
         {
             "code": "MATIC",
             "name": "Polygon",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/polygon.jpeg"
+            "logo": "chain_logos/polygon.jpeg",
+            "is_testnet": false
+        },
+        {
+            "code": "MATIC_MUMBAI",
+            "name": "Polygon Mumbai",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/polygon.jpeg",
+            "is_testnet": true
         },
         {
             "code": "AVAX",
             "name": "Avalanche",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/avax.png"
+            "logo": "chain_logos/avax.png",
+            "is_testnet": false
+        },
+        {
+            "code": "AVAX_FUJI",
+            "name": "Avalanche Fuji",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/avax.png",
+            "is_testnet": true
         },
         {
             "code": "BASE",
             "name": "Base",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/base.png"
+            "logo": "chain_logos/base.png",
+            "is_testnet": false
+        },
+        {
+            "code": "BASE_SEPOLIA",
+            "name": "Base Sepolia",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/base.png",
+            "is_testnet": true
         },
         {
             "code": "OP",
             "name": "Optimism",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/op.png"
+            "logo": "chain_logos/op.png",
+            "is_testnet": false
+        },
+        {
+            "code": "OP_GOERLI",
+            "name": "Optimism Goerli",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/op.png",
+            "is_testnet": true
         },
         {
             "code": "ARB",
             "name": "Arbitrum",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/arb.jpeg"
+            "logo": "chain_logos/arb.jpeg",
+            "is_testnet": false
+        },
+        {
+            "code": "ARB_GOERLI",
+            "name": "Arbitrum Goerli",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/arb.jpeg",
+            "is_testnet": true
         },
         {
             "code": "FTM",
             "name": "Fantom",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/ftm.png"
+            "logo": "chain_logos/ftm.png",
+            "is_testnet": false
+        },
+        {
+            "code": "FTM_TESTNET",
+            "name": "Fantom Testnet",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/ftm.png",
+            "is_testnet": true
         },
         {
             "code": "CRO",
             "name": "Cronos",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/cro.jpeg"
+            "logo": "chain_logos/cro.jpeg",
+            "is_testnet": false
+        },
+        {
+            "code": "CRO_TESTNET",
+            "name": "Cronos Testnet",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/cro.jpeg",
+            "is_testnet": true
         },
         {
             "code": "ZKSYNC",
             "name": "zkSync Era",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/zksync.jpeg"
+            "logo": "chain_logos/zksync.jpeg",
+            "is_testnet": false
+        },
+        {
+            "code": "ZKSYNC_TESTNET",
+            "name": "zkSync Era Testnet",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/zksync.jpeg",
+            "is_testnet": true
         },
         {
             "code": "LINEA",
             "name": "Linea",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/linea.png"
+            "logo": "chain_logos/linea.png",
+            "is_testnet": false
+        },
+        {
+            "code": "LINEA_GOERLI",
+            "name": "Linea Goerli",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/linea.png",
+            "is_testnet": true
         },
         {
             "code": "MANTA",
             "name": "Manta",
             "type": "evm",
             "is_active": true,
-            "logo": "chain_logos/manta.jpeg"
+            "logo": "chain_logos/manta.jpeg",
+            "is_testnet": false
+        },
+        {
+            "code": "MANTA_TESTNET",
+            "name": "Manta Pacific Testnet",
+            "type": "evm",
+            "is_active": false,
+            "logo": "chain_logos/manta.jpeg",
+            "is_testnet": true
         },
         {
             "code": "SOL",
             "name": "Solana",
             "type": "solana",
             "is_active": true,
-            "logo": "chain_logos/sol.png"
+            "logo": "chain_logos/sol.png",
+            "is_testnet": false
+        },
+        {
+            "code": "SOL_DEVNET",
+            "name": "Solana Devnet",
+            "type": "solana",
+            "is_active": false,
+            "logo": "chain_logos/sol.png",
+            "is_testnet": true
+        },
+        {
+            "code": "SOL_TESTNET",
+            "name": "Solana Testnet",
+            "type": "solana",
+            "is_active": false,
+            "logo": "chain_logos/sol.png",
+            "is_testnet": true
         },
         {
             "code": "KDA",
             "name": "Kadena",
             "type": "kadena",
             "is_active": true,
-            "logo": "chain_logos/kda.jpg"
+            "logo": "chain_logos/kda.jpg",
+            "is_testnet": false
+        },
+        {
+            "code": "KDA_TESTNET",
+            "name": "Kadena Testnet",
+            "type": "kadena",
+            "is_active": false,
+            "logo": "chain_logos/kda.jpg",
+            "is_testnet": true
         }
     ]
-} 
+}

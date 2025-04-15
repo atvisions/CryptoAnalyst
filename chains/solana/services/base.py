@@ -10,15 +10,15 @@ from decimal import Decimal
 
 class SolanaBaseService:
     """Solana 链基础服务"""
-    
+
     def __init__(self):
         self.config = Config()
-        
+
     def _get_client(self, chain: str) -> Client:
         """获取 Solana 客户端"""
         config = self.config.get_solana_config(chain)
         return Client(config['rpc_url'], commitment=Commitment("confirmed"))
-        
+
     def get_balance(self, chain: str, address: str) -> Dict[str, Any]:
         """获取余额"""
         try:
@@ -31,7 +31,7 @@ class SolanaBaseService:
             }
         except Exception as e:
             raise Exception(f"Failed to get balance: {str(e)}")
-            
+
     def get_transaction(self, chain: str, tx_hash: str) -> Dict[str, Any]:
         """获取交易详情"""
         try:
@@ -40,7 +40,7 @@ class SolanaBaseService:
             return tx['result']
         except Exception as e:
             raise Exception(f"Failed to get transaction: {str(e)}")
-            
+
     def get_token_balance(self, chain: str, token_address: str, wallet_address: str) -> Dict[str, Any]:
         """获取代币余额"""
         try:
@@ -65,7 +65,7 @@ class SolanaBaseService:
             }
         except Exception as e:
             raise Exception(f"Failed to get token balance: {str(e)}")
-            
+
     def get_token_info(self, chain: str, token_address: str) -> Dict[str, Any]:
         """获取代币信息"""
         try:
@@ -83,11 +83,12 @@ class SolanaBaseService:
 
 class SolanaRPCService:
     """Solana RPC 服务"""
-    
+
     def __init__(self):
         """初始化 Solana RPC 客户端"""
-        self.client = Client("https://api.mainnet-beta.solana.com")
-        
+        config = Config.get_solana_config("SOL")
+        self.client = Client(config["rpc_url"])
+
     def get_balance(self, address: str) -> Dict[str, Any]:
         """获取账户余额"""
         try:
@@ -108,7 +109,7 @@ class SolanaRPCService:
             }
         except Exception as e:
             raise Exception(f"获取余额失败: {str(e)}")
-            
+
     def get_token_balance(self, token_address: str, wallet_address: str) -> Dict[str, Any]:
         """获取代币余额"""
         try:
@@ -126,7 +127,7 @@ class SolanaRPCService:
             raise Exception("获取代币余额失败")
         except Exception as e:
             raise Exception(f"获取代币余额失败: {str(e)}")
-            
+
     def get_token_info(self, token_address: str) -> Dict[str, Any]:
         """获取代币信息"""
         try:
@@ -140,4 +141,4 @@ class SolanaRPCService:
                 }
             raise Exception("获取代币信息失败")
         except Exception as e:
-            raise Exception(f"获取代币信息失败: {str(e)}") 
+            raise Exception(f"获取代币信息失败: {str(e)}")

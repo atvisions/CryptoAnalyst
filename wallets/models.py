@@ -28,6 +28,7 @@ class PaymentPassword(models.Model):
 class Chain(models.Model):
     chain = models.CharField(max_length=50, unique=True)
     is_active = models.BooleanField(default=True)
+    is_testnet = models.BooleanField(default=False)  # 添加测试网标记
     logo = models.ImageField(upload_to='chain_logos/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

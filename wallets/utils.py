@@ -28,7 +28,10 @@ class ChainUtils:
     @staticmethod
     def register_additional_chains(web3: Web3):
         """注册额外的区块链网络"""
+        from common.config import Config
+
         # 注册 BSC 主网
+        bsc_config = Config.get_evm_config("BSC")
         web3.eth.account.enable_unaudited_hdwallet_features()
         web3.eth.account.register_network(
             "BSC",
@@ -37,10 +40,11 @@ class ChainUtils:
             hrp="bnb",
             symbol="BNB",
             explorer="https://bscscan.com",
-            rpc_url="https://bsc-dataseed.binance.org/"
+            rpc_url=bsc_config["rpc_url"]
         )
 
         # 注册 Polygon 主网
+        matic_config = Config.get_evm_config("MATIC")
         web3.eth.account.register_network(
             "MATIC",
             chain_id=137,
@@ -48,10 +52,11 @@ class ChainUtils:
             hrp="matic",
             symbol="MATIC",
             explorer="https://polygonscan.com",
-            rpc_url="https://polygon-rpc.com"
+            rpc_url=matic_config["rpc_url"]
         )
 
         # 注册 Arbitrum 主网
+        arb_config = Config.get_evm_config("ARB")
         web3.eth.account.register_network(
             "ARB",
             chain_id=42161,
@@ -59,7 +64,7 @@ class ChainUtils:
             hrp="arb",
             symbol="ETH",
             explorer="https://arbiscan.io",
-            rpc_url="https://arb1.arbitrum.io/rpc"
+            rpc_url=arb_config["rpc_url"]
         )
 
 def generate_mnemonic() -> str:

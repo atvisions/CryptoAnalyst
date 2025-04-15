@@ -24,6 +24,7 @@ CHAIN_CHOICES = [(chain['code'], chain['name']) for chain in CHAINS_CONFIG['chai
 
 # 链名称映射
 CHAIN_NAMES = {
+    # 主网
     'ETH': 'Ethereum',
     'BSC': 'BNB Chain',
     'MATIC': 'Polygon',
@@ -39,4 +40,21 @@ CHAIN_NAMES = {
     'MANTA': 'Manta',
     'SOL': 'Solana',
     'KDA': 'Kadena',
-} 
+
+    # 测试网
+    'ETH_GOERLI': 'Ethereum Goerli',
+    'ETH_SEPOLIA': 'Ethereum Sepolia',
+    'BSC_TESTNET': 'BNB Chain Testnet',
+    'MATIC_MUMBAI': 'Polygon Mumbai',
+    'AVAX_FUJI': 'Avalanche Fuji',
+    'OP_GOERLI': 'Optimism Goerli',
+    'ARB_GOERLI': 'Arbitrum Goerli',
+    'FTM_TESTNET': 'Fantom Testnet',
+    'CRO_TESTNET': 'Cronos Testnet',
+    'ZKSYNC_TESTNET': 'zkSync Era Testnet',
+    'LINEA_GOERLI': 'Linea Goerli',
+    'MANTA_TESTNET': 'Manta Pacific Testnet',
+    'SOL_DEVNET': 'Solana Devnet',
+    'SOL_TESTNET': 'Solana Testnet',
+    'KDA_TESTNET': 'Kadena Testnet',
+}

@@ -31,6 +31,8 @@ urlpatterns = [
     path('<int:pk>/token_metadata/', WalletViewSet.as_view({'get': 'token_metadata'})),
     path('<int:pk>/token_price_history/', WalletViewSet.as_view({'get': 'token_price_history'})),
     path('<int:pk>/refresh_balances/', WalletViewSet.as_view({'post': 'refresh_balances'})),
+    path('update_token_metadata/', WalletViewSet.as_view({'post': 'update_token_metadata'})),
+    path('check_task_status/', WalletViewSet.as_view({'post': 'check_task_status'})),
     path('<int:pk>/rename_wallet/', WalletViewSet.as_view({'post': 'rename_wallet'})),
     path('<int:pk>/delete_wallet/', WalletViewSet.as_view({'post': 'delete_wallet'})),
     path('get_supported_chains/', WalletViewSet.as_view({'get': 'get_supported_chains'})),

@@ -17,7 +17,8 @@ class SolanaBalanceService:
     def __init__(self):
         """初始化 Moralis API 客户端"""
         self.api_key = Config.MORALIS_API_KEY
-        self.base_url = "https://solana-gateway.moralis.io"
+        config = Config.get_solana_config("SOL")
+        self.base_url = config["moralis_url"]
 
     async def _make_async_request(self, session: aiohttp.ClientSession, endpoint: str, params: Dict) -> Dict:
         """异步请求 Moralis API"""
@@ -202,7 +203,7 @@ class SolanaBalanceService:
                     try:
                         # 尝试使用 CryptoCompare API 获取 SOL 价格
                         import requests
-                        response = requests.get("https://min-api.cryptocompare.com/data/price?fsym=SOL&tsyms=USD")
+                        response = requests.get(f"{Config.CRYPTOCOMPARE_API_URL}?fsym=SOL&tsyms=USD")
                         if response.status_code == 200:
                             data = response.json()
                             current_price_usd = data.get('USD', 0)

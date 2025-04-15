@@ -4,7 +4,10 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from .models import Device, Wallet, PaymentPassword, Chain, Token, WalletToken
+from .tasks import fetch_token_metadata, process_token_metadata_batch
+from celery.result import AsyncResult
 from .serializers import (
     DeviceSerializer,
     PaymentPasswordSerializer,
@@ -229,17 +232,35 @@ class WalletViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def get_supported_chains(self, request):
-        """获取支持的链列表"""
+        """获取支持的链列表，返回所有已激活的链，包括主网和测试网"""
+        # 获取所有已激活的链
         chains = Chain.objects.filter(is_active=True)
 
         chain_list = []
         for chain in chains:
+            # 从数据库中获取链类型
+            from wallets.constants import CHAIN_TYPES
+
+            # 处理测试网链类型
+            chain_code = chain.chain
+            base_chain_code = chain_code.split('_')[0] if '_' in chain_code else chain_code
+
+            # 先尝试获取完整链代码的类型，如果不存在，则使用基础链代码的类型
+            chain_type = CHAIN_TYPES.get(chain_code, CHAIN_TYPES.get(base_chain_code, '')).upper()
+
+            if chain_type == 'EVM':
+                type_value = 'EVM'
+            elif chain_type in ['SOLANA', 'KADENA']:
+                type_value = 'NON_EVM'
+            else:
+                type_value = 'NON_EVM'  # 默认为非EVM
+
             chain_list.append({
                 'chain': chain.chain,
                 'name': chain.name,
                 'logo': request.build_absolute_uri(chain.logo_url) if chain.logo_url else None,
-                'type': 'EVM' if chain.chain in EVM_CHAINS else 'NON_EVM',
-                'is_testnet': False
+                'type': type_value,
+                'is_testnet': chain.is_testnet
             })
 
         return Response(chain_list)
@@ -326,6 +347,18 @@ class WalletViewSet(viewsets.ModelViewSet):
         device = get_or_create_device(device_id)
         request.data['device'] = device.id
 
+        # 检查链是否激活
+        chain_code = request.data.get('chain')
+        if chain_code:
+            try:
+                chain_obj = Chain.objects.get(chain=chain_code)
+                if not chain_obj.is_active:
+                    return Response({'error': f'链 {chain_code} 当前未激活'},
+                                  status=status.HTTP_400_BAD_REQUEST)
+            except Chain.DoesNotExist:
+                return Response({'error': f'不支持的链 {chain_code}'},
+                              status=status.HTTP_400_BAD_REQUEST)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -385,12 +418,22 @@ class WalletViewSet(viewsets.ModelViewSet):
     def import_by_mnemonic(self, request):
         # 获取设备 ID 和链类型
         device_id = request.data.get('device_id')
-        chain = request.data.get('chain')
+        chain_code = request.data.get('chain')
         mnemonic = request.data.get('mnemonic')
         payment_password = request.data.get('payment_password')
 
-        if not all([device_id, chain, mnemonic, payment_password]):
+        if not all([device_id, chain_code, mnemonic, payment_password]):
             return Response({'error': 'Device ID, chain, mnemonic and payment password are required'},
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        # 检查链是否激活
+        try:
+            chain_obj = Chain.objects.get(chain=chain_code)
+            if not chain_obj.is_active:
+                return Response({'error': f'链 {chain_code} 当前未激活'},
+                              status=status.HTTP_400_BAD_REQUEST)
+        except Chain.DoesNotExist:
+            return Response({'error': f'不支持的链 {chain_code}'},
                           status=status.HTTP_400_BAD_REQUEST)
 
         # 验证助记词
@@ -402,12 +445,12 @@ class WalletViewSet(viewsets.ModelViewSet):
             device = get_or_create_device(device_id)
 
             # 生成钱包地址和私钥
-            address, private_key = generate_wallet_from_mnemonic(mnemonic, chain)
+            address, private_key = generate_wallet_from_mnemonic(mnemonic, chain_code)
 
             # 检查钱包是否已存在
             existing_wallet = Wallet.objects.filter(
                 device=device,
-                chain=chain,
+                chain=chain_code,
                 address=address
             ).first()
 
@@ -424,7 +467,7 @@ class WalletViewSet(viewsets.ModelViewSet):
 
                     # 获取钱包的代币余额并写入数据库
                     try:
-                        if chain == 'SOL':
+                        if chain_code == 'SOL':
                             balance_service = SolanaBalanceService()
                             balance_service.get_all_token_balances(address, wallet_id=existing_wallet.id)
                     except Exception as e:
@@ -452,14 +495,14 @@ class WalletViewSet(viewsets.ModelViewSet):
                 device=device,
                 address=address,
                 private_key=encrypted_private_key,
-                chain=chain,
+                chain=chain_code,
                 name=wallet_name,
                 avatar=avatar_path
             )
 
             # 获取钱包的代币余额并写入数据库
             try:
-                if chain == 'SOL':
+                if chain_code == 'SOL':
                     balance_service = SolanaBalanceService()
                     balance_service.get_all_token_balances(address, wallet_id=wallet.id)
                 # 如果有其他链的处理逻辑，可以在这里添加
@@ -477,11 +520,21 @@ class WalletViewSet(viewsets.ModelViewSet):
     def import_watch_only(self, request):
         # 获取设备 ID 和链类型
         device_id = request.data.get('device_id')
-        chain = request.data.get('chain')
+        chain_code = request.data.get('chain')
         address = request.data.get('address')
 
-        if not all([device_id, chain, address]):
+        if not all([device_id, chain_code, address]):
             return Response({'error': 'Device ID, chain and address are required'},
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        # 检查链是否激活
+        try:
+            chain_obj = Chain.objects.get(chain=chain_code)
+            if not chain_obj.is_active:
+                return Response({'error': f'链 {chain_code} 当前未激活'},
+                              status=status.HTTP_400_BAD_REQUEST)
+        except Chain.DoesNotExist:
+            return Response({'error': f'不支持的链 {chain_code}'},
                           status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -491,7 +544,7 @@ class WalletViewSet(viewsets.ModelViewSet):
             # 检查钱包是否已存在
             existing_wallet = Wallet.objects.filter(
                 device=device,
-                chain=chain,
+                chain=chain_code,
                 address=address
             ).first()
 
@@ -508,7 +561,7 @@ class WalletViewSet(viewsets.ModelViewSet):
 
                     # 获取钱包的代币余额并写入数据库
                     try:
-                        if chain == 'SOL':
+                        if chain_code == 'SOL':
                             balance_service = SolanaBalanceService()
                             balance_service.get_all_token_balances(address, wallet_id=existing_wallet.id)
                     except Exception as e:
@@ -532,7 +585,7 @@ class WalletViewSet(viewsets.ModelViewSet):
             wallet = Wallet.objects.create(
                 device=device,
                 address=address,
-                chain=chain,
+                chain=chain_code,
                 name=wallet_name,
                 avatar=avatar_path,
                 is_watch_only=True
@@ -540,7 +593,7 @@ class WalletViewSet(viewsets.ModelViewSet):
 
             # 获取钱包的代币余额并写入数据库
             try:
-                if chain == 'SOL':
+                if chain_code == 'SOL':
                     balance_service = SolanaBalanceService()
                     balance_service.get_all_token_balances(address, wallet_id=wallet.id)
                 # 如果有其他链的处理逻辑，可以在这里添加
@@ -565,9 +618,14 @@ class WalletViewSet(viewsets.ModelViewSet):
 
         device = get_or_create_device(device_id)
 
-        # 验证链是否支持
-        if chain not in EVM_CHAINS and chain not in ['SOL', 'KDA']:
-            return Response({'error': 'Unsupported chain'},
+        # 从数据库中验证链是否支持和激活
+        try:
+            chain_obj = Chain.objects.get(chain=chain)
+            if not chain_obj.is_active:
+                return Response({'error': f'链 {chain} 当前未激活'},
+                              status=status.HTTP_400_BAD_REQUEST)
+        except Chain.DoesNotExist:
+            return Response({'error': f'不支持的链 {chain}'},
                           status=status.HTTP_400_BAD_REQUEST)
 
         # 更新或创建链
@@ -824,9 +882,22 @@ class WalletViewSet(viewsets.ModelViewSet):
             logger = logging.getLogger(__name__)
             logger.info(f"Getting metadata for token {token_address}")
 
+            # 检查是否需要强制刷新元数据
+            force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
+
             # 先从数据库中查询代币元数据
             from wallets.models import Token
             token_obj = Token.objects.filter(address=token_address).first()
+
+            # 如果需要强制刷新元数据
+            if force_refresh and token_obj:
+                logger.info(f"Force refreshing metadata for token {token_address}")
+                # 异步获取代币元数据
+                fetch_token_metadata.delay(token_obj.id)
+                return Response({
+                    'message': f'已开始异步获取代币 {token_address} 的元数据',
+                    'token_id': token_obj.id
+                })
 
             if token_obj:
                 logger.info(f"Found token metadata in database for {token_address}")
@@ -932,6 +1003,274 @@ class WalletViewSet(viewsets.ModelViewSet):
             logger = logging.getLogger(__name__)
             logger.error(f"Error getting token metadata: {str(e)}")
             return Response({'error': f'获取代币元数据失败: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'])
+    def update_token_metadata(self, request):
+        """手动触发代币元数据更新任务"""
+        try:
+            # 获取请求参数
+            chain = request.data.get('chain')
+            token_address = request.data.get('token_address')
+            batch_size = int(request.data.get('batch_size', 30))
+            sync_mode = request.data.get('sync_mode', 'false').lower() == 'true'
+
+            import logging
+            logger = logging.getLogger(__name__)
+
+            # 构建查询条件
+            query = {}
+            if chain:
+                # 获取链对象
+                try:
+                    chain_obj = Chain.objects.get(chain=chain)
+                    query['chain'] = chain_obj
+                except Chain.DoesNotExist:
+                    return Response({'error': f'链 {chain} 不存在'}, status=status.HTTP_404_NOT_FOUND)
+
+            if token_address:
+                query['address'] = token_address
+
+            # 查询符合条件的代币
+            tokens = Token.objects.filter(**query, is_active=True)
+
+            if not tokens.exists():
+                return Response({'error': '没有找到符合条件的代币'}, status=status.HTTP_404_NOT_FOUND)
+
+            # 按链分组处理
+            chain_tokens = {}
+            for token in tokens:
+                chain_code = token.chain.chain
+                if chain_code not in chain_tokens:
+                    chain_tokens[chain_code] = []
+                chain_tokens[chain_code].append(token.id)
+
+            # 如果是同步模式，直接处理代币元数据
+            if sync_mode:
+                logger.info(f"使用同步模式处理 {tokens.count()} 个代币的元数据")
+                processed_count = 0
+                success_count = 0
+
+                for chain_code, token_ids in chain_tokens.items():
+                    # 根据链类型选择相应的服务
+                    if chain_code == 'SOL':
+                        from chains.solana.services.token import SolanaTokenService
+                        token_service = SolanaTokenService()
+                    elif chain_code in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
+                        from chains.evm.services.token import EVMTokenService
+                        token_service = EVMTokenService(chain_code)
+                    else:
+                        logger.error(f"不支持的链类型: {chain_code}")
+                        continue
+
+                    # 批量处理代币元数据
+                    for token_id in token_ids:
+                        try:
+                            token = Token.objects.get(id=token_id)
+                            processed_count += 1
+
+                            logger.info(f"处理代币 {token.symbol} ({token.address}) 的元数据")
+                            metadata = token_service.get_token_metadata(token.address)
+
+                            # 更新代币元数据
+                            if metadata:
+                                # 更新基本信息
+                                if 'name' in metadata and metadata['name']:
+                                    token.name = metadata['name']
+                                if 'symbol' in metadata and metadata['symbol']:
+                                    token.symbol = metadata['symbol']
+                                if 'decimals' in metadata:
+                                    token.decimals = int(metadata['decimals'])
+                                if 'logo' in metadata and metadata['logo']:
+                                    token.logo_url = metadata['logo']
+
+                                # 更新标准和mint信息
+                                if 'standard' in metadata:
+                                    token.standard = metadata['standard']
+                                if 'mint' in metadata:
+                                    token.mint = metadata['mint']
+
+                                # 更新描述和社交媒体链接
+                                if 'description' in metadata:
+                                    token.description = metadata['description']
+
+                                # 处理链接信息
+                                links = metadata.get('links', {})
+                                if links:
+                                    if 'website' in links:
+                                        token.website = links['website']
+                                    if 'twitter' in links:
+                                        token.twitter = links['twitter']
+                                    if 'telegram' in links:
+                                        token.telegram = links['telegram']
+                                    if 'discord' in links:
+                                        token.discord = links['discord']
+
+                                # 直接处理顶级链接
+                                if 'website' in metadata:
+                                    token.website = metadata['website']
+                                if 'twitter' in metadata:
+                                    token.twitter = metadata['twitter']
+                                if 'telegram' in metadata:
+                                    token.telegram = metadata['telegram']
+                                if 'discord' in metadata:
+                                    token.discord = metadata['discord']
+
+                                # 更新 Metaplex 元数据
+                                metaplex = metadata.get('metaplex', {})
+                                if metaplex:
+                                    if 'metadataUri' in metaplex:
+                                        token.metadata_uri = metaplex.get('metadataUri', '')
+                                    if 'masterEdition' in metaplex:
+                                        token.is_master_edition = metaplex.get('masterEdition', False)
+                                    if 'isMutable' in metaplex:
+                                        token.is_mutable = metaplex.get('isMutable', True)
+                                    if 'sellerFeeBasisPoints' in metaplex:
+                                        token.seller_fee_basis_points = metaplex.get('sellerFeeBasisPoints', 0)
+                                    if 'updateAuthority' in metaplex:
+                                        token.update_authority = metaplex.get('updateAuthority', '')
+                                    if 'primarySaleHappened' in metaplex:
+                                        # primarySaleHappened 可能是数字或布尔值
+                                        primary_sale = metaplex.get('primarySaleHappened', 0)
+                                        if isinstance(primary_sale, bool):
+                                            token.primary_sale_happened = primary_sale
+                                        else:
+                                            token.primary_sale_happened = bool(primary_sale)
+
+                                # 更新时间戳
+                                token.last_updated = timezone.now()
+                                token.save()
+
+                                success_count += 1
+                                logger.info(f"成功更新代币 {token.symbol} ({token.address}) 的元数据")
+                        except Exception as e:
+                            logger.error(f"处理代币 ID {token_id} 元数据时出错: {str(e)}")
+                            continue
+
+                return Response({
+                    'message': f'同步处理完成，共处理 {processed_count} 个代币，成功 {success_count} 个',
+                    'processed_count': processed_count,
+                    'success_count': success_count
+                })
+            else:
+                # 异步模式，使用Celery任务
+                try:
+                    # 获取回调URL（可选）
+                    callback_url = request.data.get('callback_url')
+                    auto_monitor = request.data.get('auto_monitor', 'true').lower() == 'true'
+
+                    # 为每个链启动批处理任务
+                    task_ids = []
+                    for chain_code, token_ids in chain_tokens.items():
+                        # 每批处理batch_size个代币
+                        for i in range(0, len(token_ids), batch_size):
+                            batch = token_ids[i:i+batch_size]
+                            logger.info(f"为 {chain_code} 链安排批处理任务，包含 {len(batch)} 个代币")
+                            task = process_token_metadata_batch.delay(batch, chain_code)
+                            task_ids.append(str(task.id))
+
+                    # 如果启用了自动监控，启动任务监控
+                    monitor_task_id = None
+                    if auto_monitor and task_ids:
+                        from .tasks import monitor_tasks
+                        monitor_task = monitor_tasks.delay(task_ids, callback_url)
+                        monitor_task_id = str(monitor_task.id)
+                        logger.info(f"启动任务监控，监控任务ID: {monitor_task_id}")
+
+                    response_data = {
+                        'message': f'已安排 {len(task_ids)} 个代币元数据更新任务',
+                        'task_ids': task_ids,
+                        'token_count': tokens.count()
+                    }
+
+                    if monitor_task_id:
+                        response_data['monitor_task_id'] = monitor_task_id
+                        response_data['monitor_info'] = '系统已启动自动监控任务，将每30秒检查任务状态'
+
+                    if callback_url:
+                        response_data['callback_url'] = callback_url
+                        response_data['callback_info'] = '当所有任务完成时，系统将发送回调到指定的URL'
+
+                    return Response(response_data)
+                except Exception as e:
+                    logger.error(f"安排异步任务时出错: {str(e)}")
+                    return Response({
+                        'error': f'安排异步任务时出错，请尝试使用sync_mode=true参数: {str(e)}',
+                        'suggestion': '请尝试使用sync_mode=true参数来同步处理'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"安排代币元数据更新任务时出错: {str(e)}")
+            return Response({'error': f'安排代币元数据更新任务时出错: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['post'])
+    def check_task_status(self, request):
+        """检查Celery任务状态"""
+        try:
+            # 获取请求参数
+            task_ids = request.data.get('task_ids', [])
+
+            if not task_ids:
+                return Response({'error': '需要提供任务ID列表'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 如果只提供了一个任务ID字符串，将其转换为列表
+            if isinstance(task_ids, str):
+                task_ids = [task_ids]
+
+            # 检查每个任务的状态
+            results = {}
+            completed_count = 0
+            failed_count = 0
+            pending_count = 0
+
+            for task_id in task_ids:
+                try:
+                    # 获取任务结果
+                    result = AsyncResult(task_id)
+
+                    # 检查任务状态
+                    if result.ready():
+                        if result.successful():
+                            state = 'SUCCESS'
+                            completed_count += 1
+                        else:
+                            state = 'FAILURE'
+                            failed_count += 1
+                    else:
+                        state = result.state
+                        pending_count += 1
+
+                    results[task_id] = {
+                        'state': state,
+                        'info': str(result.info) if hasattr(result, 'info') and result.info else None
+                    }
+                except Exception as e:
+                    results[task_id] = {
+                        'state': 'UNKNOWN',
+                        'error': str(e)
+                    }
+                    pending_count += 1
+
+            # 计算总体进度
+            total_tasks = len(task_ids)
+            progress = (completed_count / total_tasks) * 100 if total_tasks > 0 else 0
+
+            return Response({
+                'task_statuses': results,
+                'summary': {
+                    'total': total_tasks,
+                    'completed': completed_count,
+                    'failed': failed_count,
+                    'pending': pending_count,
+                    'progress_percentage': round(progress, 2)
+                },
+                'all_completed': completed_count + failed_count == total_tasks
+            })
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"检查任务状态时出错: {str(e)}")
+            return Response({'error': f'检查任务状态时出错: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def refresh_balances(self, request, pk=None):

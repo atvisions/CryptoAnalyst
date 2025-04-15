@@ -8,6 +8,9 @@ class Config:
     MORALIS_API_KEY = os.getenv("MORALIS_API_KEY", "")
     ALCHEMY_API_KEY = os.getenv("ALCHEMY_API_KEY", "")
 
+    # 价格 API 配置
+    CRYPTOCOMPARE_API_URL = os.getenv("CRYPTOCOMPARE_API_URL", "https://min-api.cryptocompare.com/data/price")
+
     # EVM 链配置
     EVM_CONFIGS: Dict[str, Dict[str, Any]] = {
         "ETH": {
@@ -76,6 +79,38 @@ class Config:
         },
         "CRO_TESTNET": {
             "rpc_url": "https://evm-t3.cronos.org",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "ZKSYNC": {
+            "rpc_url": "https://mainnet.era.zksync.io",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "ZKSYNC_TESTNET": {
+            "rpc_url": "https://testnet.era.zksync.dev",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "LINEA": {
+            "rpc_url": "https://rpc.linea.build",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "LINEA_GOERLI": {
+            "rpc_url": "https://rpc.goerli.linea.build",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "MANTA": {
+            "rpc_url": "https://pacific.manta.network/http",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "MANTA_TESTNET": {
+            "rpc_url": "https://pacific-testnet.manta.network/http",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "BASE": {
+            "rpc_url": "https://mainnet.base.org",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "BASE_SEPOLIA": {
+            "rpc_url": "https://sepolia.base.org",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         }
     }
