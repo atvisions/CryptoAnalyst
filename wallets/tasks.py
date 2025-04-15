@@ -51,7 +51,12 @@ async def _update_token_prices_async():
                     'chain': chain.chain
                 })
 
-        elif chain.chain in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
+        # 判断是否是EVM兼容链（包括测试网）
+        elif chain.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+             chain.chain.startswith('ETH_') or chain.chain.startswith('BSC_') or chain.chain.startswith('MATIC_') or \
+             chain.chain.startswith('ARB_') or chain.chain.startswith('OP_') or chain.chain.startswith('AVAX_') or \
+             chain.chain.startswith('BASE_') or chain.chain.startswith('ZKSYNC_') or chain.chain.startswith('LINEA_') or \
+             chain.chain.startswith('MANTA_') or chain.chain.startswith('FTM_') or chain.chain.startswith('CRO_'):
             from chains.evm.services.balance import EVMBalanceService
             balance_service = EVMBalanceService(chain.chain)
 
@@ -105,7 +110,12 @@ def update_wallet_balances():
                     balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
                     logger.info(f"Updated balances for wallet {wallet.address} (SOL)")
 
-                elif wallet.chain in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
+                # 判断是否是EVM兼容链（包括测试网）
+                elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA'] or \
+                     wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
+                     wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
+                     wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
+                     wallet.chain.startswith('MANTA_'):
                     from chains.evm.services.balance import EVMBalanceService
                     balance_service = EVMBalanceService(wallet.chain)
                     balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
@@ -136,7 +146,12 @@ def process_token_metadata_batch(token_ids, chain_code):
         if chain_code == 'SOL':
             from chains.solana.services.token import SolanaTokenService
             token_service = SolanaTokenService()
-        elif chain_code in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
+        # 判断是否是EVM兼容链（包括测试网）
+        elif chain_code.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+             chain_code.startswith('ETH_') or chain_code.startswith('BSC_') or chain_code.startswith('MATIC_') or \
+             chain_code.startswith('ARB_') or chain_code.startswith('OP_') or chain_code.startswith('AVAX_') or \
+             chain_code.startswith('BASE_') or chain_code.startswith('ZKSYNC_') or chain_code.startswith('LINEA_') or \
+             chain_code.startswith('MANTA_') or chain_code.startswith('FTM_') or chain_code.startswith('CRO_'):
             from chains.evm.services.token import EVMTokenService
             token_service = EVMTokenService(chain_code)
         else:
@@ -442,7 +457,12 @@ def fetch_token_metadata(token_id):
                 token.save()
                 logger.info(f"成功更新 SOL 链代币 {token.symbol} ({token.address}) 的元数据")
 
-        elif token.chain.chain in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
+        # 判断是否是EVM兼容链（包括测试网）
+        elif token.chain.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+             token.chain.chain.startswith('ETH_') or token.chain.chain.startswith('BSC_') or token.chain.chain.startswith('MATIC_') or \
+             token.chain.chain.startswith('ARB_') or token.chain.chain.startswith('OP_') or token.chain.chain.startswith('AVAX_') or \
+             token.chain.chain.startswith('BASE_') or token.chain.chain.startswith('ZKSYNC_') or token.chain.chain.startswith('LINEA_') or \
+             token.chain.chain.startswith('MANTA_') or token.chain.chain.startswith('FTM_') or token.chain.chain.startswith('CRO_'):
             from chains.evm.services.token import EVMTokenService
             token_service = EVMTokenService(token.chain.chain)
             metadata = token_service.get_token_metadata(token.address)

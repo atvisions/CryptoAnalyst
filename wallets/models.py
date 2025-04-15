@@ -56,7 +56,9 @@ class Wallet(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='wallets')
     address = models.CharField(max_length=128)
     private_key = models.CharField(max_length=256, null=True, blank=True)  # 加密后的私钥
+    # 保留chain字段以保持兼容性，但添加chain_obj外键字段
     chain = models.CharField(max_length=32, choices=CHAIN_CHOICES)
+    chain_obj = models.ForeignKey(Chain, on_delete=models.CASCADE, related_name='wallets', null=True)
     name = models.CharField(max_length=64, default="")
     is_watch_only = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)  # 添加激活状态字段
@@ -131,7 +133,8 @@ class WalletToken(models.Model):
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name='wallet_tokens')
     token = models.ForeignKey(Token, on_delete=models.SET_NULL, null=True, blank=True, related_name='wallet_tokens')
     token_address = models.CharField(max_length=255)
-    chain = models.CharField(max_length=20, choices=CHAIN_CHOICES, default='SOL')
+    # 移除 chain 字段，因为它是冗余的，可以通过 wallet.chain 或 wallet.chain_obj.chain 获取
+    # chain = models.CharField(max_length=20, choices=CHAIN_CHOICES, default='SOL')
     balance = models.DecimalField(max_digits=40, decimal_places=18, default=0)
     balance_formatted = models.CharField(max_length=50, blank=True, null=True)
     is_visible = models.BooleanField(default=True)

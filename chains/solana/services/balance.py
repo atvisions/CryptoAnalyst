@@ -373,7 +373,6 @@ class SolanaBalanceService:
                         token_address="So11111111111111111111111111111111111111112",
                         defaults={
                             'token': token_obj,
-                            'chain': 'SOL',
                             'balance': str(lamports),
                             'balance_formatted': str(sol_balance),
                             'is_visible': True
@@ -710,7 +709,6 @@ class SolanaBalanceService:
                                 token_address=token["mint"],
                                 defaults={
                                     'token': token_obj,
-                                    'chain': 'SOL',
                                     'balance': raw_amount,
                                     'balance_formatted': balance_formatted,
                                     'is_visible': True

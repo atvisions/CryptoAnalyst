@@ -85,11 +85,23 @@ def generate_wallet_from_mnemonic(mnemonic: str, chain: str) -> Tuple[str, str]:
     if not validate_mnemonic(mnemonic):
         raise ValueError("无效的助记词")
 
-    if chain in ["ETH", "BSC", "MATIC", "ARB", "OP", "AVAX", "BASE"]:
+    # 提取链的基础类型（去掉测试网后缀）
+    base_chain = chain.split('_')[0] if '_' in chain else chain
+
+    # 检查是否是EVM兼容链
+    if base_chain in ["ETH", "BSC", "MATIC", "ARB", "OP", "AVAX", "BASE", "ZKSYNC", "LINEA", "MANTA", "FTM", "CRO"] or \
+       chain.startswith("ETH_") or chain.startswith("BSC_") or chain.startswith("MATIC_") or \
+       chain.startswith("ARB_") or chain.startswith("OP_") or chain.startswith("AVAX_") or \
+       chain.startswith("BASE_") or chain.startswith("ZKSYNC_") or chain.startswith("LINEA_") or \
+       chain.startswith("MANTA_") or chain.startswith("FTM_") or chain.startswith("CRO_"):
         # 生成 EVM 钱包
-        mnemo = Mnemonic("english")
-        seed = mnemo.to_seed(mnemonic)
-        account = Account.create()
+        # 根据链类型选择不同的派生路径
+        # 默认使用以太坊标准路径
+        derivation_path = "m/44'/60'/0'/0/0"
+
+        # 使用助记词和派生路径生成账户
+        Account.enable_unaudited_hdwallet_features()
+        account = Account.from_mnemonic(mnemonic, account_path=derivation_path)
         return account.address, account.key.hex()
     elif chain == "SOL":
         # 生成 Solana 钱包

@@ -496,6 +496,7 @@ class WalletViewSet(viewsets.ModelViewSet):
                 address=address,
                 private_key=encrypted_private_key,
                 chain=chain_code,
+                chain_obj=chain_obj,  # 使用外键关联
                 name=wallet_name,
                 avatar=avatar_path
             )
@@ -586,6 +587,7 @@ class WalletViewSet(viewsets.ModelViewSet):
                 device=device,
                 address=address,
                 chain=chain_code,
+                chain_obj=chain_obj,  # 使用外键关联
                 name=wallet_name,
                 avatar=avatar_path,
                 is_watch_only=True
@@ -651,12 +653,22 @@ class WalletViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def verify_mnemonic(self, request):
         device_id = request.data.get('device_id')
-        chain = request.data.get('chain')
+        chain_code = request.data.get('chain')
         mnemonic = request.data.get('mnemonic')
         payment_password = request.data.get('payment_password')
 
-        if not all([device_id, chain, mnemonic, payment_password]):
+        if not all([device_id, chain_code, mnemonic, payment_password]):
             return Response({'error': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 检查链是否激活
+        try:
+            chain_obj = Chain.objects.get(chain=chain_code)
+            if not chain_obj.is_active:
+                return Response({'error': f'链 {chain_code} 当前未激活'},
+                              status=status.HTTP_400_BAD_REQUEST)
+        except Chain.DoesNotExist:
+            return Response({'error': f'不支持的链类型: {chain_code}'},
+                          status=status.HTTP_400_BAD_REQUEST)
 
         # 验证助记词
         if not validate_mnemonic(mnemonic):
@@ -667,7 +679,7 @@ class WalletViewSet(viewsets.ModelViewSet):
             device = get_or_create_device(device_id)
 
             # 生成钱包
-            address, private_key = generate_wallet_from_mnemonic(mnemonic, chain)
+            address, private_key = generate_wallet_from_mnemonic(mnemonic, chain_code)
 
             # 加密私钥
             encrypted_private_key = encrypt_private_key(private_key, payment_password)
@@ -687,7 +699,8 @@ class WalletViewSet(viewsets.ModelViewSet):
                 device=device,
                 address=address,
                 private_key=encrypted_private_key,
-                chain=chain,
+                chain=chain_code,
+                chain_obj=chain_obj,  # 使用外键关联
                 name=wallet_name,
                 avatar=avatar_path
             )
@@ -714,9 +727,16 @@ class WalletViewSet(viewsets.ModelViewSet):
             if wallet.chain == 'SOL':
                 balance_service = SolanaBalanceService()
                 balance = balance_service.get_balance(wallet.address)
-            else:
+            # 判断是否是EVM兼容链（包括测试网）
+            elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+                 wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
+                 wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
+                 wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
+                 wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
                 rpc_service = EVMRPCService(wallet.chain)
                 balance = rpc_service.get_balance(wallet.address)
+            else:
+                return Response({'error': f'不支持的链类型: {wallet.chain}'}, status=status.HTTP_400_BAD_REQUEST)
             return Response(balance)
         except Exception as e:
             import traceback
@@ -739,7 +759,12 @@ class WalletViewSet(viewsets.ModelViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            if wallet.chain in EVM_CHAINS:
+            # 判断是否是EVM兼容链（包括测试网）
+            if wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+               wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
+               wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
+               wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
+               wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
                 from chains.evm.services.token import EVMTokenService
                 token_service = EVMTokenService(wallet.chain)
                 balance = token_service.get_token_balance(token_address, wallet.address)
@@ -774,7 +799,7 @@ class WalletViewSet(viewsets.ModelViewSet):
         try:
             # 尝试获取钱包对象
             try:
-                from wallets.models import Wallet
+                from wallets.models import Wallet, WalletToken
                 wallet = Wallet.objects.get(id=pk)
             except Wallet.DoesNotExist:
                 return Response({'error': f'钱包 ID {pk} 不存在'}, status=status.HTTP_404_NOT_FOUND)
@@ -784,7 +809,12 @@ class WalletViewSet(viewsets.ModelViewSet):
                 if wallet.chain == 'SOL':
                     balance_service = SolanaBalanceService()
                     balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
-                elif wallet.chain in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
+                # 判断是否是EVM兼容链（包括测试网）
+                elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+                     wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
+                     wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
+                     wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
+                     wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
                     from chains.evm.services.balance import EVMBalanceService
                     balance_service = EVMBalanceService(wallet.chain)
                     balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
@@ -796,28 +826,34 @@ class WalletViewSet(viewsets.ModelViewSet):
             serializer = TokenManagementSerializer(wallet_tokens, many=True)
             token_list = serializer.data
 
+            # 注释掉从链上获取原生代币余额的代码，因为数据库中已经有了
             # 获取原生代币余额
             # 检查是否已经有原生代币的记录
-            has_native_token = False
-            if wallet.chain == 'SOL':
-                # 检查是否已经有 SOL 代币的记录
-                for token in token_list:
-                    if token.get('token_address') == 'So11111111111111111111111111111111111111112':
-                        has_native_token = True
-                        break
+            # has_native_token = False
+            # if wallet.chain == 'SOL':
+            #     # 检查是否已经有 SOL 代币的记录
+            #     for token in token_list:
+            #         if token.get('token_address') == 'So11111111111111111111111111111111111111112':
+            #             has_native_token = True
+            #             break
 
-                # 如果没有 SOL 代币的记录，才从链上获取
-                if not has_native_token:
-                    balance_service = SolanaBalanceService()
-                    native_balance = balance_service.get_native_balance(wallet.address, wallet_id=wallet.id)
-                    if native_balance:
-                        token_list = [native_balance] + list(token_list)
-            elif wallet.chain in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
-                from chains.evm.services.balance import EVMBalanceService
-                balance_service = EVMBalanceService(wallet.chain)
-                native_balance = balance_service.get_native_balance(wallet.address, wallet_id=wallet.id)
-                if native_balance:
-                    token_list = [native_balance] + list(token_list)
+            #     # 如果没有 SOL 代币的记录，才从链上获取
+            #     if not has_native_token:
+            #         balance_service = SolanaBalanceService()
+            #         native_balance = balance_service.get_native_balance(wallet.address, wallet_id=wallet.id)
+            #         if native_balance:
+            #             token_list = [native_balance] + list(token_list)
+            # # 判断是否是EVM兼容链（包括测试网）
+            # elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+            #      wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
+            #      wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
+            #      wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
+            #      wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
+            #     from chains.evm.services.balance import EVMBalanceService
+            #     balance_service = EVMBalanceService(wallet.chain)
+            #     native_balance = balance_service.get_native_balance(wallet.address, wallet_id=wallet.id)
+            #     if native_balance:
+            #         token_list = [native_balance] + list(token_list)
 
             # 计算总价值和 24 小时价值变化
             total_value_usd = 0
@@ -828,7 +864,8 @@ class WalletViewSet(viewsets.ModelViewSet):
                 try:
                     # 获取代币价格和余额
                     price = float(token.get('current_price_usd', 0))
-                    balance = float(token.get('balance_formatted', 0))
+                    # 使用 balance 字段而不是 balance_formatted
+                    balance = float(token.get('balance', token.get('balance_formatted', 0)))
 
                     # 计算代币价值
                     token_value = price * balance
@@ -1337,11 +1374,35 @@ class WalletViewSet(viewsets.ModelViewSet):
                     'token_count': token_count,
                     'status': 'success'
                 })
-            elif wallet.chain in ['ETH', 'BSC', 'POLYGON', 'ARBITRUM', 'OPTIMISM', 'AVALANCHE']:
+            elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+                 wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
+                 wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
+                 wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
+                 wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Refreshing balances for wallet {wallet.address} ({wallet.chain})")
+
                 from chains.evm.services.balance import EVMBalanceService
                 balance_service = EVMBalanceService(wallet.chain)
                 balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
-                return Response({'message': f'钱包 {wallet.address} 的代币余额已成功更新'})
+
+                # 查询钱包代币数量
+                from wallets.models import WalletToken
+                wallet_tokens = WalletToken.objects.filter(wallet=wallet)
+                token_count = wallet_tokens.count()
+
+                # 返回更详细的响应，包含钱包地址和刷新时间
+                from datetime import datetime
+                refresh_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                return Response({
+                    'message': f'钱包 {wallet.address} 的代币余额已成功更新',
+                    'wallet_address': wallet.address,
+                    'refresh_time': refresh_time,
+                    'token_count': token_count,
+                    'status': 'success'
+                })
             else:
                 return Response({'error': f'不支持的链类型: {wallet.chain}'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
