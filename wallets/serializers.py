@@ -38,10 +38,11 @@ class PaymentPasswordSerializer(serializers.ModelSerializer):
 
 class WalletSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
+    kadena_chain_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Wallet
-        fields = ['id', 'chain', 'address', 'name', 'is_watch_only', 'avatar', 'created_at', 'updated_at']
+        fields = ['id', 'chain', 'address', 'name', 'is_watch_only', 'avatar', 'kadena_chain_id', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_avatar(self, obj):
@@ -50,6 +51,12 @@ class WalletSerializer(serializers.ModelSerializer):
             if request is not None:
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
+        return None
+
+    def get_kadena_chain_id(self, obj):
+        # 只有当钱包是 Kadena 钱包时才返回 kadena_chain_id
+        if obj.chain == 'KDA' or obj.chain == 'KDA_TESTNET':
+            return obj.kadena_chain_id
         return None
 
 class WalletCreateSerializer(serializers.ModelSerializer):
@@ -115,10 +122,37 @@ class WalletImportSerializer(serializers.ModelSerializer):
                 raise ValidationError(f"Invalid EVM private key: {str(e)}")
         elif chain == 'KDA':
             try:
-                # Kadena 的私钥格式是以 'k:' 开头的字符串
-                if not private_key.startswith('k:'):
-                    private_key = f'k:{private_key}'
-                data['address'] = private_key  # Kadena 使用私钥作为地址
+                # 如果私钥是地址格式（以 'k:' 开头）
+                if private_key.startswith('k:'):
+                    # 直接使用作为地址
+                    data['address'] = private_key
+                    return data
+
+                # 如果私钥已经是十六进制格式但没有 'k:' 前缀
+                if len(private_key) == 64 and all(c in '0123456789abcdefABCDEF' for c in private_key):
+                    # 添加 'k:' 前缀
+                    data['address'] = f"k:{private_key}"
+                    return data
+
+                # 如果是十六进制格式的私钥
+                try:
+                    # 使用 nacl 库从私钥生成公钥和地址
+                    import nacl.signing
+
+                    # 尝试将私钥解析为字节
+                    private_key_bytes = bytes.fromhex(private_key)
+                    signing_key = nacl.signing.SigningKey(private_key_bytes)
+
+                    # 从签名密钥获取验证密钥（公钥）
+                    verify_key = signing_key.verify_key
+
+                    # 生成地址
+                    public_key = verify_key.encode().hex()
+                    address = f"k:{public_key}"
+
+                    data['address'] = address
+                except ValueError as e:
+                    raise ValidationError(f"Invalid Kadena private key format: {str(e)}")
             except Exception as e:
                 raise ValidationError(f"Invalid Kadena private key: {str(e)}")
         else:
@@ -216,12 +250,33 @@ class TokenManagementSerializer(serializers.ModelSerializer):
         return ""
 
     def get_logo(self, obj):
+        # 如果是 KDA 链的原生代币，直接返回固定的 logo URL
+        if obj.wallet.chain in ['KDA', 'KDA_TESTNET'] and obj.token_address == '':
+            return 'https://cryptologos.cc/logos/kadena-kda-logo.png'
+
         if obj.token:
+            # 如果有关联的 Token 对象但 logo_url 为空，对于 KDA 链的原生代币返回固定的 logo URL
+            if obj.wallet.chain in ['KDA', 'KDA_TESTNET'] and obj.token_address == '' and not obj.token.logo_url:
+                return 'https://cryptologos.cc/logos/kadena-kda-logo.png'
             return obj.token.logo_url
 
         # 如果没有关联的 Token 对象，尝试从链上获取代币信息
         try:
-            if obj.chain == 'SOL':
+            # 对于 Kadena 链
+            if obj.wallet.chain in ['KDA', 'KDA_TESTNET']:
+                # 对于原生 KDA 代币
+                if obj.token_address == '':
+                    return 'https://cryptologos.cc/logos/kadena-kda-logo.png'
+
+                # 如果不是原生代币，尝试从 API 获取
+                from chains.kadena.services.token import KadenaTokenService
+                token_service = KadenaTokenService()
+                token_info = token_service.get_token_metadata(obj.token_address)
+                if token_info and 'logo' in token_info:
+                    return token_info['logo']
+
+            # 对于 Solana 链
+            elif obj.wallet.chain == 'SOL':
                 # 对于常见代币，直接返回 logo URL
                 if obj.token_address == 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v':
                     return 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png'

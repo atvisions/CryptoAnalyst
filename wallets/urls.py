@@ -35,6 +35,7 @@ urlpatterns = [
     path('check_task_status/', WalletViewSet.as_view({'post': 'check_task_status'})),
     path('<int:pk>/rename_wallet/', WalletViewSet.as_view({'post': 'rename_wallet'})),
     path('<int:pk>/delete_wallet/', WalletViewSet.as_view({'post': 'delete_wallet'})),
+    path('<int:pk>/update_kadena_chain_id/', WalletViewSet.as_view({'post': 'update_kadena_chain_id'})),
     path('get_supported_chains/', WalletViewSet.as_view({'get': 'get_supported_chains'})),
     path('select_chain/', WalletViewSet.as_view({'post': 'select_chain'})),
     path('verify_mnemonic/', WalletViewSet.as_view({'post': 'verify_mnemonic'})),

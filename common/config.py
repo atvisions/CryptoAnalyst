@@ -132,32 +132,41 @@ class Config:
     }
 
     # Kadena 链配置
+    # 注意: Kadena 有两个不同的 "chain" 概念:
+    # 1. 钱包模型中的 "chain" 字段，表示区块链类型，如 "KDA", "KDA_TESTNET"
+    # 2. Kadena 平行链 ID，范围为 0-19，用于查询特定链上的余额
     KADENA_CONFIGS: Dict[str, Dict[str, Any]] = {
-        "KDA": {
-            "rpc_url": "https://api.chainweb.com/openapi",
-            "chain_id": "mainnet01",
+        "KDA": {  # 这是钱包模型中的 "chain" 字段值
+            "rpc_url": "https://api.chainweb.com",
+            "kadena_chain_id": "0",  # 这是 Kadena 平行链 ID，默认为 0
             "network_id": "mainnet01",
-            "api_version": "v1",
+            "api_version": "chainweb/0.0/mainnet01/chain/0",  # 这里的 "chain/0" 表示平行链 ID
             "nodes": [
-                "https://api.chainweb.com/openapi",
-                "https://us1.chainweb.com/openapi",
-                "https://us2.chainweb.com/openapi",
-                "https://eu1.chainweb.com/openapi",
-                "https://eu2.chainweb.com/openapi"
-            ]
+                "https://api.chainweb.com",
+                "https://us1.chainweb.com",
+                "https://us2.chainweb.com",
+                "https://eu1.chainweb.com",
+                "https://eu2.chainweb.com"
+            ],
+            "multi_chain": True,  # 标记该链是多链架构
+            "chain_count": 20,  # Kadena 有 20 个平行链（0-19）
+            "kadena_chain_ids": list(range(20))  # 所有 Kadena 平行链 ID的列表
         },
-        "KDA_TESTNET": {
-            "rpc_url": "https://api.testnet.chainweb.com/openapi",
-            "chain_id": "testnet04",
+        "KDA_TESTNET": {  # 这是钱包模型中的 "chain" 字段值
+            "rpc_url": "https://api.testnet.chainweb.com",
+            "kadena_chain_id": "0",  # 这是 Kadena 平行链 ID，默认为 0
             "network_id": "testnet04",
-            "api_version": "v1",
+            "api_version": "chainweb/0.0/testnet04/chain/0",  # 这里的 "chain/0" 表示平行链 ID
             "nodes": [
-                "https://api.testnet.chainweb.com/openapi",
-                "https://us1.testnet.chainweb.com/openapi",
-                "https://us2.testnet.chainweb.com/openapi",
-                "https://eu1.testnet.chainweb.com/openapi",
-                "https://eu2.testnet.chainweb.com/openapi"
-            ]
+                "https://api.testnet.chainweb.com",
+                "https://us1.testnet.chainweb.com",
+                "https://us2.testnet.chainweb.com",
+                "https://eu1.testnet.chainweb.com",
+                "https://eu2.testnet.chainweb.com"
+            ],
+            "multi_chain": True,  # 标记该链是多链架构
+            "chain_count": 20,  # Kadena 有 20 个平行链（0-19）
+            "kadena_chain_ids": list(range(20))  # 所有 Kadena 平行链 ID的列表
         }
     }
 

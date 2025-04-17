@@ -126,9 +126,10 @@ class WalletService(WalletInterface):
             # Solana 不支持助记词导入
             raise ValueError("Solana 不支持助记词导入")
 
-        elif chain == "KDA":
-            # Kadena 不支持助记词导入
-            raise ValueError("Kadena 不支持助记词导入")
+        elif chain == "KDA" or chain == "KDA_TESTNET":
+            # 使用自定义的方法从助记词生成 Kadena 钱包
+            from wallets.utils import generate_wallet_from_mnemonic
+            address, private_key = generate_wallet_from_mnemonic(mnemonic, chain)
 
         else:
             raise ValueError(f"不支持的链类型: {chain}")
@@ -313,9 +314,9 @@ class BaseChainService(ChainInterface):
         elif chain.startswith("SOL"):
             # Solana 不支持助记词
             return False
-        elif chain.startswith("KDA"):
-            # Kadena 不支持助记词
-            return False
+        elif chain == "KDA" or chain == "KDA_TESTNET":
+            # Kadena 支持助记词
+            return True
         else:
             raise ValueError(f"不支持的链类型: {chain}")
 
@@ -359,7 +360,7 @@ class BaseChainService(ChainInterface):
                 }
             else:
                 raise ValueError(f"获取余额失败: {response.text}")
-        elif chain.startswith("KDA"):
+        elif chain == "KDA" or chain == "KDA_TESTNET":
             # 使用 Kadena API 获取余额
             kadena_config = self.config.get_kadena_config(chain)
             headers = {
@@ -433,7 +434,7 @@ class BaseChainService(ChainInterface):
                 }
             else:
                 raise ValueError(f"获取交易历史失败: {response.text}")
-        elif chain.startswith("KDA"):
+        elif chain == "KDA" or chain == "KDA_TESTNET":
             # 使用 Kadena API 获取交易历史
             kadena_config = self.config.get_kadena_config(chain)
             headers = {

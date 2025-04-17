@@ -62,6 +62,7 @@ class Wallet(models.Model):
     name = models.CharField(max_length=64, default="")
     is_watch_only = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)  # 添加激活状态字段
+    kadena_chain_id = models.IntegerField(default=0, null=True, blank=True)  # Kadena平行链ID（0-19）
     avatar = models.ImageField(upload_to='face/', null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
