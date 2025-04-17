@@ -6,6 +6,7 @@ import base58
 from solders.keypair import Keypair
 from eth_account import Account
 from .constants import EVM_CHAINS  # 从 constants.py 导入
+from common.config import Config  # 导入 Config 类
 
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -305,12 +306,14 @@ class TokenManagementSerializer(serializers.ModelSerializer):
 
     def get_current_price_usd(self, obj):
         """获取代币当前价格"""
+        # 直接从数据库读取价格，不再调用 API
         if obj.token:
             return obj.token.current_price_usd
         return 0
 
     def get_price_change_24h(self, obj):
         """获取代币 24 小时价格变化"""
+        # 直接从数据库读取价格变化，不再调用 API
         if obj.token:
             return obj.token.price_change_24h
         return 0

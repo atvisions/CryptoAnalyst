@@ -10,6 +10,148 @@ from .models import Token, Wallet, WalletToken, Chain
 logger = logging.getLogger(__name__)
 
 @shared_task
+def update_solana_wallet_database(wallet_id):
+    """
+    异步更新 Solana 钱包的数据库
+    """
+    try:
+        from wallets.models import Wallet
+        wallet = Wallet.objects.get(id=wallet_id)
+
+        if wallet.chain != 'SOL':
+            logger.error(f"非 Solana 钱包，无法更新数据库: {wallet.chain}")
+            return False
+
+        logger.info(f"开始异步更新 Solana 钱包 {wallet.address} 的数据库")
+
+        from chains.solana.services.balance import SolanaBalanceService
+        balance_service = SolanaBalanceService()
+
+        # 使用 wallet_id 参数获取代币列表，强制更新数据库
+        logger.info(f"开始强制刷新 Solana 钱包 {wallet.address} 的代币余额（异步任务）")
+        token_balances = balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id, force_refresh=True)
+        logger.info(f"完成强制刷新 Solana 钱包 {wallet.address} 的代币余额，共 {len(token_balances)} 个代币（异步任务）")
+
+        # 更新代币价格
+        update_wallet_token_prices.delay(wallet.id)
+
+        logger.info(f"成功异步更新 Solana 钱包 {wallet.address} 的数据库")
+        return True
+    except Exception as e:
+        logger.error(f"异步更新 Solana 钱包数据库失败: {str(e)}")
+        return False
+
+@shared_task
+def update_kadena_wallet_database(wallet_id):
+    """
+    异步更新 Kadena 钱包的数据库
+    """
+    try:
+        from wallets.models import Wallet
+        wallet = Wallet.objects.get(id=wallet_id)
+
+        if wallet.chain != 'KDA' and wallet.chain != 'KDA_TESTNET':
+            logger.error(f"非 Kadena 钱包，无法更新数据库: {wallet.chain}")
+            return False
+
+        logger.info(f"开始异步更新 Kadena 钱包 {wallet.address} 的数据库")
+
+        from chains.kadena.services.balance import KadenaBalanceService
+        balance_service = KadenaBalanceService()
+
+        # 使用 wallet_id 参数获取代币列表，强制更新数据库
+        balance_service.get_all_token_balances(wallet.chain, wallet.address, wallet_id=wallet.id)
+
+        # 更新代币价格
+        update_wallet_token_prices.delay(wallet.id)
+
+        logger.info(f"成功异步更新 Kadena 钱包 {wallet.address} 的数据库")
+        return True
+    except Exception as e:
+        logger.error(f"异步更新 Kadena 钱包数据库失败: {str(e)}")
+        return False
+
+@shared_task
+def update_wallet_token_prices(wallet_id):
+    """
+    异步更新钱包代币的价格信息
+    """
+    try:
+        wallet = Wallet.objects.get(id=wallet_id)
+        logger.info(f"开始异步更新钱包 {wallet.address} ({wallet.chain}) 的代币价格")
+
+        # 获取钱包的所有代币
+        wallet_tokens = WalletToken.objects.filter(wallet_id=wallet_id, token_address__isnull=False, token_address__gt="")
+
+        # 收集所有需要查询价格的代币地址
+        token_addresses = [wt.token_address for wt in wallet_tokens]
+
+        if not token_addresses:
+            logger.info(f"钱包 {wallet.address} 没有需要更新价格的代币")
+            return True
+
+        # 根据链类型选择相应的服务
+        if wallet.chain == 'SOL':
+            from chains.solana.services.balance import SolanaBalanceService
+            balance_service = SolanaBalanceService()
+        # 判断是否是EVM兼容链
+        elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
+             wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
+             wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
+             wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
+             wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
+            from chains.evm.services.balance import EVMBalanceService
+            balance_service = EVMBalanceService(wallet.chain)
+        else:
+            logger.error(f"不支持的链类型: {wallet.chain}")
+            return False
+
+        # 批量获取代币价格
+        prices = asyncio.run(balance_service._get_token_prices(token_addresses))
+
+        # 收集需要更新的代币
+        tokens_to_update = []
+        updated_count = 0
+
+        for wallet_token in wallet_tokens:
+            token_address = wallet_token.token_address
+            if token_address in prices and wallet_token.token:
+                price_data = prices[token_address]
+                token = wallet_token.token
+
+                # 获取新的价格数据
+                new_price = price_data.get("current_price", 0)
+                new_change = price_data.get("price_change_24h", 0)
+
+                # 只在价格有显著变化时更新数据库
+                current_price = float(token.current_price_usd or 0)
+                price_change = float(token.price_change_24h or 0)
+
+                # 如果价格变化超过0.5%或者价格为0，则更新
+                if current_price == 0 or new_price == 0 or abs(new_price - current_price) / max(current_price, 0.000001) > 0.005 or abs(new_change - price_change) > 0.5:
+                    token.current_price_usd = new_price
+                    token.price_change_24h = new_change
+                    token.last_updated = timezone.now()
+                    tokens_to_update.append(token)
+                    updated_count += 1
+
+        # 批量更新代币价格
+        if tokens_to_update:
+            from django.db import transaction
+            with transaction.atomic():
+                # 使用bulk_update批量更新
+                Token.objects.bulk_update(tokens_to_update, ['current_price_usd', 'price_change_24h', 'last_updated'])
+                logger.info(f"成功批量更新 {len(tokens_to_update)} 个代币的价格")
+
+            # WebSocket通知功能已移除
+
+        logger.info(f"成功更新钱包 {wallet.address} 的 {updated_count}/{len(token_addresses)} 个代币价格")
+        return True
+    except Exception as e:
+        logger.error(f"异步更新钱包代币价格失败: {str(e)}")
+        return False
+
+@shared_task
 def update_token_prices():
     """
     更新所有代币的价格信息
@@ -41,8 +183,18 @@ async def _update_token_prices_async():
             # 获取该链上的所有代币
             tokens = Token.objects.filter(chain=chain)
 
+            # 使用缓存工具函数检查哪些代币需要更新价格
+            from wallets.cache_utils import batch_tokens_by_update_need
+            need_metadata_update, need_price_update, _ = batch_tokens_by_update_need(
+                tokens, force_update=False, metadata_ttl_hours=24, price_ttl_minutes=15
+            )
+
+            # 合并需要更新元数据和价格的代币
+            tokens_to_update = need_metadata_update + need_price_update
+            logger.info(f"{chain.chain} 链上需要更新的代币数量: {len(tokens_to_update)}/{len(tokens)}")
+
             # 批量获取代币价格
-            token_addresses = [token.address for token in tokens]
+            token_addresses = [token.address for token in tokens_to_update if token.address]  # 确保地址不为空
             if token_addresses:
                 tasks.append({
                     'service': balance_service,
@@ -63,8 +215,18 @@ async def _update_token_prices_async():
             # 获取该链上的所有代币
             tokens = Token.objects.filter(chain=chain)
 
+            # 使用缓存工具函数检查哪些代币需要更新价格
+            from wallets.cache_utils import batch_tokens_by_update_need
+            need_metadata_update, need_price_update, _ = batch_tokens_by_update_need(
+                tokens, force_update=False, metadata_ttl_hours=24, price_ttl_minutes=15
+            )
+
+            # 合并需要更新元数据和价格的代币
+            tokens_to_update = need_metadata_update + need_price_update
+            logger.info(f"{chain.chain} 链上需要更新的代币数量: {len(tokens_to_update)}/{len(tokens)}")
+
             # 批量获取代币价格
-            token_addresses = [token.address for token in tokens]
+            token_addresses = [token.address for token in tokens_to_update if token.address]  # 确保地址不为空
             if token_addresses:
                 tasks.append({
                     'service': balance_service,

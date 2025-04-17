@@ -4,6 +4,8 @@ from decimal import Decimal
 import asyncio
 import aiohttp
 import logging
+import time
+from django.utils import timezone
 from common.config import Config
 
 logger = logging.getLogger(__name__)
@@ -83,98 +85,6 @@ class EVMBalanceService:
         except Exception as e:
             logger.error(f"获取代币 {token_address} 余额失败: {str(e)}")
             return Decimal("0")
-
-    async def _get_token_prices(self, token_addresses: List[str]) -> Dict[str, Dict]:
-        """批量获取代币价格和24小时变化，使用分批处理避免请求过大"""
-        try:
-            # 设置每批处理的代币数量，减小批次大小
-            batch_size = 30  # 从50减小到30
-            all_prices = {}
-
-            # 获取 API 配置
-            api_key = Config.MORALIS_API_KEY
-            base_url = "https://deep-index.moralis.io/api/v2"
-            headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "X-API-Key": api_key
-            }
-
-            # 分批处理代币地址
-            for i in range(0, len(token_addresses), batch_size):
-                batch = token_addresses[i:i+batch_size]
-                batch_num = i//batch_size + 1
-                total_batches = (len(token_addresses) + batch_size - 1)//batch_size
-                logger.info(f"处理 {self.chain} 链代币价格批次 {batch_num}/{total_batches}，包含 {len(batch)} 个代币")
-
-                # 准备请求数据
-                payload = {
-                    "chain": self.chain.lower(),
-                    "addresses": batch
-                }
-
-                # 添加重试机制
-                max_retries = 3
-                retry_delay = 2  # 重试间隔时间（秒）
-                success = False
-
-                for retry in range(max_retries):
-                    try:
-                        # 发送批量请求
-                        async with aiohttp.ClientSession() as session:
-                            url = f"{base_url}/erc20/prices"
-                            # 增加超时设置
-                            async with session.post(url, json=payload, headers=headers, timeout=30) as response:
-                                if response.status == 200:
-                                    data = await response.json()
-                                    logger.info(f"成功获取 {self.chain} 链批次 {batch_num} 的价格数据，共 {len(data.get('tokens', []))} 条记录")
-
-                                    for token_data in data.get('tokens', []):
-                                        token_address = token_data.get("address")
-                                        if token_address:
-                                            try:
-                                                current_price = float(token_data.get("usdPrice", 0))
-                                                price_change_24h = float(token_data.get("24hPercentChange", 0))
-
-                                                all_prices[token_address] = {
-                                                    "current_price": current_price,
-                                                    "price_change_24h": price_change_24h
-                                                }
-                                                logger.debug(f"代币 {token_address} 当前价格: {current_price}, 24小时变化: {price_change_24h}%")
-                                            except (ValueError, TypeError) as e:
-                                                logger.error(f"处理代币 {token_address} 价格数据时出错: {e}")
-                                                all_prices[token_address] = {
-                                                    "current_price": 0.0,
-                                                    "price_change_24h": 0.0
-                                                }
-                                    success = True
-                                    break  # 成功获取数据，跳出重试循环
-                                else:
-                                    error_text = await response.text()
-                                    logger.error(f"获取 {self.chain} 链代币价格批次 {batch_num} 失败: {response.status}, 错误信息: {error_text}")
-                                    if retry < max_retries - 1:  # 如果还有重试机会
-                                        logger.info(f"将在 {retry_delay} 秒后重试（第 {retry+1} 次）")
-                                        await asyncio.sleep(retry_delay)
-                                        retry_delay *= 2  # 指数退避策略
-                    except Exception as e:
-                        logger.error(f"处理 {self.chain} 链批次 {batch_num} 时发生异常: {str(e)}")
-                        if retry < max_retries - 1:  # 如果还有重试机会
-                            logger.info(f"将在 {retry_delay} 秒后重试（第 {retry+1} 次）")
-                            await asyncio.sleep(retry_delay)
-                            retry_delay *= 2  # 指数退避策略
-
-                if not success:
-                    logger.warning(f"{self.chain} 链批次 {batch_num} 在多次重试后仍然失败，跳过该批次")
-
-                # 增加批次间的等待时间，避免API限制
-                await asyncio.sleep(1.5)  # 从0.5秒增加到1.5秒
-
-            logger.info(f"完成 {self.chain} 链所有代币价格获取，共处理 {len(all_prices)} 个代币")
-            return all_prices
-
-        except Exception as e:
-            logger.error(f"获取 {self.chain} 链代币价格时出错: {e}")
-            return {}
 
     def get_native_balance(self, wallet_address: str, wallet_id: int = None) -> Dict[str, Any]:
         """获取原生代币余额并更新数据库"""
@@ -263,9 +173,10 @@ class EVMBalanceService:
                 chain = Chain.objects.get(chain=self.chain)
 
                 # 检查原生代币是否已存在
+                # 使用空字符串作为地址，与 WalletToken 中的 token_address 保持一致
                 token, created = Token.objects.get_or_create(
                     chain=chain,
-                    address="native",
+                    address="",  # 使用空字符串，而不是 "native"
                     defaults={
                         "symbol": symbol,
                         "name": name,
@@ -296,28 +207,29 @@ class EVMBalanceService:
             current_price_usd = 0
             price_change_24h = 0
 
+            # 直接从 API 获取原生代币价格，不使用缓存
+            # 尝试使用 CryptoCompare API 获取价格
+            import requests
+            symbol_map = {
+                "ETH": "ETH",
+                "BSC": "BNB",
+                "MATIC": "MATIC",
+                "ARB": "ARB",
+                "OP": "OP",
+                "AVAX": "AVAX",
+                "BASE": "ETH",
+                "ZKSYNC": "ETH",
+                "LINEA": "ETH",
+                "MANTA": "ETH",
+                "FTM": "FTM",
+                "CRO": "CRO"
+            }
+
+            # 获取当前链的原生代币符号
+            chain_symbol = self.chain.split('_')[0]  # 去除可能的 _TESTNET 后缀
+            crypto_symbol = symbol_map.get(chain_symbol, chain_symbol)
+
             try:
-                # 尝试使用 CryptoCompare API 获取价格
-                import requests
-                symbol_map = {
-                    "ETH": "ETH",
-                    "BSC": "BNB",
-                    "MATIC": "MATIC",
-                    "ARB": "ARB",
-                    "OP": "OP",
-                    "AVAX": "AVAX",
-                    "BASE": "ETH",
-                    "ZKSYNC": "ETH",
-                    "LINEA": "ETH",
-                    "MANTA": "ETH",
-                    "FTM": "FTM",
-                    "CRO": "CRO"
-                }
-
-                # 获取当前链的原生代币符号
-                chain_symbol = self.chain.split('_')[0]  # 去除可能的 _TESTNET 后缀
-                crypto_symbol = symbol_map.get(chain_symbol, chain_symbol)
-
                 response = requests.get(f"https://min-api.cryptocompare.com/data/price?fsym={crypto_symbol}&tsyms=USD")
                 if response.status_code == 200:
                     data = response.json()
@@ -354,227 +266,518 @@ class EVMBalanceService:
             logger.warning(f"获取原生代币余额失败，返回空值")
             return None
 
-    def get_all_token_balances(self, wallet_address: str, wallet_id: int = None) -> List[Dict[str, Any]]:
+    def get_all_balances(self, wallet_address: str, force_refresh: bool = False) -> dict:
+        """获取所有代币余额"""
+        try:
+            # 获取原生代币余额
+            native_balance = self.get_native_balance(wallet_address)
+
+            # 获取所有代币余额
+            token_balances = self.get_all_token_balances(wallet_address, force_refresh=force_refresh)
+
+            # 获取隐藏的代币列表
+            from wallets.models import WalletToken
+            hidden_tokens = WalletToken.objects.filter(
+                wallet__address=wallet_address,
+                is_visible=False
+            ).values_list('token_address', flat=True)
+
+            # 过滤掉隐藏的代币和余额为0的代币
+            visible_tokens = [
+                token for token in token_balances
+                if token['token_address'] not in hidden_tokens and
+                   float(token.get('balance_formatted', '0')) > 0
+            ]
+
+            # 计算总价值（USD）
+            from decimal import Decimal
+            total_value_usd = Decimal('0')
+            total_value_change_24h = Decimal('0')
+
+            # 计算代币总价值
+            for token in visible_tokens:
+                if token.get('value_usd'):
+                    value_usd = Decimal(str(token['value_usd']))
+                    price_change = Decimal(str(token.get('price_change_24h', 0)))
+                    total_value_usd += value_usd
+                    total_value_change_24h += value_usd * price_change / 100
+
+            return {
+                'total_value_usd': str(total_value_usd),
+                'total_value_change_24h': str(total_value_change_24h),
+                'tokens': visible_tokens
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting all balances: {str(e)}")
+            return {
+                'total_value_usd': '0',
+                'total_value_change_24h': '0',
+                'tokens': []
+            }
+
+    async def _get_token_prices(self, token_addresses: List[str]) -> Dict[str, Dict]:
+        """批量获取代币价格和24小时变化"""
+        try:
+            import time
+            prices_start_time = time.time()
+            logger.info(f"开始获取代币价格，共 {len(token_addresses)} 个代币")
+
+            # 如果没有代币地址，直接返回空字典
+            if not token_addresses:
+                return {}
+
+            # 设置每批处理的代币数量
+            batch_size = 90  # Moralis限制最多100个
+            all_prices = {}
+
+            # 使用集合来去除重复地址
+            unique_addresses = list(set(token_addresses))
+            logger.info(f"去除重复后需要查询的代币数量: {len(unique_addresses)}")
+
+            # 跳过空地址
+            uncached_addresses = [addr for addr in unique_addresses if addr]
+
+            # 获取 API 配置
+            api_key = Config.MORALIS_API_KEY
+            base_url = "https://deep-index.moralis.io/api/v2"
+            headers = {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "X-API-Key": api_key
+            }
+
+            # 获取当前链的 Moralis 链 ID
+            chain_id_map = {
+                "ETH": "eth",
+                "ETH_SEPOLIA": "sepolia",
+                "ETH_GOERLI": "goerli",
+                "BSC": "bsc",
+                "BSC_TESTNET": "bsc testnet",
+                "MATIC": "polygon",
+                "MATIC_MUMBAI": "mumbai",
+                "ARB": "arbitrum",
+                "ARB_SEPOLIA": "arbitrum sepolia",
+                "OP": "optimism",
+                "OP_GOERLI": "optimism-goerli",
+                "AVAX": "avalanche",
+                "AVAX_FUJI": "avalanche testnet",
+                "BASE": "base",
+                "BASE_SEPOLIA": "base-sepolia",
+                "ZKSYNC": "zksync",
+                "ZKSYNC_TESTNET": "zksync-testnet",
+                "LINEA": "linea",
+                "LINEA_GOERLI": "linea-goerli",
+                "MANTA": "manta",
+                "MANTA_TESTNET": "manta-testnet",
+                "FTM": "fantom",
+                "FTM_TESTNET": "fantom-testnet",
+                "CRO": "cronos",
+                "CRO_TESTNET": "cronos-testnet"
+            }
+
+            moralis_chain = chain_id_map.get(self.chain, "").lower()
+            if not moralis_chain:
+                logger.error(f"Unsupported chain for Moralis API: {self.chain}")
+                return {}
+
+            # 准备并行请求函数
+            async def fetch_batch_prices(batch_num, batch):
+                if not batch:
+                    logger.warning(f"批次 {batch_num} 为空，跳过")
+                    return {}
+
+                # 将地址列表转换为对象数组格式
+                formatted_tokens = [{"token_address": addr} for addr in batch]
+
+                payload = {
+                    "chain": moralis_chain,
+                    "tokens": formatted_tokens
+                }
+
+                # 添加重试机制
+                max_retries = 3
+                retry_delay = 2  # 重试间隔时间（秒）
+                batch_prices = {}
+                success = False
+
+                for retry in range(max_retries):
+                    try:
+                        # 使用共享的会话以减少连接建立开销
+                        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as session:
+                            url = f"{base_url}/erc20/prices"
+                            start_time = time.time()
+                            async with session.post(url, json=payload, headers=headers) as response:
+                                end_time = time.time()
+                                logger.debug(f"批次 {batch_num} 请求耗时: {end_time - start_time:.2f} 秒")
+                                if response.status == 200:
+                                    data = await response.json()
+
+                                    # 检查响应是列表还是字典
+                                    token_list = []
+                                    if isinstance(data, list):
+                                        # 如果是列表，直接使用
+                                        token_list = data
+                                        logger.info(f"成功获取 {self.chain} 链批次 {batch_num} 的价格数据，共 {len(token_list)} 条记录")
+                                    elif isinstance(data, dict) and 'tokens' in data:
+                                        # 如果是字典且包含 tokens 字段，使用 tokens 字段
+                                        token_list = data['tokens']
+                                        logger.info(f"成功获取 {self.chain} 链批次 {batch_num} 的价格数据，共 {len(token_list)} 条记录")
+                                    else:
+                                        # 其他情况，记录错误并跳过
+                                        logger.error(f"意外的响应格式: {data}")
+                                        continue
+
+                                    for token_data in token_list:
+                                        # 适应新的响应格式
+                                        token_address = None
+                                        if isinstance(token_data, dict):
+                                            # 尝试不同的字段名称
+                                            token_address = token_data.get("token_address") or token_data.get("address") or token_data.get("tokenAddress")
+
+                                        if token_address:
+                                            try:
+                                                current_price = float(token_data.get("usdPrice", 0))
+                                                price_change_24h = float(token_data.get("24hPercentChange", 0) or token_data.get("usdPrice24hrPercentChange", 0))
+
+                                                price_data = {
+                                                    "current_price": current_price,
+                                                    "price_change_24h": price_change_24h
+                                                }
+
+                                                batch_prices[token_address] = price_data
+                                                logger.debug(f"代币 {token_address} 当前价格: {current_price}, 24小时变化: {price_change_24h}%")
+                                            except (ValueError, TypeError) as e:
+                                                logger.error(f"处理代币 {token_address} 价格数据时出错: {e}")
+                                                batch_prices[token_address] = {
+                                                    "current_price": 0.0,
+                                                    "price_change_24h": 0.0
+                                                }
+                                    success = True
+                                    break  # 成功获取数据，跳出重试循环
+                                else:
+                                    error_text = await response.text()
+                                    logger.error(f"获取 {self.chain} 链代币价格批次 {batch_num} 失败: {response.status}, 错误信息: {error_text}")
+                                    if retry < max_retries - 1:  # 如果还有重试机会
+                                        logger.info(f"将在 {retry_delay} 秒后重试（第 {retry+1} 次）")
+                                        await asyncio.sleep(retry_delay)
+                                        retry_delay *= 2  # 指数退避策略
+                    except Exception as e:
+                        logger.error(f"处理 {self.chain} 链批次 {batch_num} 时发生异常: {str(e)}")
+                        if retry < max_retries - 1:  # 如果还有重试机会
+                            logger.info(f"将在 {retry_delay} 秒后重试（第 {retry+1} 次）")
+                            await asyncio.sleep(retry_delay)
+                            retry_delay *= 2  # 指数退避策略
+
+                if not success:
+                    logger.warning(f"{self.chain} 链批次 {batch_num} 在多次重试后仍然失败，跳过该批次")
+
+                # 增加批次间的等待时间，避免API限制
+                await asyncio.sleep(0.5)
+                
+                return batch_prices
+
+            # 分批处理代币地址
+            batches = [uncached_addresses[i:i+batch_size] for i in range(0, len(uncached_addresses), batch_size)]
+            logger.info(f"将 {len(uncached_addresses)} 个代币分为 {len(batches)} 个批次处理")
+
+            # 并行处理所有批次
+            tasks = [fetch_batch_prices(i, batch) for i, batch in enumerate(batches)]
+            batch_results = await asyncio.gather(*tasks)
+
+            # 合并所有批次的结果
+            for result in batch_results:
+                all_prices.update(result)
+
+            # 记录总耗时
+            prices_end_time = time.time()
+            total_prices_time = prices_end_time - prices_start_time
+            logger.info(f"完成 {self.chain} 链所有代币价格获取，共处理 {len(all_prices)} 个代币，总耗时: {total_prices_time:.2f} 秒")
+            
+            return all_prices
+
+        except Exception as e:
+            logger.error(f"获取 {self.chain} 链代币价格时出错: {e}")
+            return {}  # 如果出错，返回空字典
+
+    def get_moralis_token_balances(self, wallet_address: str) -> List[Dict[str, Any]]:
+        """使用 Moralis API 获取所有代币余额"""
+        try:
+            import requests
+            import time
+            start_time = time.time()
+
+            # 获取 Moralis API 配置
+            api_key = Config.MORALIS_API_KEY
+            if not api_key:
+                logger.error("Moralis API key is not configured")
+                return []
+
+            # 准备请求参数
+            chain_id_map = {
+                "ETH": "eth",
+                "ETH_SEPOLIA": "sepolia",
+                "ETH_GOERLI": "goerli",
+                "BSC": "bsc",
+                "BSC_TESTNET": "bsc testnet",
+                "MATIC": "polygon",
+                "MATIC_MUMBAI": "mumbai",
+                "ARB": "arbitrum",
+                "ARB_SEPOLIA": "arbitrum sepolia",
+                "OP": "optimism",
+                "OP_GOERLI": "optimism-goerli",
+                "AVAX": "avalanche",
+                "AVAX_FUJI": "avalanche testnet",
+                "BASE": "base",
+                "BASE_SEPOLIA": "base-sepolia",
+                "ZKSYNC": "zksync",
+                "ZKSYNC_TESTNET": "zksync-testnet",
+                "LINEA": "linea",
+                "LINEA_GOERLI": "linea-goerli",
+                "MANTA": "manta",
+                "MANTA_TESTNET": "manta-testnet",
+                "FTM": "fantom",
+                "FTM_TESTNET": "fantom-testnet",
+                "CRO": "cronos",
+                "CRO_TESTNET": "cronos-testnet"
+            }
+
+            # 获取当前链的 Moralis 链 ID
+            moralis_chain = chain_id_map.get(self.chain, "").lower()
+            if not moralis_chain:
+                logger.error(f"Unsupported chain for Moralis API: {self.chain}")
+                return []
+
+            # 构建 API URL
+            base_url = "https://deep-index.moralis.io/api/v2"
+            url = f"{base_url}/{wallet_address}/erc20"
+
+            # 设置请求头
+            headers = {
+                "accept": "application/json",
+                "X-API-Key": api_key
+            }
+
+            # 设置请求参数
+            params = {
+                "chain": moralis_chain
+            }
+
+            # 添加重试机制
+            max_retries = 3
+            retry_delay = 2  # 初始重试延迟（秒）
+
+            for retry in range(max_retries):
+                try:
+                    # 发送请求
+                    logger.info(f"Calling Moralis API: {url} with chain={moralis_chain}")
+                    response = requests.get(url, headers=headers, params=params, timeout=30)
+                    logger.info(f"Moralis API response status: {response.status_code}")
+
+                    # 检查响应状态
+                    if response.status_code == 200:
+                        data = response.json()
+                        logger.info(f"Successfully got token balances from Moralis API: {len(data)} tokens")
+
+                        # 处理响应数据
+                        tokens = []
+                        for token_data in data:
+                            token_address = token_data.get("token_address", "")
+                            if not token_address:
+                                continue
+
+                            # 获取代币余额
+                            balance = token_data.get("balance", "0")
+                            decimals = int(token_data.get("decimals", 18))
+
+                            # 计算带精度的余额
+                            from decimal import Decimal
+                            balance_decimal = Decimal(balance) / Decimal(10**decimals)
+
+                            # 如果余额为 0，跳过
+                            if balance_decimal == 0:
+                                continue
+
+                            # 构建代币信息
+                            token_info = {
+                                "token_address": token_address,
+                                "symbol": token_data.get("symbol", ""),
+                                "name": token_data.get("name", ""),
+                                "balance": str(balance_decimal),
+                                "balance_formatted": str(balance_decimal),
+                                "decimals": decimals,
+                                "logo": token_data.get("logo", ""),
+                                "current_price_usd": 0,
+                                "price_change_24h": 0
+                            }
+
+                            tokens.append(token_info)
+
+                        # 获取代币价格
+                        if tokens:
+                            # 收集所有代币地址
+                            token_addresses = [token["token_address"] for token in tokens]
+
+                            # 批量获取代币价格
+                            token_prices = asyncio.run(self._get_token_prices(token_addresses))
+
+                            # 更新代币价格
+                            for token in tokens:
+                                token_address = token["token_address"]
+                                if token_address in token_prices:
+                                    price_data = token_prices[token_address]
+                                    token["current_price_usd"] = price_data.get("current_price", 0)
+                                    token["price_change_24h"] = price_data.get("price_change_24h", 0)
+
+                        end_time = time.time()
+                        logger.info(f"Moralis API call completed in {end_time - start_time:.2f} seconds")
+                        return tokens
+                    elif response.status_code == 429:
+                        # 如果遇到速率限制，等待一段时间后重试
+                        logger.warning(f"Moralis API rate limit exceeded, retrying in {retry_delay} seconds")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2  # 指数退避
+                    else:
+                        # 其他错误，记录错误信息
+                        error_text = response.text
+                        logger.error(f"Moralis API error: {response.status_code}, {error_text}")
+                        if retry < max_retries - 1:
+                            logger.info(f"Retrying in {retry_delay} seconds (attempt {retry + 1}/{max_retries})")
+                            time.sleep(retry_delay)
+                            retry_delay *= 2  # 指数退避
+                        else:
+                            logger.error("Max retries reached, giving up")
+                            return []
+                except Exception as e:
+                    logger.error(f"Error calling Moralis API: {e}")
+                    if retry < max_retries - 1:
+                        logger.info(f"Retrying in {retry_delay} seconds (attempt {retry + 1}/{max_retries})")
+                        time.sleep(retry_delay)
+                        retry_delay *= 2  # 指数退避
+                    else:
+                        logger.error("Max retries reached, giving up")
+                        return []
+
+            return []
+        except Exception as e:
+            logger.error(f"Error getting token balances from Moralis API: {e}")
+            return []
+
+    def update_token_in_database(self, wallet_id: int, token: Dict[str, Any]) -> None:
+        """更新数据库中的代币信息"""
+        try:
+            from wallets.models import Wallet, Chain, Token, WalletToken
+
+            # 获取钱包和链对象
+            wallet = Wallet.objects.get(id=wallet_id)
+            chain = Chain.objects.get(chain=self.chain)
+
+            # 获取代币信息
+            token_address = token.get("token_address", "")
+            symbol = token.get("symbol", "")
+            name = token.get("name", "")
+            decimals = token.get("decimals", 18)
+            logo = token.get("logo", "")
+            balance = token.get("balance", "0")
+            balance_formatted = token.get("balance_formatted", "0")
+            current_price_usd = token.get("current_price_usd", 0)
+            price_change_24h = token.get("price_change_24h", 0)
+
+            # 获取或创建代币对象
+            token_obj, created = Token.objects.get_or_create(
+                chain=chain,
+                address=token_address,
+                defaults={
+                    "symbol": symbol,
+                    "name": name,
+                    "decimals": decimals,
+                    "logo_url": logo,
+                    "current_price_usd": current_price_usd,
+                    "price_change_24h": price_change_24h,
+                    "last_updated": timezone.now()
+                }
+            )
+
+            # 如果代币对象已存在，更新价格信息
+            if not created:
+                token_obj.current_price_usd = current_price_usd
+                token_obj.price_change_24h = price_change_24h
+                token_obj.last_updated = timezone.now()
+                token_obj.save(update_fields=["current_price_usd", "price_change_24h", "last_updated"])
+
+            # 更新或创建钱包代币对象
+            wallet_token, _ = WalletToken.objects.update_or_create(
+                wallet=wallet,
+                token_address=token_address,
+                defaults={
+                    "token": token_obj,
+                    "balance": balance,
+                    "balance_formatted": balance_formatted,
+                    "is_visible": True,
+                    "last_synced": timezone.now()
+                }
+            )
+
+            logger.info(f"Successfully updated token {symbol} ({token_address}) in database")
+        except Exception as e:
+            logger.error(f"Error updating token in database: {e}")
+
+    def get_all_token_balances(self, wallet_address: str, wallet_id: int = None, force_refresh: bool = False) -> List[Dict[str, Any]]:
         """获取钱包所有代币余额"""
         try:
             # 初始化结果列表
             token_balances = []
 
+            logger.info(f"直接从链上获取数据，不使用缓存")
+
             # 获取原生代币余额
             native_balance = self.get_native_balance(wallet_address, wallet_id)
+
             if native_balance:
                 logger.info(f"成功获取原生代币余额: {native_balance}")
                 token_balances.append(native_balance)
             else:
                 logger.warning(f"无法获取原生代币余额")
 
-            # 获取 ERC20 代币余额
-            # 如果有 wallet_id，尝试从数据库中获取已知的代币列表
+            # 使用 Moralis API 获取所有代币余额
+            moralis_tokens = self.get_moralis_token_balances(wallet_address)
+            if moralis_tokens:
+                logger.info(f"成功从 Moralis 获取代币余额，共 {len(moralis_tokens)} 个代币")
+                # 将 Moralis 返回的代币添加到结果列表
+                for token in moralis_tokens:
+                    # 跳过原生代币，因为我们已经处理过了
+                    if token.get('token_address', '') == '':
+                        continue
+                    token_balances.append(token)
+
+                    # 如果提供了钱包ID，更新数据库
+                    if wallet_id:
+                        self.update_token_in_database(wallet_id, token)
+            else:
+                logger.warning(f"无法从 Moralis 获取代币余额")
+
+            # 如果提供了 wallet_id，处理零余额的代币
             if wallet_id:
-                from wallets.models import WalletToken, Token
-                # 获取钱包已有的代币列表
-                wallet_tokens = WalletToken.objects.filter(wallet_id=wallet_id, token_address__isnull=False, token_address__gt="")
+                try:
+                    from wallets.models import WalletToken
+                    # 获取数据库中当前钱包的所有代币
+                    wallet_tokens = WalletToken.objects.filter(wallet_id=wallet_id)
+                    logger.info(f"数据库中的代币数量: {wallet_tokens.count()}")
 
-                for wallet_token in wallet_tokens:
-                    try:
-                        # 获取代币余额
-                        token_balance = self.get_token_balance(wallet_token.token_address, wallet_address)
-                        if token_balance > 0:
-                            # 获取代币信息
-                            token_info = {}
-                            if wallet_token.token:
-                                token_info = {
-                                    "token_address": wallet_token.token_address,
-                                    "symbol": wallet_token.token.symbol,
-                                    "name": wallet_token.token.name,
-                                    "balance": str(token_balance),
-                                    "balance_formatted": str(token_balance),
-                                    "decimals": wallet_token.token.decimals,
-                                    "logo": wallet_token.token.logo_url,
-                                    "current_price_usd": float(wallet_token.token.current_price_usd),
-                                    "price_change_24h": float(wallet_token.token.price_change_24h)
-                                }
-                            else:
-                                # 如果没有代币信息，尝试从链上获取
-                                from chains.evm.services.token import EVMTokenService
-                                token_service = EVMTokenService(self.chain)
-                                token_metadata = token_service.get_token_metadata(wallet_token.token_address)
+                    # 获取当前链上返回的所有代币地址
+                    current_token_addresses = [token.get('token_address', '') for token in token_balances]
+                    logger.info(f"链上返回的代币地址: {current_token_addresses}")
 
-                                token_info = {
-                                    "token_address": wallet_token.token_address,
-                                    "symbol": token_metadata.get("symbol", ""),
-                                    "name": token_metadata.get("name", ""),
-                                    "balance": str(token_balance),
-                                    "balance_formatted": str(token_balance),  # 确保 balance_formatted 不为 null
-                                    "decimals": token_metadata.get("decimals", 18),
-                                    "logo": token_metadata.get("logo", ""),
-                                    "current_price_usd": 0,
-                                    "price_change_24h": 0
-                                }
-
-                                # 更新数据库中的 balance_formatted
-                                wallet_token.balance_formatted = str(token_balance)
-                                wallet_token.save(update_fields=['balance_formatted'])
-
-                            token_balances.append(token_info)
-                    except Exception as token_error:
-                        logger.error(f"获取代币 {wallet_token.token_address} 余额失败: {token_error}")
-
-            # 尝试获取常见 ERC20 代币的余额
-            # 根据链类型选择不同的常见代币列表
-            common_tokens = []
-
-            # 为了避免重复查询，记录已查询过的代币地址
-            queried_tokens = set([token.get('token_address', '') for token in token_balances])
-
-            # 根据链类型选择常见代币
-            if self.chain.startswith('ETH'):
-                # 以太坊主网常见代币
-                common_tokens = [
-                    # USDT
-                    {'address': '0xdAC17F958D2ee523a2206206994597C13D831ec7', 'symbol': 'USDT', 'name': 'Tether USD', 'decimals': 6, 'logo': 'https://cryptologos.cc/logos/tether-usdt-logo.png'},
-                    # USDC
-                    {'address': '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 'symbol': 'USDC', 'name': 'USD Coin', 'decimals': 6, 'logo': 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'},
-                    # DAI
-                    {'address': '0x6B175474E89094C44Da98b954EedeAC495271d0F', 'symbol': 'DAI', 'name': 'Dai Stablecoin', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png'},
-                    # WETH
-                    {'address': '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', 'symbol': 'WETH', 'name': 'Wrapped Ether', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/ethereum-eth-logo.png'},
-                    # WBTC
-                    {'address': '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', 'symbol': 'WBTC', 'name': 'Wrapped BTC', 'decimals': 8, 'logo': 'https://cryptologos.cc/logos/wrapped-bitcoin-wbtc-logo.png'},
-                    # UNI
-                    {'address': '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', 'symbol': 'UNI', 'name': 'Uniswap', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/uniswap-uni-logo.png'},
-                    # LINK
-                    {'address': '0x514910771AF9Ca656af840dff83E8264EcF986CA', 'symbol': 'LINK', 'name': 'ChainLink Token', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/chainlink-link-logo.png'},
-                    # AAVE
-                    {'address': '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9', 'symbol': 'AAVE', 'name': 'Aave Token', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/aave-aave-logo.png'},
-                    # SHIB
-                    {'address': '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE', 'symbol': 'SHIB', 'name': 'SHIBA INU', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png'},
-                ]
-            elif self.chain.startswith('BSC'):
-                # 币安主网常见代币
-                common_tokens = [
-                    # BUSD
-                    {'address': '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', 'symbol': 'BUSD', 'name': 'Binance USD', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/binance-usd-busd-logo.png'},
-                    # USDT
-                    {'address': '0x55d398326f99059fF775485246999027B3197955', 'symbol': 'USDT', 'name': 'Tether USD', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/tether-usdt-logo.png'},
-                    # USDC
-                    {'address': '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', 'symbol': 'USDC', 'name': 'USD Coin', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'},
-                    # WBNB
-                    {'address': '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', 'symbol': 'WBNB', 'name': 'Wrapped BNB', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/bnb-bnb-logo.png'},
-                    # CAKE
-                    {'address': '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82', 'symbol': 'CAKE', 'name': 'PancakeSwap Token', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/pancakeswap-cake-logo.png'},
-                ]
-            elif self.chain.startswith('MATIC') or self.chain.startswith('POLYGON'):
-                # Polygon主网常见代币
-                common_tokens = [
-                    # USDT
-                    {'address': '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', 'symbol': 'USDT', 'name': 'Tether USD', 'decimals': 6, 'logo': 'https://cryptologos.cc/logos/tether-usdt-logo.png'},
-                    # USDC
-                    {'address': '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', 'symbol': 'USDC', 'name': 'USD Coin', 'decimals': 6, 'logo': 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'},
-                    # WMATIC
-                    {'address': '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', 'symbol': 'WMATIC', 'name': 'Wrapped Matic', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/polygon-matic-logo.png'},
-                    # WETH
-                    {'address': '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619', 'symbol': 'WETH', 'name': 'Wrapped Ether', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/ethereum-eth-logo.png'},
-                ]
-            elif self.chain.startswith('ARB'):
-                # Arbitrum主网常见代币
-                common_tokens = [
-                    # USDT
-                    {'address': '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', 'symbol': 'USDT', 'name': 'Tether USD', 'decimals': 6, 'logo': 'https://cryptologos.cc/logos/tether-usdt-logo.png'},
-                    # USDC
-                    {'address': '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8', 'symbol': 'USDC', 'name': 'USD Coin', 'decimals': 6, 'logo': 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png'},
-                    # WETH
-                    {'address': '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', 'symbol': 'WETH', 'name': 'Wrapped Ether', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/ethereum-eth-logo.png'},
-                    # ARB
-                    {'address': '0x912CE59144191C1204E64559FE8253a0e49E6548', 'symbol': 'ARB', 'name': 'Arbitrum', 'decimals': 18, 'logo': 'https://cryptologos.cc/logos/arbitrum-arb-logo.png'},
-                ]
-
-            # 查询常见代币的余额
-            for token in common_tokens:
-                if token['address'] not in queried_tokens:
-                    try:
-                        # 获取代币余额
-                        token_balance = self.get_token_balance(token['address'], wallet_address)
-                        if token_balance > 0:
-                            # 获取代币价格和24小时变化
-                            current_price_usd = 0
-                            price_change_24h = 0
-
-                            try:
-                                # 尝试使用 CryptoCompare API 获取价格
-                                import requests
-                                response = requests.get(f"https://min-api.cryptocompare.com/data/price?fsym={token['symbol']}&tsyms=USD")
-                                if response.status_code == 200:
-                                    data = response.json()
-                                    current_price_usd = data.get('USD', 0)
-
-                                    # 获取 24 小时价格变化
-                                    response_24h = requests.get(f"https://min-api.cryptocompare.com/data/v2/histohour?fsym={token['symbol']}&tsym=USD&limit=24")
-                                    if response_24h.status_code == 200:
-                                        data_24h = response_24h.json()
-                                        if data_24h.get('Response') == 'Success' and data_24h.get('Data') and data_24h['Data'].get('Data'):
-                                            price_24h_ago = data_24h['Data']['Data'][0]['open']
-                                            if price_24h_ago > 0:
-                                                price_change_24h = ((current_price_usd - price_24h_ago) / price_24h_ago) * 100
-                                            else:
-                                                price_change_24h = 0
-                            except Exception as e:
-                                logger.error(f"获取代币 {token['symbol']} 价格失败: {e}")
-
-                            # 添加到结果列表
-                            token_info = {
-                                "token_address": token['address'],
-                                "symbol": token['symbol'],
-                                "name": token['name'],
-                                "balance": str(token_balance),
-                                "balance_formatted": str(token_balance),  # 确保 balance_formatted 不为 null
-                                "decimals": token['decimals'],
-                                "logo": token['logo'],
-                                "current_price_usd": current_price_usd,
-                                "price_change_24h": price_change_24h
-                            }
-
-                            # 如果提供了钱包ID，更新数据库
-                            if wallet_id:
-                                from wallets.models import Wallet, WalletToken
-                                wallet = Wallet.objects.get(id=wallet_id)
-                                # 获取或创建 Token 对象
-                                from wallets.models import Chain, Token
-                                chain = Chain.objects.get(chain=self.chain)
-                                token_obj, created = Token.objects.get_or_create(
-                                    chain=chain,
-                                    address=token['address'],
-                                    defaults={
-                                        "symbol": token['symbol'],
-                                        "name": token['name'],
-                                        "decimals": token['decimals'],
-                                        "logo_url": token['logo'],
-                                        "current_price_usd": current_price_usd,
-                                        "price_change_24h": price_change_24h
-                                    }
-                                )
-
-                                # 如果 Token 对象已存在，更新价格信息
-                                if not created:
-                                    token_obj.current_price_usd = current_price_usd
-                                    token_obj.price_change_24h = price_change_24h
-                                    token_obj.save(update_fields=['current_price_usd', 'price_change_24h'])
-
-                                # 更新或创建 WalletToken 对象
-                                wallet_token, _ = WalletToken.objects.update_or_create(
-                                    wallet=wallet,
-                                    token_address=token['address'],
-                                    defaults={
-                                        "token": token_obj,
-                                        "balance": str(token_balance),
-                                        "balance_formatted": str(token_balance),  # 确保 balance_formatted 不为 null
-                                        "is_visible": True
-                                    }
-                                )
-                            token_balances.append(token_info)
-                            queried_tokens.add(token['address'])
-                    except Exception as token_error:
-                        logger.error(f"获取代币 {token['address']} 余额失败: {token_error}")
+                    # 找出数据库中存在但链上没有返回的代币（可能是零余额的代币）
+                    for wt in wallet_tokens:
+                        logger.info(f"检查数据库中的代币: {wt.token_address}, 当前余额: {wt.balance}")
+                        if wt.token_address not in current_token_addresses and wt.token_address != "":
+                            logger.info(f"删除零余额代币: {wt.token_address}, 原余额: {wt.balance}")
+                            # 删除零余额代币
+                            wt.delete()
+                            logger.info(f"已删除代币 {wt.token_address}")
+                except Exception as e:
+                    logger.error(f"Error processing zero balance tokens: {e}")
 
             # 返回所有代币余额
             return token_balances

@@ -410,5 +410,3 @@ class SolanaTokenService:
             }
         except Exception as e:
             raise Exception(f"获取代币余额失败: {str(e)}")
-
-    # 删除 get_token_metadata_from_moralis 方法，已将其功能整合到 get_token_metadata 方法中

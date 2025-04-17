@@ -5,7 +5,7 @@ from wallets.utils import ChainUtils
 
 class EVMRPCService:
     """EVM 链基础服务"""
-    
+
     def __init__(self, chain: str):
         self.config = Config()
         self.chain = chain
@@ -14,13 +14,28 @@ class EVMRPCService:
         ChainUtils.setup_chain_warnings()
         # 注册额外的区块链网络
         ChainUtils.register_additional_chains(self.web3)
-        
+
     def _get_web3(self, chain: str) -> Web3:
         """获取 Web3 实例"""
+        import logging
+        logger = logging.getLogger(__name__)
+
         config = self.config.get_evm_config(chain)
-        web3 = Web3(Web3.HTTPProvider(config['rpc_url']))
+        rpc_url = config['rpc_url']
+
+        logger.info(f"初始化 {chain} 链的 Web3 实例，RPC URL: {rpc_url}")
+
+        web3 = Web3(Web3.HTTPProvider(rpc_url))
+
+        # 检查连接状态
+        connected = web3.is_connected()
+        if connected:
+            logger.info(f"成功连接到 {chain} 链的 RPC 节点")
+        else:
+            logger.error(f"无法连接到 {chain} 链的 RPC 节点: {rpc_url}")
+
         return web3
-        
+
     def get_balance(self, address: str) -> Dict[str, Any]:
         """获取余额"""
         try:
@@ -32,7 +47,7 @@ class EVMRPCService:
             }
         except Exception as e:
             raise Exception(f"获取余额失败: {str(e)}")
-            
+
     def get_transaction(self, tx_hash: str) -> Dict[str, Any]:
         """获取交易详情"""
         try:
@@ -40,7 +55,7 @@ class EVMRPCService:
             return dict(tx)
         except Exception as e:
             raise Exception(f"获取交易详情失败: {str(e)}")
-            
+
     def get_token_balance(self, token_address: str, wallet_address: str) -> Dict[str, Any]:
         """获取代币余额"""
         try:
@@ -57,7 +72,7 @@ class EVMRPCService:
             }
         except Exception as e:
             raise Exception(f"获取代币余额失败: {str(e)}")
-            
+
     def get_token_info(self, token_address: str) -> Dict[str, Any]:
         """获取代币信息"""
         try:
@@ -76,4 +91,4 @@ class EVMRPCService:
                 'address': token_address
             }
         except Exception as e:
-            raise Exception(f"获取代币信息失败: {str(e)}") 
+            raise Exception(f"获取代币信息失败: {str(e)}")

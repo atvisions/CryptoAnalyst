@@ -36,6 +36,31 @@ class KadenaSdk:
             "Content-Type": "application/json"
         }
 
+    def _calculate_hash(self, payload: Dict[str, Any]) -> str:
+        """
+        计算请求的哈希值
+
+        Args:
+            payload: 请求载荷
+
+        Returns:
+            哈希值
+        """
+        try:
+            # 将载荷转换为 JSON 字符串
+            payload_json = json.dumps(payload)
+            # 计算 SHA-256 哈希
+            hash_bytes = hashlib.sha256(payload_json.encode('utf-8')).digest()
+            # 转换为 Base64 URL 安全编码
+            hash_base64 = base64.urlsafe_b64encode(hash_bytes).decode('utf-8')
+            # 移除填充字符
+            hash_base64 = hash_base64.rstrip('=')
+            return hash_base64
+        except Exception as e:
+            print(f"[ERROR] 计算哈希值时发生错误: {e}")
+            # 返回一个默认的哈希值
+            return "DldRwCblQ7Loqy6wYJnaodHl30d3j3eH-qtFzfEv46g"
+
     def _generate_pact_request(self, code: str, address: str = "") -> Dict[str, Any]:
         """
         使用pact命令行工具生成请求JSON
@@ -344,11 +369,12 @@ class KadenaSdk:
                 "nonce": f"token-balance-check-{self.kadena_chain_id}"
             }
 
-            # 将内部对象转换为字符串，并包装在cmd字段中
+            # 使用正确的请求格式
+            # 注意：Kadena API 期望的格式是包含 payload 字段的 JSON 对象
             payload = {
-                "cmd": json.dumps(inner_payload),
-                "sigs": [],  # 添加空的签名列表
-                "hash": "DldRwCblQ7Loqy6wYJnaodHl30d3j3eH-qtFzfEv46g"  # 添加 hash 字段
+                "hash": self._calculate_hash(inner_payload),
+                "sigs": [],
+                "cmd": json.dumps(inner_payload)
             }
 
             print(f"[DEBUG] 请求URL: {url}")
@@ -394,11 +420,12 @@ class KadenaSdk:
                 "nonce": f"token-balance-check-v2-{self.kadena_chain_id}"
             }
 
-            # 将内部对象转换为字符串，并包装在cmd字段中
+            # 使用正确的请求格式
+            # 注意：Kadena API 期望的格式是包含 payload 字段的 JSON 对象
             payload = {
-                "cmd": json.dumps(inner_payload),
-                "sigs": [],  # 添加空的签名列表
-                "hash": "DldRwCblQ7Loqy6wYJnaodHl30d3j3eH-qtFzfEv46g"  # 添加 hash 字段
+                "hash": self._calculate_hash(inner_payload),
+                "sigs": [],
+                "cmd": json.dumps(inner_payload)
             }
 
             print(f"[DEBUG] 请求URL: {url}")
@@ -458,11 +485,12 @@ class KadenaSdk:
                 "nonce": f"token-info-{self.kadena_chain_id}"
             }
 
-            # 将内部对象转换为字符串，并包装在cmd字段中
+            # 使用正确的请求格式
+            # 注意：Kadena API 期望的格式是包含 payload 字段的 JSON 对象
             data = {
-                "cmd": json.dumps(inner_payload),
-                "sigs": [],  # 添加空的签名列表
-                "hash": "DldRwCblQ7Loqy6wYJnaodHl30d3j3eH-qtFzfEv46g"  # 添加 hash 字段
+                "hash": self._calculate_hash(inner_payload),
+                "sigs": [],
+                "cmd": json.dumps(inner_payload)
             }
 
             # 发送请求
@@ -508,11 +536,12 @@ class KadenaSdk:
                 "nonce": f"token-info-v2-{self.kadena_chain_id}"
             }
 
-            # 将内部对象转换为字符串，并包装在cmd字段中
+            # 使用正确的请求格式
+            # 注意：Kadena API 期望的格式是包含 payload 字段的 JSON 对象
             data = {
-                "cmd": json.dumps(inner_payload),
-                "sigs": [],  # 添加空的签名列表
-                "hash": "DldRwCblQ7Loqy6wYJnaodHl30d3j3eH-qtFzfEv46g"  # 添加 hash 字段
+                "hash": self._calculate_hash(inner_payload),
+                "sigs": [],
+                "cmd": json.dumps(inner_payload)
             }
 
             # 发送请求
@@ -614,36 +643,8 @@ class KadenaSdk:
                     "logo": "https://cryptologos.cc/logos/kadena-kda-logo.png"
                 })
 
-            # 使用 Pact API 查询钱包持有的代币列表
-            # 构建 Pact 代码来查询钱包持有的代币列表
-            # 这里我们尝试查询一些常见的 Kadena 代币
-            common_tokens = [
-                "coin.kaddex.kdx",
-                "coin.flux",
-                "coin.hypercent",
-                "coin.marmalade.kda",
-                "coin.free.demi"
-            ]
-
-            for token_address in common_tokens:
-                try:
-                    # 获取代币余额
-                    balance = self.get_token_balance(token_address, wallet_address)
-                    if balance > 0:
-                        # 获取代币信息
-                        token_info = self.get_token_info(token_address)
-
-                        tokens.append({
-                            "token_address": token_address,
-                            "balance": str(balance),
-                            "name": token_info.get("name", "Unknown"),
-                            "symbol": token_info.get("symbol", "Unknown"),
-                            "decimals": token_info.get("decimals", 12),
-                            "logo": token_info.get("logo", "")
-                        })
-                except Exception as token_error:
-                    print(f"Error getting balance for token {token_address}: {str(token_error)}")
-                    continue
+            # 为了提高性能，我们只查询原生 KDA 代币
+            # 如果需要查询其他代币，可以在用户明确要求时添加
 
             # 如果没有找到任何代币，只返回原生 KDA
             if len(tokens) == 0:

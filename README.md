@@ -9,6 +9,7 @@
 - 支持 Kadena 链
 - 用户认证和授权
 - RESTful API 接口
+- 高性能钱包刷新（[查看优化文档](docs/evm_refresh_optimization.md)）
 
 ## 安装和设置
 
@@ -61,4 +62,4 @@ python manage.py runserver
 
 ## 许可证
 
-MIT 
+MIT

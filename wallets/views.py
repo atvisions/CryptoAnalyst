@@ -972,31 +972,136 @@ class WalletViewSet(viewsets.ModelViewSet):
             except Wallet.DoesNotExist:
                 return Response({'error': f'钱包 ID {pk} 不存在'}, status=status.HTTP_404_NOT_FOUND)
 
-            # 如果数据库中没有代币记录，或者需要强制刷新，则从链上获取并更新数据库
-            force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
-            if not WalletToken.objects.filter(wallet=wallet).exists() or force_refresh:
-                if wallet.chain == 'SOL':
-                    balance_service = SolanaBalanceService()
-                    balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
-                # 判断是否是EVM兼容链（包括测试网）
-                elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
-                     wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
-                     wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
-                     wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
-                     wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
-                    from chains.evm.services.balance import EVMBalanceService
-                    balance_service = EVMBalanceService(wallet.chain)
-                    balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
-                # 判断是否是KDA链（包括测试网）
-                elif wallet.chain == 'KDA' or wallet.chain == 'KDA_TESTNET':
-                    from chains.kadena.services.balance import KadenaBalanceService
-                    balance_service = KadenaBalanceService()
-                    balance_service.get_all_token_balances(wallet.chain, wallet.address, wallet_id=wallet.id)
+            # 直接从数据库读取数据，不主动刷新
+            # 用户需要点击刷新按钮才会从链上获取最新数据
+
+            # 检查钱包链类型是否支持
+            if wallet.chain != 'SOL' and \
+               wallet.chain.split('_')[0] not in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] and \
+               not wallet.chain.startswith('ETH_') and not wallet.chain.startswith('BSC_') and not wallet.chain.startswith('MATIC_') and \
+               not wallet.chain.startswith('ARB_') and not wallet.chain.startswith('OP_') and not wallet.chain.startswith('AVAX_') and \
+               not wallet.chain.startswith('BASE_') and not wallet.chain.startswith('ZKSYNC_') and not wallet.chain.startswith('LINEA_') and \
+               not wallet.chain.startswith('MANTA_') and not wallet.chain.startswith('FTM_') and not wallet.chain.startswith('CRO_') and \
+               wallet.chain != 'KDA' and wallet.chain != 'KDA_TESTNET':
+                return Response({'error': f'不支持的链类型: {wallet.chain}'}, status=status.HTTP_400_BAD_REQUEST)
 
             # 从数据库中获取代币余额
+            import logging
+            logger = logging.getLogger(__name__)
+
+            # 检查数据库中是否有 SOL 的记录
+            if wallet.chain == 'SOL':
+                sol_token = WalletToken.objects.filter(wallet=wallet, token_address='So11111111111111111111111111111111111111112').first()
+                if sol_token:
+                    logger.info(f"SOL 记录存在，余额: {sol_token.balance}, 可见性: {sol_token.is_visible}")
+                else:
+                    logger.info("SOL 记录不存在，创建一个新的记录")
+                    # 如果数据库中没有 SOL 的记录，则创建一个
+                    from chains.solana.services.balance import SolanaBalanceService
+                    balance_service = SolanaBalanceService()
+                    native_balance = balance_service.get_native_balance(wallet.address, force_refresh=True)
+                    if native_balance:
+                        # 获取链对象
+                        from wallets.models import Chain
+                        chain_obj, _ = Chain.objects.get_or_create(chain=wallet.chain, defaults={'is_active': True})
+
+                        # 创建或获取 SOL 代币记录
+                        from wallets.models import Token
+                        token, _ = Token.objects.get_or_create(
+                            chain=chain_obj,
+                            address='So11111111111111111111111111111111111111112',
+                            defaults={
+                                'symbol': 'SOL',
+                                'name': 'Solana',
+                                'decimals': 9,
+                                'logo_url': 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png',
+                                'is_active': True
+                            }
+                        )
+
+                        # 获取 SOL 价格
+                        try:
+                            import requests
+                            from common.config import Config  # 确保在函数内部导入 Config
+                            response = requests.get(f"{Config.CRYPTOCOMPARE_API_URL}?fsym=SOL&tsyms=USD")
+                            if response.status_code == 200:
+                                data = response.json()
+                                current_price_usd = data.get('USD', 0)
+
+                                # 获取 24 小时价格变化
+                                response_24h = requests.get("https://min-api.cryptocompare.com/data/v2/histohour?fsym=SOL&tsym=USD&limit=24")
+                                if response_24h.status_code == 200:
+                                    data_24h = response_24h.json()
+                                    if data_24h.get('Response') == 'Success' and data_24h.get('Data') and data_24h['Data'].get('Data'):
+                                        price_24h_ago = data_24h['Data']['Data'][0]['close']
+                                        if price_24h_ago > 0:
+                                            price_change_24h = ((current_price_usd - price_24h_ago) / price_24h_ago) * 100
+                                        else:
+                                            price_change_24h = 0
+                                    else:
+                                        price_change_24h = 0
+                                else:
+                                    price_change_24h = 0
+
+                                # 更新 Token 记录的价格信息
+                                token.current_price_usd = current_price_usd
+                                token.price_change_24h = price_change_24h
+                                token.save()
+                                logger.info(f"SOL 价格: {current_price_usd}, 24h 变化: {price_change_24h}%")
+                            else:
+                                logger.error(f"无法获取 SOL 价格，状态码: {response.status_code}")
+                        except Exception as e:
+                            logger.error(f"获取 SOL 价格时出错: {e}")
+
+                        # 创建 WalletToken 记录
+                        WalletToken.objects.create(
+                            wallet=wallet,
+                            token=token,
+                            token_address='So11111111111111111111111111111111111111112',
+                            balance=native_balance.get('balance', '0'),
+                            balance_formatted=native_balance.get('balance_formatted', '0'),
+                            is_visible=True
+                        )
+                        logger.info(f"已创建 SOL 记录，余额: {native_balance.get('balance_formatted', '0')}")
+
+            # 获取所有可见的代币
             wallet_tokens = WalletToken.objects.filter(wallet=wallet, is_visible=True)
 
+            # 输出所有代币信息便于调试
+            for wt in wallet_tokens:
+                logger.info(f"代币: {wt.token_address}, 余额: {wt.balance}, 可见性: {wt.is_visible}")
+
+            # 过滤掉非原生代币且余额为0的代币
+            # 原生代币始终显示，即使余额很小
+            from django.db.models import Q
+
+            # 如果是 Solana 链，确保 SOL 原生代币始终显示
+            if wallet.chain == 'SOL':
+                # 再次检查数据库中是否有 SOL 的记录
+                sol_token = WalletToken.objects.filter(wallet=wallet, token_address='So11111111111111111111111111111111111111112').first()
+                if sol_token:
+                    logger.info(f"SOL 记录存在，余额: {sol_token.balance}, 可见性: {sol_token.is_visible}")
+                    # 确保 SOL 记录是可见的
+                    if not sol_token.is_visible:
+                        sol_token.is_visible = True
+                        sol_token.save()
+                        logger.info(f"已将 SOL 记录设置为可见")
+
+            # 过滤条件
+            wallet_tokens = wallet_tokens.filter(
+                Q(balance__gt='0') |
+                Q(token_address='') |
+                Q(token_address='So11111111111111111111111111111111111111112', wallet__chain='SOL') |
+                Q(token_address='coin', wallet__chain__in=['KDA', 'KDA_TESTNET'])
+            )
+
+            # 再次输出过滤后的代币信息
+            logger.info(f"过滤后的代币数量: {wallet_tokens.count()}")
+            for wt in wallet_tokens:
+                logger.info(f"过滤后的代币: {wt.token_address}, 余额: {wt.balance}")
+
             # 序列化数据
+            from wallets.serializers import TokenManagementSerializer
             serializer = TokenManagementSerializer(wallet_tokens, many=True)
             token_list = serializer.data
 
@@ -1010,32 +1115,16 @@ class WalletViewSet(viewsets.ModelViewSet):
                     # 获取代币价格和余额
                     price = float(token.get('current_price_usd', 0))
 
-                    # 优先使用 balance_formatted，如果为 null 则使用 balance
-                    balance_formatted = token.get('balance_formatted')
-                    if balance_formatted is not None and balance_formatted != '':
-                        balance = float(balance_formatted)
+                    # 优先使用 balance 字段，因为它是原始的精确值
+                    # 如果 balance_formatted 为 0 但 balance 不为 0，则使用 balance
+                    balance_str = token.get('balance', '0')
+                    balance_formatted_str = token.get('balance_formatted', '0')
+
+                    # 如果 balance_formatted 为 0 但 balance 不为 0，则使用 balance
+                    if balance_formatted_str == '0' and balance_str != '0':
+                        balance = float(balance_str)
                     else:
-                        # 如果 balance_formatted 为 null，则使用 balance
-                        balance_str = token.get('balance', '0')
-                        # 尝试处理可能的大数字符串
-                        try:
-                            # 如果是大数字符串，尝试处理小数点
-                            if '.' in balance_str:
-                                # 分割整数部分和小数部分
-                                int_part, dec_part = balance_str.split('.')
-                                # 获取代币的小数位数
-                                decimals = token.get('decimals', 18)
-                                # 如果是原生代币或者小数位数小于等于18，直接使用原始值
-                                if token.get('token_address', '') == '' or decimals <= 18:
-                                    balance = float(balance_str)
-                                else:
-                                    # 对于小数位数大于18的代币，需要进行特殊处理
-                                    balance = float(int_part + '.' + dec_part[:18])
-                            else:
-                                balance = float(balance_str)
-                        except ValueError:
-                            # 如果转换失败，使用默认值0
-                            balance = 0
+                        balance = float(balance_formatted_str)
 
                     # 计算代币价值
                     token_value = price * balance
@@ -1046,7 +1135,12 @@ class WalletViewSet(viewsets.ModelViewSet):
                     if price_change != 0:
                         token_value_change = token_value * price_change / 100
                         total_value_change_24h += token_value_change
+
+                    # 记录计算过程便于调试
+                    logger.info(f"代币 {token.get('symbol')}: 价格={price}, 余额={balance}, 价值={token_value}, 变化={price_change}%")
                 except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
                     logger.error(f"Error calculating token value: {str(e)}")
                     continue
 
@@ -1497,295 +1591,244 @@ class WalletViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def refresh_balances(self, request, pk=None):
-        """手动刷新钱包代币余额和元数据"""
+        """手动刷新钱包代币余额和元数据，使用异步方式更新价格"""
         try:
+            import logging
+            import time
+            from datetime import datetime, timedelta
+            from django.utils import timezone
+            logger = logging.getLogger(__name__)
+
+            # 记录请求开始时间
+            start_time = time.time()
+            logger.info(f"开始刷新钱包余额，钱包ID: {pk}")
+
             # 尝试获取钱包对象
             try:
-                from wallets.models import Wallet
+                from wallets.models import Wallet, WalletToken, Token, Chain
                 wallet = Wallet.objects.get(id=pk)
+                logger.info(f"找到钱包: {wallet.address} (链: {wallet.chain})")
             except Wallet.DoesNotExist:
+                logger.error(f"钱包 ID {pk} 不存在")
                 return Response({'error': f'钱包 ID {pk} 不存在'}, status=status.HTTP_404_NOT_FOUND)
 
             # 根据钱包链类型调用相应的服务更新余额
             if wallet.chain == 'SOL':
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.info(f"Refreshing balances for wallet {wallet.address} (SOL)")
-
                 from chains.solana.services.balance import SolanaBalanceService
                 balance_service = SolanaBalanceService()
-
-                # 获取钱包代币余额
-                logger.info(f"Starting to refresh balances for wallet {wallet.address}")
-                try:
-                    result = balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
-                    logger.info(f"Successfully refreshed balances for wallet {wallet.address}")
-
-                    # 打印获取到的元数据
-                    if result:
-                        logger.info(f"Found {len(result)} tokens with non-zero balance")
-                    else:
-                        logger.warning(f"No tokens found for wallet {wallet.address}")
-                except Exception as e:
-                    logger.error(f"Error refreshing balances: {e}")
-                    return Response({'error': f'刷新代币余额失败: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-                # 查询数据库中的代币数据
-                from wallets.models import Token, WalletToken
-                tokens = Token.objects.filter(chain__chain='SOL')
-                logger.info(f"Database tokens count: {tokens.count()}")
-
-                # 打印数据库中的 Bonk 代币数据
-                bonk_token = Token.objects.filter(address="DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263").first()
-                if bonk_token:
-                    logger.info(f"Bonk token in database: {bonk_token.__dict__}")
-                else:
-                    logger.warning("Bonk token not found in database")
-
-                # 打印钱包代币数据
-                wallet_tokens = WalletToken.objects.filter(wallet=wallet)
-                logger.info(f"Wallet tokens count: {wallet_tokens.count()}")
-
-                # 返回更详细的响应，包含钱包地址和刷新时间
-                from datetime import datetime
-                refresh_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-                # 查询钱包代币数量
-                token_count = wallet_tokens.count()
-
-                return Response({
-                    'message': f'钱包 {wallet.address} 的代币余额已成功更新',
-                    'wallet_address': wallet.address,
-                    'refresh_time': refresh_time,
-                    'token_count': token_count,
-                    'status': 'success'
-                })
+                logger.info(f"开始刷新 Solana 钱包 {wallet.address} 的代币余额")
+                token_balances = balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id, force_refresh=True)
             # 判断是否是KDA链（包括测试网）
             elif wallet.chain == 'KDA' or wallet.chain == 'KDA_TESTNET':
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.info(f"Refreshing balances for wallet {wallet.address} (KDA)")
-
                 from chains.kadena.services.balance import KadenaBalanceService
                 balance_service = KadenaBalanceService()
-
-                # 获取钱包代币余额
-                logger.info(f"Starting to refresh balances for wallet {wallet.address}")
-                try:
-                    result = balance_service.get_all_token_balances(wallet.chain, wallet.address, wallet_id=wallet.id)
-                    logger.info(f"Successfully refreshed balances for wallet {wallet.address}")
-
-                    # 打印获取到的元数据
-                    if result:
-                        logger.info(f"Found {len(result)} tokens with non-zero balance")
-                    else:
-                        logger.warning(f"No tokens found for wallet {wallet.address}")
-                except Exception as e:
-                    logger.error(f"Error refreshing balances: {e}")
-                    return Response({'error': f'刷新代币余额失败: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-                # 查询数据库中的代币数据
-                from wallets.models import Token, WalletToken
-                tokens = Token.objects.filter(chain__chain=wallet.chain)
-                logger.info(f"Database tokens count: {tokens.count()}")
-
-                # 打印钱包代币数据
-                wallet_tokens = WalletToken.objects.filter(wallet=wallet)
-                logger.info(f"Wallet tokens count: {wallet_tokens.count()}")
-
-                # 返回更详细的响应，包含钱包地址和刷新时间
-                from datetime import datetime
-                refresh_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-                # 查询钱包代币数量
-                token_count = wallet_tokens.count()
-
-                return Response({
-                    'message': f'钱包 {wallet.address} 的代币余额已成功更新',
-                    'wallet_address': wallet.address,
-                    'refresh_time': refresh_time,
-                    'token_count': token_count,
-                    'status': 'success'
-                })
+                logger.info(f"开始刷新 Kadena 钱包 {wallet.address} 的代币余额")
+                token_balances = balance_service.get_all_token_balances(wallet.chain, wallet.address, wallet_id=wallet.id)
+            # 判断是否是EVM兼容链
             elif wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO'] or \
                  wallet.chain.startswith('ETH_') or wallet.chain.startswith('BSC_') or wallet.chain.startswith('MATIC_') or \
                  wallet.chain.startswith('ARB_') or wallet.chain.startswith('OP_') or wallet.chain.startswith('AVAX_') or \
                  wallet.chain.startswith('BASE_') or wallet.chain.startswith('ZKSYNC_') or wallet.chain.startswith('LINEA_') or \
                  wallet.chain.startswith('MANTA_') or wallet.chain.startswith('FTM_') or wallet.chain.startswith('CRO_'):
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.info(f"Refreshing balances for wallet {wallet.address} ({wallet.chain})")
-
                 from chains.evm.services.balance import EVMBalanceService
                 balance_service = EVMBalanceService(wallet.chain)
+                logger.info(f"开始刷新 EVM 钱包 {wallet.address} 的代币余额")
+                token_balances = balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id, force_refresh=True)
+            else:
+                logger.error(f"不支持的链类型: {wallet.chain}")
+                return Response({'error': f'不支持的链类型: {wallet.chain}'}, status=status.HTTP_400_BAD_REQUEST)
 
-                # 获取所有代币余额
-                token_balances = balance_service.get_all_token_balances(wallet.address, wallet_id=wallet.id)
+            # 记录刷新结果
+            logger.info(f"完成刷新钱包 {wallet.address} 的代币余额，共 {len(token_balances)} 个代币")
+            logger.info(f"刷新后的代币列表: {[token.get('symbol', 'Unknown') for token in token_balances]}")
 
-                # 更新数据库中的代币余额
-                from wallets.models import WalletToken, Token, Chain
+            # 特殊处理 SOL 原生代币
+            if wallet.chain == 'SOL':
+                # 获取 SOL 原生代币余额
+                from chains.solana.services.balance import SolanaBalanceService
+                balance_service = SolanaBalanceService()
+                # 使用 wallet_id 参数，确保数据库也被更新
+                native_balance = balance_service.get_native_balance(wallet.address, wallet_id=wallet.id, force_refresh=True)
 
-                # 获取链对象
-                chain_obj, _ = Chain.objects.get_or_create(chain=wallet.chain, defaults={'is_active': True})
+                if native_balance:
+                    logger.info(f"SOL 原生代币余额: {native_balance.get('balance_formatted', '0')}")
 
-                for token_balance in token_balances:
-                    token_address = token_balance.get('token_address', '')
-                    balance = token_balance.get('balance', '0')
-                    symbol = token_balance.get('symbol', '')
-                    name = token_balance.get('name', '')
-                    decimals = token_balance.get('decimals', 18)
-                    logo = token_balance.get('logo', '')
+                    # 获取链对象
+                    chain_obj, _ = Chain.objects.get_or_create(chain=wallet.chain, defaults={'is_active': True})
 
-                    # 更新或创建 Token 记录
-                    if token_address:
-                        token, created = Token.objects.get_or_create(
-                            chain=chain_obj,
-                            address=token_address,
-                            defaults={
-                                'symbol': symbol,
-                                'name': name,
-                                'decimals': decimals,
-                                'logo_url': logo,
-                                'is_active': True
-                            }
-                        )
-                    else:
-                        # 对于原生代币，使用特殊处理
-                        token, created = Token.objects.get_or_create(
-                            chain=chain_obj,
-                            address='',
-                            defaults={
-                                'symbol': symbol or wallet.chain.split('_')[0],
-                                'name': name or f"{wallet.chain.split('_')[0]} Coin",
-                                'decimals': decimals,
-                                'logo_url': logo,
-                                'is_active': True
-                            }
-                        )
-
-                    # 更新或创建 WalletToken 记录
-                    wallet_token, created = WalletToken.objects.get_or_create(
-                        wallet=wallet,
-                        token_address=token_address,
+                    # 创建或获取 SOL 代币记录
+                    token, _ = Token.objects.get_or_create(
+                        chain=chain_obj,
+                        address='So11111111111111111111111111111111111111112',
                         defaults={
-                            'token': token,
-                            'balance': balance,
-                            'is_visible': True
+                            'symbol': 'SOL',
+                            'name': 'Solana',
+                            'decimals': 9,
+                            'logo_url': 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png',
+                            'is_active': True,
+                            'last_updated': timezone.now()
                         }
                     )
 
-                    if not created:
-                        wallet_token.balance = balance
-                        wallet_token.token = token
-                        wallet_token.save()
+                    # 创建或更新 WalletToken 记录
+                    wallet_token, created = WalletToken.objects.update_or_create(
+                        wallet=wallet,
+                        token_address='So11111111111111111111111111111111111111112',
+                        defaults={
+                            'token': token,
+                            'balance': native_balance.get('balance', '0'),
+                            'balance_formatted': native_balance.get('balance_formatted', '0'),
+                            'is_visible': True,
+                            'last_synced': timezone.now()
+                        }
+                    )
 
-                # 查询钱包代币数量
-                from wallets.models import WalletToken, Token
-                wallet_tokens = WalletToken.objects.filter(wallet=wallet)
-                token_count = wallet_tokens.count()
+                    if created:
+                        logger.info(f"创建了 SOL 原生代币记录，余额: {native_balance.get('balance_formatted', '0')}")
+                    else:
+                        logger.info(f"更新了 SOL 原生代币记录，余额: {native_balance.get('balance_formatted', '0')}")
 
-                # 更新代币价格
+                    # 再次检查数据库中的 SOL 记录
+                    sol_token = WalletToken.objects.filter(wallet=wallet, token_address='So11111111111111111111111111111111111111112').first()
+                    if sol_token:
+                        logger.info(f"数据库中的 SOL 记录余额: {sol_token.balance_formatted}")
+                    else:
+                        logger.error("SOL 记录仍然不存在于数据库中")
+
+            # 获取链对象
+            chain_obj, _ = Chain.objects.get_or_create(chain=wallet.chain, defaults={'is_active': True})
+
+            # 处理代币元数据和余额
+            for token_balance in token_balances:
+                token_address = token_balance.get('token_address', '')
+                balance = token_balance.get('balance', '0')
+                balance_formatted = token_balance.get('balance_formatted', '0')
+                symbol = token_balance.get('symbol', '')
+                name = token_balance.get('name', '')
+                decimals = token_balance.get('decimals', 18)
+                logo = token_balance.get('logo', '')
+
+                # 查找或创建代币记录
+                token = None
+                if token_address:
+                    token = Token.objects.filter(chain=chain_obj, address=token_address).first()
+
+                # 如果代币不存在或需要更新元数据
+                if token is None:
+                    # 使用 get_or_create 而不是 create，避免创建重复记录
+                    token, created = Token.objects.get_or_create(
+                        chain=chain_obj,
+                        address=token_address,
+                        defaults={
+                            'symbol': symbol,
+                            'name': name,
+                            'decimals': decimals,
+                            'logo_url': logo,
+                            'is_active': True,
+                            'last_updated': timezone.now()
+                        }
+                    )
+                    if created:
+                        logger.info(f"创建新的代币记录: {symbol} ({token_address})")
+                    else:
+                        logger.info(f"使用现有代币记录: {symbol} ({token_address})")
+                else:
+                    # 检查是否需要更新元数据（超过1周未更新）
+                    one_week_ago = timezone.now() - timedelta(days=7)
+                    if token.last_updated is None or token.last_updated < one_week_ago:
+                        # 更新代币元数据
+                        if symbol and symbol != 'Unknown':
+                            token.symbol = symbol
+                        if name and name != 'Unknown':
+                            token.name = name
+                        if decimals:
+                            token.decimals = decimals
+                        if logo:
+                            token.logo_url = logo
+                        token.last_updated = timezone.now()
+                        token.save()
+                        logger.info(f"更新代币元数据: {symbol} ({token_address})")
+
+                # 更新或创建钱包代币记录
+                # 正确格式化余额
                 try:
-                    # 获取所有代币的地址
-                    token_addresses = [wt.token_address for wt in wallet_tokens if wt.token_address]
+                    from decimal import Decimal
+                    decimal_balance = Decimal(balance)
+                    # 如果是整数，直接显示整数
+                    if decimal_balance == decimal_balance.to_integral_value():
+                        formatted_balance = str(int(decimal_balance))
+                    else:
+                        # 否则保留小数点后 4 位
+                        formatted_balance = str(round(decimal_balance, 4))
+                except Exception as e:
+                    logger.error(f"格式化余额时出错: {str(e)}")
+                    formatted_balance = balance_formatted
 
-                    # 添加原生代币
-                    if wallet.chain.split('_')[0] in ['ETH', 'BSC', 'MATIC', 'ARB', 'OP', 'AVAX', 'BASE', 'ZKSYNC', 'LINEA', 'MANTA', 'FTM', 'CRO']:
-                        # 根据链类型获取原生代币的符号
-                        native_symbol = 'ETH'  # 默认为 ETH
+                wallet_token, created = WalletToken.objects.update_or_create(
+                    wallet=wallet,
+                    token_address=token_address,
+                    defaults={
+                        'token': token,
+                        'balance': balance,
+                        'balance_formatted': formatted_balance,
+                        'is_visible': True,
+                        'last_synced': timezone.now()
+                    }
+                )
 
-                        if wallet.chain.startswith('BSC'):
-                            native_symbol = 'BNB'
-                        elif wallet.chain.startswith('MATIC'):
-                            native_symbol = 'MATIC'
-                        elif wallet.chain.startswith('ARB'):
-                            native_symbol = 'ARB'
-                        elif wallet.chain.startswith('OP'):
-                            native_symbol = 'OP'
-                        elif wallet.chain.startswith('AVAX'):
-                            native_symbol = 'AVAX'
-                        elif wallet.chain.startswith('FTM'):
-                            native_symbol = 'FTM'
-                        elif wallet.chain.startswith('CRO'):
-                            native_symbol = 'CRO'
+                if created:
+                    logger.info(f"创建新的钱包代币记录: {symbol} ({token_address})")
+                else:
+                    logger.info(f"更新钱包代币记录: {symbol} ({token_address}), 余额: {balance_formatted}")
 
-                        # 更新原生代币的价格和24小时变化
-                        import requests
-                        response = requests.get(f"https://min-api.cryptocompare.com/data/price?fsym={native_symbol}&tsyms=USD")
-                        if response.status_code == 200:
-                            data = response.json()
-                            current_price_usd = data.get('USD', 0)
+            # 处理零余额代币：从数据库中删除余额为0的代币（排除原生代币）
+            # 获取链上返回的所有代币地址
+            chain_token_addresses = [token.get('token_address', '') for token in token_balances]
+            # 找出数据库中存在但链上没有返回的代币（可能是零余额的代币）
+            wallet_tokens = WalletToken.objects.filter(wallet=wallet)
+            for wt in wallet_tokens:
+                # 排除原生代币（空地址或特定地址）
+                is_native_token = (wt.token_address == "" or
+                                  (wallet.chain == 'SOL' and wt.token_address == "So11111111111111111111111111111111111111112") or
+                                  ((wallet.chain == 'KDA' or wallet.chain == 'KDA_TESTNET') and wt.token_address == "coin"))
 
-                            # 获取 24 小时价格变化
-                            price_change_24h = 0
-                            response_24h = requests.get(f"https://min-api.cryptocompare.com/data/v2/histohour?fsym={native_symbol}&tsym=USD&limit=24")
-                            if response_24h.status_code == 200:
-                                data_24h = response_24h.json()
-                                if data_24h.get('Response') == 'Success' and data_24h.get('Data') and data_24h['Data'].get('Data'):
-                                    price_24h_ago = data_24h['Data']['Data'][0]['open']
-                                    if price_24h_ago > 0:
-                                        price_change_24h = ((current_price_usd - price_24h_ago) / price_24h_ago) * 100
-                                        logger.info(f"计算 {native_symbol} 24小时价格变化: {price_change_24h:.2f}%")
+                if wt.token_address not in chain_token_addresses and not is_native_token:
+                    logger.info(f"删除零余额代币: {wt.token_address}")
+                    wt.delete()
 
-                            # 获取原生代币的 Token 记录
-                            native_token = Token.objects.filter(chain__chain=wallet.chain, address='').first()
-                            if native_token:
-                                native_token.current_price_usd = current_price_usd
-                                native_token.price_change_24h = price_change_24h
-                                native_token.save()
-                                logger.info(f"更新原生代币 {native_symbol} 价格: {current_price_usd} USD, 24小时变化: {price_change_24h:.2f}%")
+            # 异步更新代币价格
+            from wallets.tasks import update_wallet_token_prices
+            update_wallet_token_prices.delay(wallet.id)
+            logger.info(f"已开始异步更新钱包 {wallet.address} 的代币价格")
 
-                    # 更新 ERC20 代币的价格
-                    for wallet_token in wallet_tokens:
-                        if wallet_token.token and wallet_token.token_address:
-                            try:
-                                # 获取代币符号
-                                symbol = wallet_token.token.symbol
+            # 查询更新后的钱包代币数量
+            token_count = WalletToken.objects.filter(wallet=wallet).count()
 
-                                # 获取代币价格和24小时变化
-                                import requests
-                                response = requests.get(f"https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms=USD")
-                                if response.status_code == 200:
-                                    data = response.json()
-                                    current_price_usd = data.get('USD', 0)
+            # 记录刷新完成的总耗时
+            end_time = time.time()
+            total_time = end_time - start_time
+            logger.info(f"钱包 {wallet.address} ({wallet.chain}) 刷新完成，总耗时: {total_time:.2f} 秒")
 
-                                    # 获取 24 小时价格变化
-                                    price_change_24h = 0
-                                    response_24h = requests.get(f"https://min-api.cryptocompare.com/data/v2/histohour?fsym={symbol}&tsym=USD&limit=24")
-                                    if response_24h.status_code == 200:
-                                        data_24h = response_24h.json()
-                                        if data_24h.get('Response') == 'Success' and data_24h.get('Data') and data_24h['Data'].get('Data'):
-                                            price_24h_ago = data_24h['Data']['Data'][0]['open']
-                                            if price_24h_ago > 0:
-                                                price_change_24h = ((current_price_usd - price_24h_ago) / price_24h_ago) * 100
-                                                logger.info(f"计算 {symbol} 24小时价格变化: {price_change_24h:.2f}%")
+            # 返回更详细的响应
+            refresh_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            return Response({
+                'message': f'钱包 {wallet.address} 的代币余额已成功更新',
+                'wallet_address': wallet.address,
+                'refresh_time': refresh_time,
+                'token_count': token_count,
+                'status': 'success',
+                'execution_time': f"{total_time:.2f} 秒"
+            })
 
-                                    wallet_token.token.current_price_usd = current_price_usd
-                                    wallet_token.token.price_change_24h = price_change_24h
-                                    wallet_token.token.save()
-                                    logger.info(f"更新代币 {symbol} 价格: {current_price_usd} USD, 24小时变化: {price_change_24h:.2f}%")
-                            except Exception as price_error:
-                                logger.error(f"获取代币 {wallet_token.token_address} 价格失败: {price_error}")
-                except Exception as price_update_error:
-                    logger.error(f"更新代币价格失败: {price_update_error}")
-
-                # 返回更详细的响应，包含钱包地址和刷新时间
-                from datetime import datetime
-                refresh_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-                return Response({
-                    'message': f'钱包 {wallet.address} 的代币余额已成功更新',
-                    'wallet_address': wallet.address,
-                    'refresh_time': refresh_time,
-                    'token_count': token_count,
-                    'status': 'success'
-                })
-            else:
-                return Response({'error': f'不支持的链类型: {wallet.chain}'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            # 记录错误耗时
+            end_time = time.time()
+            total_time = end_time - start_time
+
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Error refreshing wallet balances: {str(e)}")
+            logger.error(f"刷新钱包余额失败，耗时: {total_time:.2f} 秒")
             return Response({'error': f'更新钱包余额失败: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
@@ -1909,10 +1952,10 @@ class WalletTokenViewSet(viewsets.ModelViewSet):
             wallet = Wallet.objects.get(device=device, chain=chain)
 
         # 更新或创建代币可见性设置
+        # 移除 chain 参数，因为 WalletToken 模型中没有 chain 字段
         wallet_token, created = WalletToken.objects.get_or_create(
             wallet=wallet,
             token_address=token_address,
-            chain=chain,
             defaults={
                 'is_visible': is_visible,
                 'balance': 0

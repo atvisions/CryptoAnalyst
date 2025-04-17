@@ -3,7 +3,6 @@ import os
 
 class Config:
     """配置管理类"""
-
     # API 密钥配置
     MORALIS_API_KEY = os.getenv("MORALIS_API_KEY", "")
     ALCHEMY_API_KEY = os.getenv("ALCHEMY_API_KEY", "")
@@ -26,11 +25,11 @@ class Config:
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "BSC": {
-            "rpc_url": "https://bsc-dataseed.binance.org/",
+            "rpc_url": f"https://binance.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "BSC_TESTNET": {
-            "rpc_url": "https://data-seed-prebsc-1-s1.binance.org:8545/",
+            "rpc_url": f"https://bsc-testnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "MATIC": {
@@ -58,59 +57,99 @@ class Config:
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "AVAX": {
-            "rpc_url": "https://api.avax.network/ext/bc/C/rpc",
+            "rpc_url": f"https://avax-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "AVAX_FUJI": {
-            "rpc_url": "https://api.avax-test.network/ext/bc/C/rpc",
+            "rpc_url": f"https://avax-fuji.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "FTM": {
-            "rpc_url": "https://rpc.ftm.tools/",
+            "rpc_url": f"https://fantom-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "FTM_TESTNET": {
-            "rpc_url": "https://rpc.testnet.fantom.network/",
+            "rpc_url": f"https://fantom-testnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "CRO": {
-            "rpc_url": "https://evm.cronos.org",
+            "rpc_url": f"https://cronos-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "CRO_TESTNET": {
-            "rpc_url": "https://evm-t3.cronos.org",
+            "rpc_url": f"https://cronos-testnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "ZKSYNC": {
-            "rpc_url": "https://mainnet.era.zksync.io",
+            "rpc_url": f"https://zksync-era-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "ZKSYNC_TESTNET": {
-            "rpc_url": "https://testnet.era.zksync.dev",
+            "rpc_url": f"https://zksync-era-testnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "LINEA": {
-            "rpc_url": "https://rpc.linea.build",
+            "rpc_url": f"https://linea-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "LINEA_GOERLI": {
-            "rpc_url": "https://rpc.goerli.linea.build",
+            "rpc_url": f"https://linea-goerli.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "MANTA": {
-            "rpc_url": "https://pacific.manta.network/http",
+            "rpc_url": f"https://manta-pacific.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "MANTA_TESTNET": {
-            "rpc_url": "https://pacific-testnet.manta.network/http",
+            "rpc_url": f"https://manta-testnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "BASE": {
-            "rpc_url": "https://mainnet.base.org",
+            "rpc_url": f"https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         },
         "BASE_SEPOLIA": {
-            "rpc_url": "https://sepolia.base.org",
+            "rpc_url": f"https://base-sepolia.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "SCROLL": {
+            "rpc_url": f"https://scroll-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "SCROLL_SEPOLIA": {
+            "rpc_url": f"https://scroll-sepolia.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "GNOSIS": {
+            "rpc_url": f"https://gnosis-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "GNOSIS_CHIADO": {
+            "rpc_url": f"https://gnosis-chiado.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "CELO": {
+            "rpc_url": f"https://celo-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "CELO_ALFAJORES": {
+            "rpc_url": f"https://celo-alfajores.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "CELO_BAKLAVA": {
+            "rpc_url": f"https://celo-baklava.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "METIS": {
+            "rpc_url": f"https://metis-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "OPBNB": {
+            "rpc_url": f"https://opbnb-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
+            "moralis_url": "https://deep-index.moralis.io/api/v2"
+        },
+        "OPBNB_TESTNET": {
+            "rpc_url": f"https://opbnb-testnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://deep-index.moralis.io/api/v2"
         }
     }
@@ -118,11 +157,11 @@ class Config:
     # Solana 链配置
     SOLANA_CONFIGS: Dict[str, Dict[str, Any]] = {
         "SOL": {
-            "rpc_url": "https://api.mainnet-beta.solana.com",
+            "rpc_url": f"https://solana-mainnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://solana-gateway.moralis.io"
         },
         "SOL_DEVNET": {
-            "rpc_url": "https://api.devnet.solana.com",
+            "rpc_url": f"https://solana-devnet.g.alchemy.com/v2/{ALCHEMY_API_KEY}",
             "moralis_url": "https://solana-gateway.moralis.io"
         },
         "SOL_TESTNET": {

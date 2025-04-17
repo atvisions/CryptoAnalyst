@@ -29,6 +29,34 @@ class EVMTokenService:
 
     def get_token_metadata(self, token_address: str) -> Dict[str, Any]:
         """获取代币元数据"""
+        # 检查缓存
+        from django.core.cache import cache
+        cache_key = f"{self.chain}:token:{token_address.lower()}:metadata"
+        cached_metadata = cache.get(cache_key)
+        if cached_metadata:
+            logger.info(f"从缓存获取代币 {token_address} 的元数据")
+            return cached_metadata
+
+        # 检查数据库
+        try:
+            from wallets.models import Token, Chain
+            chain = Chain.objects.get(chain=self.chain)
+            token = Token.objects.filter(chain=chain, address=token_address).first()
+            if token:
+                # 如果数据库中有记录，使用数据库中的元数据
+                metadata = {
+                    'name': token.name,
+                    'symbol': token.symbol,
+                    'decimals': token.decimals,
+                    'logo': token.logo_url
+                }
+                # 缓存元数据，有效期24小时
+                cache.set(cache_key, metadata, 60 * 60 * 24)  # 24小时
+                logger.info(f"从数据库获取代币 {token_address} 的元数据")
+                return metadata
+        except Exception as e:
+            logger.warning(f"从数据库获取代币元数据失败: {e}")
+
         # ERC20 代币合约 ABI
         erc20_abi = [
             {
@@ -82,12 +110,18 @@ class EVMTokenService:
                     logger.warning(f"获取代币小数位失败: {str(e)}")
                     decimals = 18  # 默认使用18位小数
 
-                logger.info(f"成功获取代币元数据: {name} ({symbol})")
-                return {
+                # 构造元数据对象
+                metadata = {
                     'name': name,
                     'symbol': symbol,
                     'decimals': decimals
                 }
+
+                # 缓存元数据，有效期24小时
+                cache.set(cache_key, metadata, 60 * 60 * 24)  # 24小时
+
+                logger.info(f"成功从链上获取代币元数据: {name} ({symbol})，并缓存")
+                return metadata
             except Exception as e:
                 logger.error(f"获取代币元数据失败 (尝试 {retry+1}/{max_retries}): {str(e)}")
                 if retry < max_retries - 1:
@@ -97,11 +131,18 @@ class EVMTokenService:
 
         # 所有重试都失败后返回默认值
         logger.error(f"在 {max_retries} 次尝试后无法获取代币元数据，返回默认值")
-        return {
+
+        # 构造默认元数据
+        default_metadata = {
             'name': 'Unknown',
             'symbol': 'Unknown',
             'decimals': 18
         }
+
+        # 缓存默认元数据，但只缓存30分钟，因为这是失败的结果
+        cache.set(cache_key, default_metadata, 60 * 30)  # 30分钟
+
+        return default_metadata
 
     def get_token_balance(self, token_address: str, wallet_address: str) -> Dict[str, Any]:
         """获取特定代币余额"""

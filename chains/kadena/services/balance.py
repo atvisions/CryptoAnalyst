@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional
 from decimal import Decimal
 import logging
 import requests
+from django.utils import timezone
 from common.config import Config
 from wallets.models import Token, WalletToken, Wallet, Chain
 
@@ -30,20 +31,8 @@ class KadenaBalanceService:
                 import concurrent.futures
                 import time
 
-                # 使用缓存键来检查是否有缓存
-                cache_key = f"{chain}:{address}:balance"
-                cache_timeout = 60  # 缓存 60 秒
-
-                # 尝试从缓存中获取余额
-                from django.core.cache import cache
-                cached_balance = cache.get(cache_key)
-                if cached_balance is not None:
-                    logger.info(f"从缓存中获取余额: {cached_balance}")
-                    return {
-                        "balance": cached_balance,
-                        "chain": chain,
-                        "address": address
-                    }
+                # 直接从链上获取数据，不使用缓存
+                logger.info(f"直接从链上获取数据，不使用缓存")
 
                 # 如果没有缓存，并行查询链
                 logger.info(f"没有缓存，开始并行查询所有 Kadena 平行链上的余额")
@@ -53,6 +42,9 @@ class KadenaBalanceService:
                 # 定义查询单个链的函数
                 def query_chain_balance(kadena_chain_id):
                     try:
+                        # 直接从链上获取数据，不使用缓存
+                        logger.info(f"直接从 Kadena 平行链 {kadena_chain_id} 获取数据")
+
                         # 更新 API 版本以匹配当前 Kadena 链 ID
                         # 注意: 这里的 kadena_chain_id 是 Kadena 平行链的 ID（0-19）
                         # 不要与钱包模型中的 chain 字段（如 "KDA", "KDA_TESTNET"）混淆
@@ -78,6 +70,9 @@ class KadenaBalanceService:
                         # 获取当前链上的余额
                         chain_balance = sdk.get_balance(address)
 
+                        # 不使用缓存
+                        logger.info(f"获取到 Kadena 平行链 {kadena_chain_id} 的余额: {chain_balance}")
+
                         # 对Chain 0的结果进行特殊处理
                         if kadena_chain_id == 0:
                             logger.info(f"Kadena 平行链 0 (主链) 上的余额: {chain_balance}")
@@ -94,10 +89,12 @@ class KadenaBalanceService:
                             logger.error(f"\u2757\u2757\u2757 获取 Kadena 链 0 (主链) 上的余额失败: {str(chain_error)}")
                         else:
                             logger.error(f"获取 Kadena 链 {kadena_chain_id} 上的余额失败: {str(chain_error)}")
+                        # 不使用缓存
+                        logger.info(f"查询 Kadena 平行链 {kadena_chain_id} 失败，返回零余额")
                         return kadena_chain_id, Decimal('0')
 
                 # 使用线程池并行查询
-                with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:  # 增加并发线程数
                     # 提交所有查询任务
                     # 优先查询Chain 0，然后再查询其他链
                     # 将Chain 0放在列表的最前面，确保它首先被查询
@@ -139,8 +136,8 @@ class KadenaBalanceService:
                 # 记录查询的链数量
                 logger.info(f"共查询了 {len(kadena_chain_ids_to_query)} 个 Kadena 平行链")
 
-                # 将结果存入缓存
-                cache.set(cache_key, str(total_balance), cache_timeout)
+                # 不使用缓存
+                logger.info(f"所有链上的总余额: {total_balance}")
 
                 return {
                     "balance": str(total_balance),
@@ -168,6 +165,68 @@ class KadenaBalanceService:
             logger.error(f"获取 Kadena 余额失败: {str(e)}")
             raise Exception(f"获取 Kadena 余额失败: {str(e)}")
 
+    def get_all_balances(self, chain: str, address: str, force_refresh: bool = False) -> dict:
+        """获取所有代币余额"""
+        try:
+            # 获取所有代币余额
+            token_balances = self.get_all_token_balances(chain, address, force_refresh=force_refresh)
+
+            # 获取隐藏的代币列表
+            from wallets.models import WalletToken
+            hidden_tokens = WalletToken.objects.filter(
+                wallet__address=address,
+                is_visible=False
+            ).values_list('token_address', flat=True)
+
+            # 过滤掉隐藏的代币和余额为0的代币
+            visible_tokens = [
+                token for token in token_balances
+                if token.get('token_address', '') not in hidden_tokens and
+                   float(token.get('balance', '0')) > 0
+            ]
+
+            # 计算总价值（USD）
+            from decimal import Decimal
+            total_value_usd = Decimal('0')
+            total_value_change_24h = Decimal('0')
+
+            # 计算代币总价值
+            for token in visible_tokens:
+                # 计算代币价值，使用 current_price_usd 和 balance
+                if token.get('current_price_usd') and token.get('balance'):
+                    try:
+                        price = Decimal(str(token['current_price_usd']))
+                        balance = Decimal(str(token['balance']))
+                        price_change = Decimal(str(token.get('price_change_24h', 0)))
+
+                        # 计算代币价值
+                        value_usd = price * balance
+
+                        # 添加到代币数据中，便于前端显示
+                        token['value_usd'] = str(value_usd)
+
+                        # 累加总价值
+                        total_value_usd += value_usd
+                        total_value_change_24h += value_usd * price_change / 100
+
+                        logger.info(f"计算代币 {token.get('symbol')} 价值: {price} * {balance} = {value_usd} USD")
+                    except Exception as e:
+                        logger.error(f"计算代币 {token.get('symbol')} 价值时出错: {str(e)}")
+
+            return {
+                'total_value_usd': str(total_value_usd),
+                'total_value_change_24h': str(total_value_change_24h),
+                'tokens': visible_tokens
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting all balances: {str(e)}")
+            return {
+                'total_value_usd': '0',
+                'total_value_change_24h': '0',
+                'tokens': []
+            }
+
     def get_all_token_balances(self, chain: str, address: str, wallet_id: Optional[int] = None) -> List[Dict[str, Any]]:
         """获取所有代币余额并更新数据库"""
         try:
@@ -175,40 +234,24 @@ class KadenaBalanceService:
             start_time = time.time()
             logger.info(f"开始获取 {chain} 链上地址 {address} 的所有代币余额")
 
-            # 使用缓存键来检查是否有缓存
-            cache_key = f"{chain}:{address}:all_tokens"
-            cache_timeout = 60  # 缓存 60 秒
+            # 直接从链上获取数据，不使用缓存
+            logger.info(f"直接从链上获取数据，不使用缓存")
 
-            # 尝试从缓存中获取代币列表
-            from django.core.cache import cache
-            cached_tokens = cache.get(cache_key)
-
-            # 如果提供了钱包ID并且有缓存，直接更新数据库
-            if wallet_id and cached_tokens is not None:
-                logger.info(f"从缓存中获取代币列表，共 {len(cached_tokens)} 个代币")
-
-                # 更新数据库
-                self._update_database(wallet_id, chain, cached_tokens)
-
-                end_time = time.time()
-                logger.info(f"从缓存获取并更新数据库耗时: {end_time - start_time:.2f} 秒")
-                return cached_tokens
-
-            # 如果没有缓存，查询原生代币余额
+            # 查询原生代币余额
             native_balance = self.get_balance(chain, address)
             logger.info(f"获取到原生代币余额: {native_balance}")
 
             # 获取代币列表
             from chains.kadena.services.token import KadenaTokenService
             token_service = KadenaTokenService()
-            tokens = token_service.get_token_list(address)
+            tokens = token_service.get_token_list(address, chain)  # 传递 chain 参数
             logger.info(f"获取到 {len(tokens)} 个代币")
 
             # 合并所有代币余额
             all_tokens = [native_balance] + tokens
 
-            # 将结果存入缓存
-            cache.set(cache_key, all_tokens, cache_timeout)
+            # 不使用缓存
+            logger.info(f"共获取到 {len(all_tokens)} 个代币")
 
             # 如果提供了钱包ID，更新数据库
             if wallet_id:
@@ -236,9 +279,29 @@ class KadenaBalanceService:
             if tokens and len(tokens) > 0:
                 self._update_native_token(wallet, chain_obj, tokens[0])
 
+            # 获取链上返回的所有代币地址
+            current_token_addresses = [token.get('token_address', '') for token in (tokens[1:] if len(tokens) > 1 else [])]
+
             # 更新其他代币
             for token in tokens[1:] if len(tokens) > 1 else []:
                 self._update_token(wallet, chain_obj, token)
+
+            # 处理零余额的代币
+            try:
+                # 获取数据库中当前钱包的所有代币（排除原生代币）
+                wallet_tokens = WalletToken.objects.filter(wallet=wallet).exclude(token_address="")
+                logger.info(f"数据库中的代币数量: {wallet_tokens.count()}")
+
+                # 找出数据库中存在但链上没有返回的代币（可能是零余额的代币）
+                for wt in wallet_tokens:
+                    logger.info(f"检查数据库中的代币: {wt.token_address}, 当前余额: {wt.balance}")
+                    if wt.token_address not in current_token_addresses and wt.token_address != "coin":
+                        logger.info(f"删除零余额代币: {wt.token_address}, 原余额: {wt.balance}")
+                        # 删除零余额代币
+                        wt.delete()
+                        logger.info(f"已删除代币 {wt.token_address}")
+            except Exception as e:
+                logger.error(f"Error processing zero balance tokens: {e}")
 
             logger.info(f"数据库更新完成，共处理 {len(tokens)} 个代币")
         except Exception as e:
@@ -404,13 +467,27 @@ class KadenaBalanceService:
                     token_record.delete()
 
             # 创建或更新钱包代币关系
+            # 正确格式化余额
+            balance = balance_data["balance"]
+            try:
+                decimal_balance = Decimal(balance)
+                # 如果是整数，直接显示整数
+                if decimal_balance == decimal_balance.to_integral_value():
+                    balance_formatted = str(int(decimal_balance))
+                else:
+                    # 否则保留小数点后 4 位
+                    balance_formatted = str(round(decimal_balance, 4))
+            except:
+                # 如果转换失败，直接使用原始值
+                balance_formatted = balance
+
             wallet_token, created = WalletToken.objects.get_or_create(
                 wallet=wallet,
                 token_address="",  # 原生代币使用空字符串作为 token_address
                 defaults={
                     "token": token,
-                    "balance": balance_data["balance"],
-                    "balance_formatted": balance_data["balance"],
+                    "balance": balance,
+                    "balance_formatted": balance_formatted,
                     "is_visible": True
                 }
             )
@@ -426,7 +503,20 @@ class KadenaBalanceService:
                     # 不更新余额，保留旧值
                 else:
                     wallet_token.balance = new_balance
-                    wallet_token.balance_formatted = new_balance
+
+                    # 正确格式化余额，保留整数部分
+                    try:
+                        decimal_balance = Decimal(new_balance)
+                        # 如果是整数，直接显示整数
+                        if decimal_balance == decimal_balance.to_integral_value():
+                            wallet_token.balance_formatted = str(int(decimal_balance))
+                        else:
+                            # 否则保留小数点后 4 位
+                            wallet_token.balance_formatted = str(round(decimal_balance, 4))
+                    except:
+                        # 如果转换失败，直接使用原始值
+                        wallet_token.balance_formatted = new_balance
+
                     wallet_token.save()
                     logger.info(f"更新了现有的 KDA 余额记录，从 {old_balance} 变为 {new_balance}")
             else:
@@ -463,7 +553,8 @@ class KadenaBalanceService:
                     "symbol": metadata.get("symbol", "Unknown"),
                     "decimals": metadata.get("decimals", 12),  # Kadena 默认精度为 12
                     "logo_url": metadata.get("logo", ""),
-                    "is_active": True
+                    "is_active": True,
+                    "last_updated": timezone.now()
                 }
             )
 
@@ -471,6 +562,18 @@ class KadenaBalanceService:
                 logger.info(f"创建了新的代币记录: {token.symbol}")
             else:
                 logger.info(f"使用现有的代币记录: {token.symbol} (ID: {token.id})")
+
+                # 检查是否需要更新元数据
+                from wallets.cache_utils import should_update_token_metadata
+                if should_update_token_metadata(token, force_update=False, cache_ttl_hours=24):
+                    # 更新代币元数据
+                    token.name = metadata.get("name", token.name)
+                    token.symbol = metadata.get("symbol", token.symbol)
+                    token.decimals = metadata.get("decimals", token.decimals)
+                    token.logo_url = metadata.get("logo", token.logo_url)
+                    token.last_updated = timezone.now()
+                    token.save()
+                    logger.info(f"更新了代币 {token.symbol} 的元数据")
 
             # 更新钱包代币关系
             # 尝试查找现有的钱包代币关系

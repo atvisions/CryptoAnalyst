@@ -35,7 +35,7 @@ class KadenaTokenService:
             api_version
         )
 
-    def get_token_list(self, wallet_address: str, chain: str = "KDA") -> List[Dict[str, Any]]:
+    def get_token_list(self, wallet_address: str, chain: str) -> List[Dict[str, Any]]:
         """获取钱包持有的代币列表"""
         try:
             logger.info(f"获取钱包 {wallet_address} 的代币列表")
@@ -48,28 +48,14 @@ class KadenaTokenService:
             # 如果出错，返回空列表
             return []
 
-    def get_token_metadata(self, token_address: str, chain: str = "KDA") -> Dict[str, Any]:
+    def get_token_metadata(self, token_address: str, chain: str) -> Dict[str, Any]:
         """获取代币元数据"""
         try:
-            # 使用缓存键来检查是否有缓存
-            cache_key = f"{chain}:{token_address}:metadata"
-            cache_timeout = 3600  # 缓存 1 小时，元数据变化不频繁
-
-            # 尝试从缓存中获取元数据
-            from django.core.cache import cache
-            cached_metadata = cache.get(cache_key)
-            if cached_metadata is not None:
-                logger.debug(f"从缓存中获取代币 {token_address} 的元数据")
-                return cached_metadata
-
-            # 如果没有缓存，查询元数据
+            # 直接从链上获取数据，不使用缓存
             logger.info(f"获取代币 {token_address} 的元数据")
             sdk = self._get_sdk(chain)
             metadata = sdk.get_token_info(token_address)
             logger.info(f"获取到代币元数据: {metadata}")
-
-            # 将结果存入缓存
-            cache.set(cache_key, metadata, cache_timeout)
 
             return metadata
         except Exception as e:
@@ -84,26 +70,14 @@ class KadenaTokenService:
                 'social': {}
             }
 
-            # 将默认值存入缓存，避免重复查询失败
-            from django.core.cache import cache
-            cache.set(cache_key, default_metadata, 300)  # 缓存 5 分钟，失败的查询缓存时间短一些
+            # 不使用缓存
 
             return default_metadata
 
-    def get_token_balance(self, token_address: str, wallet_address: str, chain: str = "KDA") -> Dict[str, Any]:
+    def get_token_balance(self, token_address: str, wallet_address: str, chain: str) -> Dict[str, Any]:
         """获取特定代币余额"""
         try:
-            # 使用缓存键来检查是否有缓存
-            cache_key = f"{chain}:{wallet_address}:{token_address}:balance"
-            cache_timeout = 60  # 缓存 60 秒
-
-            # 尝试从缓存中获取余额
-            from django.core.cache import cache
-            cached_balance = cache.get(cache_key)
-            if cached_balance is not None:
-                logger.debug(f"从缓存中获取钱包 {wallet_address} 的代币 {token_address} 余额: {cached_balance}")
-                return cached_balance
-
+            # 直接从链上获取数据，不使用缓存
             logger.info(f"获取钱包 {wallet_address} 的代币 {token_address} 余额")
 
             # 获取链配置
@@ -124,9 +98,6 @@ class KadenaTokenService:
                     'token_address': token_address,
                     'wallet_address': wallet_address
                 }
-
-                # 将结果存入缓存
-                cache.set(cache_key, result, cache_timeout)
 
                 return result
             else:
@@ -164,9 +135,6 @@ class KadenaTokenService:
                     'wallet_address': wallet_address
                 }
 
-                # 将结果存入缓存
-                cache.set(cache_key, result, cache_timeout)
-
                 return result
         except Exception as e:
             logger.error(f"获取代币余额失败: {str(e)}")
@@ -177,9 +145,5 @@ class KadenaTokenService:
                 'token_address': token_address,
                 'wallet_address': wallet_address
             }
-
-            # 将默认值存入缓存，避免重复查询失败
-            from django.core.cache import cache
-            cache.set(cache_key, default_result, 30)  # 缓存 30 秒，失败的查询缓存时间短一些
 
             return default_result
