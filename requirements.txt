@@ -5,29 +5,17 @@ djangorestframework==3.14.0
 # 环境配置
 python-dotenv==1.0.1
 
-# 区块链相关
-web3==6.15.1
-eth-account==0.10.0
-solana-sdk==0.25.6
-solders==0.18.1
-mnemonic==0.20
-kadena-sdk==2.0.5
-
-# 加密和数据库
-cryptography==42.0.5
-SQLAlchemy==2.0.25
-base58==2.1.1
+# 数据分析
+numpy==1.26.4
+pandas==2.2.1
 
 # 网络请求
 requests==2.28.1
+python-binance==1.0.19
 
-# 其他依赖
+# 数据库
 PyMySQL==1.1.0
-PyNaCl==1.5.0
-Pillow==10.2.0
 
 # 异步任务
 celery==5.3.6
 redis==5.0.1
-
-# ...

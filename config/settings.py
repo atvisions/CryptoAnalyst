@@ -42,10 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'wallets',
-    'chains.evm',
-    'chains.solana',
-    'chains.kadena',
+    'CryptoAnalyst',
 ]
 
 MIDDLEWARE = [
@@ -85,7 +82,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'wallet',
+        'NAME': 'cryptoAnalyst',
         'USER': 'root',
         'PASSWORD': '@Liuzhao-9575@',
         'HOST': 'localhost',
@@ -170,57 +167,17 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
-# Logging settings
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-        'performance': {
-            'format': '⏱️ PERF: {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-        'performance': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'performance',
-        },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'chains.evm': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'chains.solana': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'chains.kadena': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'wallets': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-}
+# Binance API配置
+BINANCE_API_KEY = os.getenv('BINANCE_API_KEY')
+BINANCE_API_SECRET = os.getenv('BINANCE_API_SECRET')
+
+# CoinGecko API配置
+COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
+
+# Coze API配置
+COZE_API_KEY = os.getenv('COZE_API_KEY', 'pat_AxbmqO9e6LRa2YR6A0nAXveJk2KaFsOaH39BySvQW2aauwjTI1w23UZOQg3SGLf3')
+COZE_BOT_ID = os.getenv('COZE_BOT_ID', '7495286417250566198')
+COZE_SPACE_ID = os.getenv('COZE_SPACE_ID', '7438583157530132518')
+COZE_CLIENT_ID = os.getenv('COZE_CLIENT_ID', '07824516174661002127491165287425.app.coze')
+COZE_CLIENT_SECRET = os.getenv('COZE_CLIENT_SECRET', 'k6MAJiGByurigysH3aAmw87aXOF6KX517LZTaEAbfpaYJnw8')
+COZE_API_URL = os.getenv('COZE_API_URL', 'https://api.coze.cn')
