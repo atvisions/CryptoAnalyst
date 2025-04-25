@@ -3,6 +3,8 @@ import os
 import requests
 from typing import Dict, Optional
 from dotenv import load_dotenv
+import pandas as pd
+from binance.client import Client
 
 logger = logging.getLogger(__name__)
 
@@ -111,34 +113,47 @@ class ChainDataService:
             float: 未实现盈亏比率，如果获取失败则返回0.0
         """
         try:
-            # 优先使用Glassnode API
-            if self.glassnode_api_key:
-                url = f"{self.glassnode_base_url}/metrics/market/realized_profit_loss_ratio"
-                params = {
-                    'a': symbol,
-                    'api_key': self.glassnode_api_key
-                }
-                response = requests.get(url, params=params)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    if data and len(data) > 0:
-                        return float(data[-1]['v'])  # 返回最新值
+            # 获取最近200天的K线数据
+            klines = self.binance_client.get_historical_klines(
+                symbol=f"{symbol}USDT",
+                interval=Client.KLINE_INTERVAL_1DAY,
+                limit=200
+            )
             
-            # 如果Glassnode失败，尝试CryptoQuant
-            if self.cryptoquant_api_key:
-                url = f"{self.cryptoquant_base_url}/btc/pnl-status"
-                headers = {'Authorization': f'Bearer {self.cryptoquant_api_key}'}
-                response = requests.get(url, headers=headers)
+            if not klines or len(klines) < 200:
+                self.logger.warning(f"获取{symbol}的K线数据失败或数据不足")
+                return 0.0
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    if 'data' in data and 'nupl' in data['data']:
-                        return float(data['data']['nupl'])
+            # 转换为DataFrame
+            df = pd.DataFrame(klines, columns=[
+                'timestamp', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_volume', 'trades', 'buy_base_volume',
+                'buy_quote_volume', 'ignore'
+            ])
             
-            logger.warning("无法获取未实现盈亏比率数据")
-            return 0.0
+            # 转换数据类型
+            for col in ['open', 'high', 'low', 'close', 'volume']:
+                df[col] = df[col].astype(float)
+                
+            # 计算已实现价格
+            df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
+            df['volume_price'] = df['typical_price'] * df['volume']
+            realized_price = df['volume_price'].sum() / df['volume'].sum()
+            
+            # 计算当前价格与已实现价格的比率
+            current_price = float(df['close'].iloc[-1])
+            
+            if realized_price == 0:
+                self.logger.warning(f"{symbol}的已实现价格为0，无法计算NUPL")
+                return 0.0
+                
+            nupl = (current_price - realized_price) / realized_price * 100
+            
+            # 限制数值范围在 -100% 到 100% 之间
+            nupl = max(min(nupl, 100.0), -100.0)
+            
+            return round(float(nupl), 2)
             
         except Exception as e:
-            logger.error(f"获取未实现盈亏比率失败: {str(e)}")
-            return 0.0 
+            self.logger.error(f"计算{symbol}的未实现盈亏比率时发生错误: {str(e)}")
+            return 0.0

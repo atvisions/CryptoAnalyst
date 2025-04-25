@@ -85,6 +85,19 @@ class TechnicalAnalysisService:
                 'MayerMultiple': mayer_multiple
             }
             
+            # 检查所有指标是否有效
+            for key, value in indicators.items():
+                if isinstance(value, (int, float)):
+                    if not np.isfinite(value):
+                        logger.warning(f"指标 {key} 的值无效: {value}")
+                        indicators[key] = 0.0
+                elif isinstance(value, dict):
+                    for sub_key, sub_value in value.items():
+                        if isinstance(sub_value, (int, float)):
+                            if not np.isfinite(sub_value):
+                                logger.warning(f"指标 {key}.{sub_key} 的值无效: {sub_value}")
+                                value[sub_key] = 0.0
+            
             return {
                 'status': 'success',
                 'data': {
@@ -467,32 +480,54 @@ class TechnicalAnalysisService:
                 logger.warning(f"数据长度不足200天，无法计算NUPL")
                 return 0.0
             
-            # 打印原始数据
-            logger.info(f"计算NUPL的原始数据:")
-            logger.info(f"数据长度: {len(df)}")
-            logger.info(f"最新价格: {df['close'].iloc[-1]}")
+            # 确保数据类型正确
+            df['close'] = pd.to_numeric(df['close'], errors='coerce')
+            df['high'] = pd.to_numeric(df['high'], errors='coerce')
+            df['low'] = pd.to_numeric(df['low'], errors='coerce')
+            df['volume'] = pd.to_numeric(df['volume'], errors='coerce')
             
-            # 计算200日移动平均线作为成本基准
-            ma200 = df['close'].rolling(window=200).mean()
-            
-            # 打印MA200数据
-            logger.info(f"MA200值: {ma200.iloc[-1]}")
-            
-            # 计算当前价格与200日均线的比率
-            current_price = float(df['close'].iloc[-1])
-            ma200_value = float(ma200.iloc[-1])
-            
-            if ma200_value == 0:
-                logger.warning("MA200值为0，无法计算NUPL")
+            # 检查是否有无效数据
+            if df[['close', 'high', 'low', 'volume']].isna().any().any():
+                logger.warning("数据中包含无效值")
                 return 0.0
-                
-            nupl = (current_price - ma200_value) / ma200_value * 100
             
-            # 打印计算结果
-            logger.info(f"NUPL计算结果: {nupl}")
+            # 计算已实现价格（使用过去200天的成交量加权平均价格）
+            df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
+            df['volume_price'] = df['typical_price'] * df['volume']
             
-            # 限制数值范围
-            nupl = max(min(nupl, 1000.0), -1000.0)
+            # 检查计算结果
+            if df['volume_price'].isna().any() or df['volume'].isna().any():
+                logger.warning("计算过程中出现无效值")
+                return 0.0
+            
+            total_volume = df['volume'].sum()
+            if total_volume == 0 or np.isnan(total_volume) or np.isinf(total_volume):
+                logger.warning("总成交量无效")
+                return 0.0
+            
+            realized_price = df['volume_price'].sum() / total_volume
+            
+            # 检查已实现价格
+            if realized_price == 0 or np.isnan(realized_price) or np.isinf(realized_price):
+                logger.warning("已实现价格无效")
+                return 0.0
+            
+            # 获取当前价格
+            current_price = float(df['close'].iloc[-1])
+            if np.isnan(current_price) or np.isinf(current_price):
+                logger.warning("当前价格无效")
+                return 0.0
+            
+            # 计算NUPL
+            nupl = (current_price - realized_price) / realized_price * 100
+            
+            # 检查计算结果
+            if np.isnan(nupl) or np.isinf(nupl):
+                logger.warning("NUPL计算结果无效")
+                return 0.0
+            
+            # 限制数值范围在 -100% 到 100% 之间
+            nupl = max(min(nupl, 100.0), -100.0)
             
             return round(float(nupl), 2)
             

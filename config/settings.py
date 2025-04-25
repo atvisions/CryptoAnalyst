@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cryptoAnalyst',
+        'NAME': 'CryptoAnalyst',
         'USER': 'root',
         'PASSWORD': '@Liuzhao-9575@',
         'HOST': 'localhost',
@@ -167,6 +167,9 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
+# Celery Beat settings
+# 定时任务配置已移至 celery.py 中
+
 # Binance API配置
 BINANCE_API_KEY = os.getenv('BINANCE_API_KEY')
 BINANCE_API_SECRET = os.getenv('BINANCE_API_SECRET')
@@ -175,9 +178,7 @@ BINANCE_API_SECRET = os.getenv('BINANCE_API_SECRET')
 COINGECKO_API_KEY = os.getenv('COINGECKO_API_KEY')
 
 # Coze API配置
-COZE_API_KEY = os.getenv('COZE_API_KEY', 'pat_AxbmqO9e6LRa2YR6A0nAXveJk2KaFsOaH39BySvQW2aauwjTI1w23UZOQg3SGLf3')
-COZE_BOT_ID = os.getenv('COZE_BOT_ID', '7495286417250566198')
-COZE_SPACE_ID = os.getenv('COZE_SPACE_ID', '7438583157530132518')
-COZE_CLIENT_ID = os.getenv('COZE_CLIENT_ID', '07824516174661002127491165287425.app.coze')
-COZE_CLIENT_SECRET = os.getenv('COZE_CLIENT_SECRET', 'k6MAJiGByurigysH3aAmw87aXOF6KX517LZTaEAbfpaYJnw8')
-COZE_API_URL = os.getenv('COZE_API_URL', 'https://api.coze.cn')
+COZE_API_KEY = os.getenv('COZE_API_KEY', 'pat_mGFYEurP7DS6f9XMW8ZHtAxZwghcYCWfayQraqVYDN4Zz71zvF94Mm3fJ2dV7wBH')
+COZE_BOT_ID = os.getenv('COZE_BOT_ID', '7494575252253720584')
+COZE_SPACE_ID = os.getenv('COZE_SPACE_ID', '7494574941820633105')
+COZE_API_URL = os.getenv('COZE_API_URL', 'https://api.coze.com')

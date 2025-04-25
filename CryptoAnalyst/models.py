@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class Chain(models.Model):
     """链模型"""
@@ -16,89 +17,149 @@ class Chain(models.Model):
         return self.chain
 
 class Token(models.Model):
-    """代币模型"""
+    """代币基本信息模型"""
     chain = models.ForeignKey(Chain, on_delete=models.CASCADE, related_name='tokens')
+    symbol = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=100)
-    symbol = models.CharField(max_length=20)
     address = models.CharField(max_length=100, blank=True)
     decimals = models.IntegerField(default=18)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = "代币"
-        verbose_name_plural = "代币"
-        unique_together = ('chain', 'symbol')
-
     def __str__(self):
-        return f"{self.chain.chain} - {self.symbol}"
+        return f"{self.chain.chain} - {self.symbol} - {self.name}"
 
-class TokenAnalysisData(models.Model):
-    """代币分析数据模型"""
-    token = models.OneToOneField(Token, on_delete=models.CASCADE, related_name='analysis_data')
-    price = models.FloatField(null=True, blank=True)
-    volume_24h = models.FloatField(null=True, blank=True)
-    price_change_24h = models.FloatField(null=True, blank=True)
-    fear_greed_index = models.FloatField(null=True, blank=True)
-    nupl = models.FloatField(null=True, blank=True, help_text="未实现盈亏")
-    exchange_netflow = models.FloatField(null=True, blank=True, help_text="交易所净流入")
-    mayer_multiple = models.FloatField(null=True, blank=True, help_text="梅耶倍数")
+class TechnicalAnalysis(models.Model):
+    """技术分析数据模型 - 存储原始指标数据"""
+    token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='technical_analysis')
+    timestamp = models.DateTimeField(default=timezone.now)
     
-    # 技术指标
-    rsi = models.FloatField(null=True, blank=True, help_text="相对强弱指标")
-    macd_line = models.FloatField(null=True, blank=True, help_text="MACD线")
-    macd_signal = models.FloatField(null=True, blank=True, help_text="MACD信号线")
-    macd_histogram = models.FloatField(null=True, blank=True, help_text="MACD柱状图")
-    bollinger_upper = models.FloatField(null=True, blank=True, help_text="布林带上轨")
-    bollinger_middle = models.FloatField(null=True, blank=True, help_text="布林带中轨")
-    bollinger_lower = models.FloatField(null=True, blank=True, help_text="布林带下轨")
-    bias = models.FloatField(null=True, blank=True, help_text="乖离率")
-    psy = models.FloatField(null=True, blank=True, help_text="心理线")
-    dmi_plus = models.FloatField(null=True, blank=True, help_text="DMI+DI")
-    dmi_minus = models.FloatField(null=True, blank=True, help_text="DMI-DI")
-    dmi_adx = models.FloatField(null=True, blank=True, help_text="DMI ADX")
-    vwap = models.FloatField(null=True, blank=True, help_text="成交量加权平均价格")
-    funding_rate = models.FloatField(null=True, blank=True, help_text="资金费率")
+    # RSI
+    rsi = models.FloatField(null=True)
     
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    # MACD
+    macd_line = models.FloatField(null=True)
+    macd_signal = models.FloatField(null=True)
+    macd_histogram = models.FloatField(null=True)
+    
+    # 布林带
+    bollinger_upper = models.FloatField(null=True)
+    bollinger_middle = models.FloatField(null=True)
+    bollinger_lower = models.FloatField(null=True)
+    
+    # BIAS
+    bias = models.FloatField(null=True)
+    
+    # PSY
+    psy = models.FloatField(null=True)
+    
+    # DMI
+    dmi_plus = models.FloatField(null=True)
+    dmi_minus = models.FloatField(null=True)
+    dmi_adx = models.FloatField(null=True)
+    
+    # VWAP
+    vwap = models.FloatField(null=True)
+    
+    # 资金费率
+    funding_rate = models.FloatField(null=True)
+    
+    # 链上数据
+    exchange_netflow = models.FloatField(null=True)
+    nupl = models.FloatField(null=True)
+    mayer_multiple = models.FloatField(null=True)
+    
     class Meta:
-        verbose_name = "代币分析数据"
-        verbose_name_plural = "代币分析数据"
+        ordering = ['-timestamp']
+        get_latest_by = 'timestamp'
 
+class MarketData(models.Model):
+    """市场数据模型"""
+    token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='market_data')
+    timestamp = models.DateTimeField(default=timezone.now)
+    price = models.FloatField()
+    volume = models.FloatField(null=True)
+    price_change_24h = models.FloatField(null=True)
+    price_change_percent_24h = models.FloatField(null=True)
+    high_24h = models.FloatField(null=True)
+    low_24h = models.FloatField(null=True)
+    
+    class Meta:
+        ordering = ['-timestamp']
+        get_latest_by = 'timestamp'
+
+class AnalysisReport(models.Model):
+    """分析报告模型 - 存储所有分析结果"""
+    token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='analysis_reports')
+    timestamp = models.DateTimeField(default=timezone.now)
+    technical_analysis = models.ForeignKey(TechnicalAnalysis, on_delete=models.CASCADE, related_name='analysis_reports')
+    
+    # 趋势分析
+    trend_up_probability = models.IntegerField(default=0)  # 上涨概率
+    trend_sideways_probability = models.IntegerField(default=0)  # 横盘概率
+    trend_down_probability = models.IntegerField(default=0)  # 下跌概率
+    trend_summary = models.TextField(blank=True)  # 趋势总结
+    
+    # 指标分析
+    # RSI
+    rsi_analysis = models.TextField(blank=True)
+    rsi_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # MACD
+    macd_analysis = models.TextField(blank=True)
+    macd_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # 布林带
+    bollinger_analysis = models.TextField(blank=True)
+    bollinger_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # BIAS
+    bias_analysis = models.TextField(blank=True)
+    bias_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # PSY
+    psy_analysis = models.TextField(blank=True)
+    psy_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # DMI
+    dmi_analysis = models.TextField(blank=True)
+    dmi_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # VWAP
+    vwap_analysis = models.TextField(blank=True)
+    vwap_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # 资金费率
+    funding_rate_analysis = models.TextField(blank=True)
+    funding_rate_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # 交易所净流入
+    exchange_netflow_analysis = models.TextField(blank=True)
+    exchange_netflow_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # NUPL
+    nupl_analysis = models.TextField(blank=True)
+    nupl_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # Mayer Multiple
+    mayer_multiple_analysis = models.TextField(blank=True)
+    mayer_multiple_support_trend = models.CharField(max_length=20, blank=True)
+    
+    # 交易建议
+    trading_action = models.CharField(max_length=20, default='等待')  # 买入/卖出/持有
+    trading_reason = models.TextField(blank=True)  # 建议原因
+    entry_price = models.FloatField(default=0)  # 入场价格
+    stop_loss = models.FloatField(default=0)  # 止损价格
+    take_profit = models.FloatField(default=0)  # 止盈价格
+    
+    # 风险评估
+    risk_level = models.CharField(max_length=10, default='中')  # 高/中/低
+    risk_score = models.IntegerField(default=50)  # 0-100
+    risk_details = models.JSONField(default=list)  # 风险详情列表
+    
+    class Meta:
+        ordering = ['-timestamp']
+        get_latest_by = 'timestamp'
+        
     def __str__(self):
-        return f"{self.token.symbol} 分析数据"
-
-    def to_json_data(self):
-        """转换为JSON数据"""
-        return {
-            'price': self.price,
-            'volume_24h': self.volume_24h,
-            'price_change_24h': self.price_change_24h,
-            'fear_greed_index': self.fear_greed_index,
-            'nupl': self.nupl,
-            'exchange_netflow': self.exchange_netflow,
-            'mayer_multiple': self.mayer_multiple,
-            'rsi': self.rsi,
-            'macd': {
-                'line': self.macd_line,
-                'signal': self.macd_signal,
-                'histogram': self.macd_histogram
-            },
-            'bollinger_bands': {
-                'upper': self.bollinger_upper,
-                'middle': self.bollinger_middle,
-                'lower': self.bollinger_lower
-            },
-            'bias': self.bias,
-            'psy': self.psy,
-            'dmi': {
-                'plus_di': self.dmi_plus,
-                'minus_di': self.dmi_minus,
-                'adx': self.dmi_adx
-            },
-            'vwap': self.vwap,
-            'funding_rate': self.funding_rate,
-            'updated_at': self.updated_at.isoformat()
-        } 
+        return f"{self.token.symbol} - {self.timestamp}" 
