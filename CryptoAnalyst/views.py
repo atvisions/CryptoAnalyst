@@ -40,6 +40,23 @@ class TechnicalIndicatorsAPIView(APIView):
         if not self.coze_api_url:
             logger.warning("COZE_API_URL 环境变量未设置，使用默认值")
 
+    def _init_coze_api(self):
+        """初始化 Coze API 配置"""
+        if not hasattr(self, 'coze_api_key') or not self.coze_api_key:
+            self.coze_api_key = os.getenv('COZE_API_KEY')
+            if not self.coze_api_key:
+                raise ValueError("COZE_API_KEY 环境变量未设置")
+        
+        if not hasattr(self, 'coze_bot_id') or not self.coze_bot_id:
+            self.coze_bot_id = os.getenv('COZE_BOT_ID', '7494575252253720584')
+            if not self.coze_bot_id:
+                logger.warning("COZE_BOT_ID 环境变量未设置，使用默认值")
+        
+        if not hasattr(self, 'coze_api_url') or not self.coze_api_url:
+            self.coze_api_url = os.getenv('COZE_API_URL', 'https://api.coze.com')
+            if not self.coze_api_url:
+                logger.warning("COZE_API_URL 环境变量未设置，使用默认值")
+
     def _update_analysis_data(self, token: Token, indicators: Dict, current_price: float) -> None:
         """更新技术分析数据"""
         try:
@@ -96,6 +113,9 @@ class TechnicalIndicatorsAPIView(APIView):
     async def _get_coze_analysis(self, symbol: str, indicators: Dict, technical_analysis: TechnicalAnalysis) -> Dict:
         """异步获取 Coze 分析报告"""
         try:
+            # 初始化 Coze API 配置
+            self._init_coze_api()
+            
             # 获取市场数据
             market_data = await sync_to_async(self.market_service.get_market_data)(symbol)
             if not market_data:
@@ -135,249 +155,123 @@ class TechnicalIndicatorsAPIView(APIView):
                 "additional_messages": additional_messages
             }
 
+            # 设置超时
+            timeout = aiohttp.ClientTimeout(total=30)
+            
             # 发送请求创建对话
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    f"{self.coze_api_url}/v3/chat",
-                    headers=headers,
-                    json=payload
-                ) as response:
-                    if response.status != 200:
-                        error_text = await response.text()
-                        logger.error(f"Coze API请求失败: {error_text}")
-                        return None
-                    
-                    response_data = await response.json()
-                    if response_data.get('code') != 0:
-                        logger.error("Coze API响应错误")
-                        return None
-
-                    data = response_data.get('data', {})
-                    chat_id = data.get('id')
-                    conversation_id = data.get('conversation_id')
-
-                    if not chat_id or not conversation_id:
-                        logger.error("创建对话响应中缺少必要的ID")
-                        return None
-
-                    # 轮询获取对话结果
-                    max_retries = 20
-                    retry_count = 0
-                    
-                    while retry_count < max_retries:
-                        # 构建获取对话状态的请求
-                        retrieve_url = f"{self.coze_api_url}/v3/chat/retrieve"
-                        retrieve_params = {
-                            "bot_id": self.coze_bot_id,
-                            "chat_id": chat_id,
-                            "conversation_id": conversation_id
-                        }
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                try:
+                    async with session.post(
+                        f"{self.coze_api_url}/v3/chat",
+                        headers=headers,
+                        json=payload
+                    ) as response:
+                        if response.status != 200:
+                            error_text = await response.text()
+                            logger.error(f"Coze API请求失败: {error_text}")
+                            return None
                         
-                        logger.info(f"第 {retry_count + 1} 次尝试获取对话状态")
-                        try:
-                            async with session.get(retrieve_url, headers=headers, params=retrieve_params) as status_response:
-                                status_text = await status_response.text()
-                                logger.info(f"状态响应: {status_text}")
+                        response_data = await response.json()
+                        if response_data.get('code') != 0:
+                            logger.error(f"Coze API响应错误: {response_data}")
+                            return None
+
+                        data = response_data.get('data', {})
+                        chat_id = data.get('id')
+                        conversation_id = data.get('conversation_id')
+
+                        if not chat_id or not conversation_id:
+                            logger.error("创建对话响应中缺少必要的ID")
+                            return None
+
+                        # 轮询获取对话结果
+                        max_retries = 20
+                        retry_count = 0
+                        retry_interval = 1  # 初始重试间隔（秒）
+                        
+                        while retry_count < max_retries:
+                            try:
+                                # 构建获取对话状态的请求
+                                retrieve_url = f"{self.coze_api_url}/v3/chat/retrieve"
+                                retrieve_params = {
+                                    "bot_id": self.coze_bot_id,
+                                    "chat_id": chat_id,
+                                    "conversation_id": conversation_id
+                                }
                                 
-                                if status_response.status == 200:
-                                    status_data = json.loads(status_text)
-                                    if status_data.get('code') == 0:
-                                        data = status_data.get('data', {})
-                                        status = data.get('status')
-                                        
-                                        if status == "completed":
-                                            # 获取消息列表
-                                            message_list_url = f"{self.coze_api_url}/v3/chat/message/list"
-                                            message_list_params = {
-                                                "bot_id": self.coze_bot_id,
-                                                "chat_id": chat_id,
-                                                "conversation_id": conversation_id
-                                            }
+                                logger.info(f"第 {retry_count + 1} 次尝试获取对话状态")
+                                
+                                async with session.get(retrieve_url, headers=headers, params=retrieve_params) as status_response:
+                                    status_text = await status_response.text()
+                                    logger.info(f"状态响应: {status_text}")
+                                    
+                                    if status_response.status == 200:
+                                        status_data = json.loads(status_text)
+                                        if status_data.get('code') == 0:
+                                            data = status_data.get('data', {})
+                                            status = data.get('status')
                                             
-                                            async with session.get(message_list_url, headers=headers, params=message_list_params) as messages_response:
-                                                messages_text = await messages_response.text()
-                                                logger.info(f"消息列表响应: {messages_text}")
+                                            if status == "completed":
+                                                # 获取消息列表
+                                                message_list_url = f"{self.coze_api_url}/v3/chat/message/list"
+                                                message_list_params = {
+                                                    "bot_id": self.coze_bot_id,
+                                                    "chat_id": chat_id,
+                                                    "conversation_id": conversation_id
+                                                }
                                                 
-                                                if messages_response.status == 200:
-                                                    messages_data = json.loads(messages_text)
-                                                    if messages_data.get('code') == 0:
-                                                        # 处理消息列表数据
-                                                        if "data" in messages_data and isinstance(messages_data["data"], dict) and "messages" in messages_data["data"]:
-                                                            messages = messages_data["data"]["messages"]
-                                                        elif "data" in messages_data and isinstance(messages_data["data"], list):
-                                                            messages = messages_data["data"]
-                                                        else:
-                                                            logger.error("无法解析消息列表格式")
-                                                            return None
+                                                async with session.get(message_list_url, headers=headers, params=message_list_params) as messages_response:
+                                                    messages_text = await messages_response.text()
+                                                    logger.info(f"消息列表响应: {messages_text}")
+                                                    
+                                                    if messages_response.status == 200:
+                                                        messages_data = json.loads(messages_text)
+                                                        if messages_data.get('code') == 0:
+                                                            # 处理消息列表数据
+                                                            if "data" in messages_data and isinstance(messages_data["data"], dict) and "messages" in messages_data["data"]:
+                                                                messages = messages_data["data"]["messages"]
+                                                            elif "data" in messages_data and isinstance(messages_data["data"], list):
+                                                                messages = messages_data["data"]
+                                                            else:
+                                                                logger.error("无法解析消息列表格式")
+                                                                return None
 
-                                                        # 查找助手的回复
-                                                        for message in messages:
-                                                            if message.get('role') == 'assistant' and message.get('type') == 'answer':
-                                                                content = message.get('content', '')
-                                                                if content and content != '###':
-                                                                    try:
-                                                                        if content.startswith('```json'):
-                                                                            content = content[7:-3].strip()
-                                                                        analysis_data = json.loads(content)
-                                                                        
-                                                                        # 确保所有必要的字段都存在
-                                                                        trend_analysis = analysis_data.get('trend_analysis', {})
-                                                                        if not trend_analysis:
-                                                                            trend_analysis = {
-                                                                                'probabilities': {
-                                                                                    'up': 0,
-                                                                                    'sideways': 0,
-                                                                                    'down': 0
-                                                                                },
-                                                                                'summary': ''
-                                                                            }
-
-                                                                        indicators_analysis = analysis_data.get('indicators_analysis', {})
-                                                                        if not indicators_analysis:
-                                                                            indicators_analysis = {}
-
-                                                                        trading_advice = analysis_data.get('trading_advice', {})
-                                                                        if not trading_advice:
-                                                                            trading_advice = {
-                                                                                'action': '等待',
-                                                                                'reason': '无法获取交易建议',
-                                                                                'entry_price': 0,
-                                                                                'stop_loss': 0,
-                                                                                'take_profit': 0
-                                                                            }
-
-                                                                        risk_assessment = analysis_data.get('risk_assessment', {})
-                                                                        if not risk_assessment:
-                                                                            risk_assessment = {
-                                                                                'level': '高',
-                                                                                'score': 100,
-                                                                                'details': ['无法获取风险评估']
-                                                                            }
-
-                                                                        # 保存分析报告
-                                                                        analysis_report = await sync_to_async(self.report_service.save_analysis_report)(
-                                                                            symbol=symbol,
-                                                                            data={
-                                                                                'trend_up_probability': trend_analysis.get('probabilities', {}).get('up', 0),
-                                                                                'trend_sideways_probability': trend_analysis.get('probabilities', {}).get('sideways', 0),
-                                                                                'trend_down_probability': trend_analysis.get('probabilities', {}).get('down', 0),
-                                                                                'trend_summary': trend_analysis.get('summary', ''),
-                                                                                'indicators_analysis': indicators_analysis,
-                                                                                'trading_action': trading_advice.get('action', '等待'),
-                                                                                'trading_reason': trading_advice.get('reason', ''),
-                                                                                'entry_price': trading_advice.get('entry_price', 0),
-                                                                                'stop_loss': trading_advice.get('stop_loss', 0),
-                                                                                'take_profit': trading_advice.get('take_profit', 0),
-                                                                                'risk_level': risk_assessment.get('level', '中'),
-                                                                                'risk_score': risk_assessment.get('score', 50),
-                                                                                'risk_details': risk_assessment.get('details', [])
-                                                                            }
-                                                                        )
-
-                                                                        if not analysis_report:
-                                                                            logger.error("保存分析报告失败")
+                                                            # 查找助手的回复
+                                                            for message in messages:
+                                                                if message.get('role') == 'assistant' and message.get('type') == 'answer':
+                                                                    content = message.get('content', '')
+                                                                    if content and content != '###':
+                                                                        try:
+                                                                            if content.startswith('```json'):
+                                                                                content = content[7:-3].strip()
+                                                                            analysis_data = json.loads(content)
+                                                                            return analysis_data
+                                                                        except json.JSONDecodeError as e:
+                                                                            logger.error(f"解析JSON失败: {str(e)}")
                                                                             return None
+                                
+                                # 如果没有获取到完整结果，继续重试
+                                await asyncio.sleep(retry_interval)
+                                retry_interval = min(retry_interval * 1.5, 5)  # 指数退避，最大5秒
+                                retry_count += 1
+                                
+                            except asyncio.TimeoutError:
+                                logger.error("获取对话状态超时")
+                                retry_count += 1
+                                await asyncio.sleep(retry_interval)
+                            except Exception as e:
+                                logger.error(f"获取对话状态时发生错误: {str(e)}")
+                                retry_count += 1
+                                await asyncio.sleep(retry_interval)
 
-                                                                        return {
-                                                                            'trend_analysis': {
-                                                                                'probabilities': {
-                                                                                    'up': int(analysis_report.trend_up_probability),
-                                                                                    'sideways': int(analysis_report.trend_sideways_probability),
-                                                                                    'down': int(analysis_report.trend_down_probability)
-                                                                                },
-                                                                                'summary': analysis_report.trend_summary
-                                                                            },
-                                                                            'indicators_analysis': {
-                                                                                'RSI': {
-                                                                                    'value': float(technical_analysis.rsi) if technical_analysis and technical_analysis.rsi is not None else None,
-                                                                                    'analysis': analysis_report.rsi_analysis,
-                                                                                    'support_trend': analysis_report.rsi_support_trend
-                                                                                },
-                                                                                'MACD': {
-                                                                                    'value': {
-                                                                                        'line': float(technical_analysis.macd_line) if technical_analysis and technical_analysis.macd_line is not None else None,
-                                                                                        'signal': float(technical_analysis.macd_signal) if technical_analysis and technical_analysis.macd_signal is not None else None,
-                                                                                        'histogram': float(technical_analysis.macd_histogram) if technical_analysis and technical_analysis.macd_histogram is not None else None
-                                                                                    },
-                                                                                    'analysis': analysis_report.macd_analysis,
-                                                                                    'support_trend': analysis_report.macd_support_trend
-                                                                                },
-                                                                                'BollingerBands': {
-                                                                                    'value': {
-                                                                                        'upper': float(technical_analysis.bollinger_upper) if technical_analysis and technical_analysis.bollinger_upper is not None else None,
-                                                                                        'middle': float(technical_analysis.bollinger_middle) if technical_analysis and technical_analysis.bollinger_middle is not None else None,
-                                                                                        'lower': float(technical_analysis.bollinger_lower) if technical_analysis and technical_analysis.bollinger_lower is not None else None
-                                                                                    },
-                                                                                    'analysis': analysis_report.bollinger_analysis,
-                                                                                    'support_trend': analysis_report.bollinger_support_trend
-                                                                                },
-                                                                                'BIAS': {
-                                                                                    'value': float(technical_analysis.bias) if technical_analysis and technical_analysis.bias is not None else None,
-                                                                                    'analysis': analysis_report.bias_analysis,
-                                                                                    'support_trend': analysis_report.bias_support_trend
-                                                                                },
-                                                                                'PSY': {
-                                                                                    'value': float(technical_analysis.psy) if technical_analysis and technical_analysis.psy is not None else None,
-                                                                                    'analysis': analysis_report.psy_analysis,
-                                                                                    'support_trend': analysis_report.psy_support_trend
-                                                                                },
-                                                                                'DMI': {
-                                                                                    'value': {
-                                                                                        'plus_di': float(technical_analysis.dmi_plus) if technical_analysis and technical_analysis.dmi_plus is not None else None,
-                                                                                        'minus_di': float(technical_analysis.dmi_minus) if technical_analysis and technical_analysis.dmi_minus is not None else None,
-                                                                                        'adx': float(technical_analysis.dmi_adx) if technical_analysis and technical_analysis.dmi_adx is not None else None
-                                                                                    },
-                                                                                    'analysis': analysis_report.dmi_analysis,
-                                                                                    'support_trend': analysis_report.dmi_support_trend
-                                                                                },
-                                                                                'VWAP': {
-                                                                                    'value': float(technical_analysis.vwap) if technical_analysis and technical_analysis.vwap is not None else None,
-                                                                                    'analysis': analysis_report.vwap_analysis,
-                                                                                    'support_trend': analysis_report.vwap_support_trend
-                                                                                },
-                                                                                'FundingRate': {
-                                                                                    'value': float(technical_analysis.funding_rate) if technical_analysis and technical_analysis.funding_rate is not None else None,
-                                                                                    'analysis': analysis_report.funding_rate_analysis,
-                                                                                    'support_trend': analysis_report.funding_rate_support_trend
-                                                                                },
-                                                                                'ExchangeNetflow': {
-                                                                                    'value': float(technical_analysis.exchange_netflow) if technical_analysis and technical_analysis.exchange_netflow is not None else None,
-                                                                                    'analysis': analysis_report.exchange_netflow_analysis,
-                                                                                    'support_trend': analysis_report.exchange_netflow_support_trend
-                                                                                },
-                                                                                'NUPL': {
-                                                                                    'value': float(technical_analysis.nupl) if technical_analysis and technical_analysis.nupl is not None else None,
-                                                                                    'analysis': analysis_report.nupl_analysis,
-                                                                                    'support_trend': analysis_report.nupl_support_trend
-                                                                                },
-                                                                                'MayerMultiple': {
-                                                                                    'value': float(technical_analysis.mayer_multiple) if technical_analysis and technical_analysis.mayer_multiple is not None else None,
-                                                                                    'analysis': analysis_report.mayer_multiple_analysis,
-                                                                                    'support_trend': analysis_report.mayer_multiple_support_trend
-                                                                                }
-                                                                            },
-                                                                            'trading_advice': {
-                                                                                'action': analysis_report.trading_action,
-                                                                                'reason': analysis_report.trading_reason,
-                                                                                'entry_price': float(analysis_report.entry_price),
-                                                                                'stop_loss': float(analysis_report.stop_loss),
-                                                                                'take_profit': float(analysis_report.take_profit)
-                                                                            },
-                                                                            'risk_assessment': {
-                                                                                'level': analysis_report.risk_level,
-                                                                                'score': int(analysis_report.risk_score),
-                                                                                'details': analysis_report.risk_details
-                                                                            }
-                                                                        }
-                                                                    except json.JSONDecodeError as e:
-                                                                        logger.error(f"解析JSON失败: {str(e)}")
-                                                                        return None
-                        except Exception as e:
-                            logger.error(f"获取对话状态时发生错误: {str(e)}")
-                            retry_count += 1
-                            time.sleep(1)  # 等待重试
-
-                    logger.error("所有重试失败，无法获取对话结果")
+                        logger.error("所有重试失败，无法获取对话结果")
+                        return None
+                        
+                except asyncio.TimeoutError:
+                    logger.error("Coze API 请求超时")
+                    return None
+                except aiohttp.ClientError as e:
+                    logger.error(f"Coze API 请求错误: {str(e)}")
                     return None
 
         except Exception as e:
@@ -747,3 +641,70 @@ def _sanitize_indicators(self, indicators):
     except Exception as e:
         logger.error(f"处理指标数据时出错: {str(e)}")
         return {}
+
+class TechnicalIndicatorsDataAPIView(APIView):
+    """技术指标数据API视图"""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.ta_service = TechnicalAnalysisService()
+        self.market_service = MarketDataService()
+
+    async def async_get(self, request, symbol: str):
+        """异步处理 GET 请求"""
+        try:
+            # 获取技术指标
+            technical_data = await sync_to_async(self.ta_service.get_all_indicators)(symbol)
+            if technical_data['status'] == 'error':
+                return Response(technical_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            indicators = technical_data['data']['indicators']
+            
+            # 获取市场数据
+            market_data = await sync_to_async(self.market_service.get_market_data)(symbol)
+            if not market_data:
+                return Response({
+                    'status': 'error',
+                    'message': f"无法获取{symbol}的市场数据"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # 格式化指标数据
+            formatted_indicators = {
+                'rsi': float(indicators.get('RSI', 0)),
+                'macd_line': float(indicators.get('MACD', {}).get('line', 0)),
+                'macd_signal': float(indicators.get('MACD', {}).get('signal', 0)),
+                'macd_histogram': float(indicators.get('MACD', {}).get('histogram', 0)),
+                'bollinger_upper': float(indicators.get('BollingerBands', {}).get('upper', 0)),
+                'bollinger_middle': float(indicators.get('BollingerBands', {}).get('middle', 0)),
+                'bollinger_lower': float(indicators.get('BollingerBands', {}).get('lower', 0)),
+                'bias': float(indicators.get('BIAS', 0)),
+                'psy': float(indicators.get('PSY', 0)),
+                'dmi_plus': float(indicators.get('DMI', {}).get('plus_di', 0)),
+                'dmi_minus': float(indicators.get('DMI', {}).get('minus_di', 0)),
+                'dmi_adx': float(indicators.get('DMI', {}).get('adx', 0)),
+                'vwap': float(indicators.get('VWAP', 0)),
+                'funding_rate': float(indicators.get('FundingRate', 0)),
+                'exchange_netflow': float(indicators.get('ExchangeNetflow', 0)),
+                'nupl': float(indicators.get('NUPL', 0)),
+                'mayer_multiple': float(indicators.get('MayerMultiple', 0))
+            }
+
+            return Response({
+                'status': 'success',
+                'data': {
+                    'symbol': symbol,
+                    'price': market_data['price'],
+                    'indicators': formatted_indicators
+                }
+            })
+
+        except Exception as e:
+            logger.error(f"获取技术指标数据失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request, symbol: str):
+        """同步入口点，调用异步处理"""
+        return asyncio.run(self.async_get(request, symbol))
