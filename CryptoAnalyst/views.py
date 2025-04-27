@@ -245,7 +245,25 @@ class TechnicalIndicatorsAPIView(APIView):
                                                                             if content.startswith('```json'):
                                                                                 content = content[7:-3].strip()
                                                                             analysis_data = json.loads(content)
-                                                                            return analysis_data
+                                                                            
+                                                                            # 转换数据格式
+                                                                            formatted_data = {
+                                                                                'trend_up_probability': analysis_data.get('trend_analysis', {}).get('probabilities', {}).get('up', 0),
+                                                                                'trend_sideways_probability': analysis_data.get('trend_analysis', {}).get('probabilities', {}).get('sideways', 0),
+                                                                                'trend_down_probability': analysis_data.get('trend_analysis', {}).get('probabilities', {}).get('down', 0),
+                                                                                'trend_summary': analysis_data.get('trend_analysis', {}).get('summary', ''),
+                                                                                'indicators_analysis': analysis_data.get('indicators_analysis', {}),
+                                                                                'trading_action': analysis_data.get('trading_advice', {}).get('action', '等待'),
+                                                                                'trading_reason': analysis_data.get('trading_advice', {}).get('reason', ''),
+                                                                                'entry_price': float(analysis_data.get('trading_advice', {}).get('entry_price', 0)),
+                                                                                'stop_loss': float(analysis_data.get('trading_advice', {}).get('stop_loss', 0)),
+                                                                                'take_profit': float(analysis_data.get('trading_advice', {}).get('take_profit', 0)),
+                                                                                'risk_level': analysis_data.get('risk_assessment', {}).get('level', '中'),
+                                                                                'risk_score': int(analysis_data.get('risk_assessment', {}).get('score', 50)),
+                                                                                'risk_details': analysis_data.get('risk_assessment', {}).get('details', [])
+                                                                            }
+                                                                            
+                                                                            return formatted_data
                                                                         except json.JSONDecodeError as e:
                                                                             logger.error(f"解析JSON失败: {str(e)}")
                                                                             return None
@@ -519,6 +537,16 @@ class TechnicalIndicatorsAPIView(APIView):
                     return Response({
                         'status': 'error',
                         'message': "获取分析结果失败"
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                # 保存分析报告
+                try:
+                    await sync_to_async(self.report_service.save_analysis_report)(symbol, coze_analysis)
+                except Exception as e:
+                    logger.error(f"保存分析报告失败: {str(e)}")
+                    return Response({
+                        'status': 'error',
+                        'message': f"保存分析报告失败: {str(e)}"
                     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
                 # 返回完整响应
