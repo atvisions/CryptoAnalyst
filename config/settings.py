@@ -28,12 +28,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-your-secret-key-here')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# 根据环境变量设置 DEBUG 模式
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.3.16']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.3.16', 'www.kxianjunshi.com', 'kxianjunshi.com']
 
 
 # Application definition
@@ -295,9 +296,16 @@ CORS_ALLOW_HEADERS = [
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_PREFLIGHT_MAX_AGE = 86400  # 24小时
 
-# 在生产环境中应该设置具体的允许源
-# CORS_ALLOWED_ORIGINS = [
-#     "chrome-extension://donikojkgchpmgdbfodnpbjhfpiehfhd",
-#     "http://localhost:8000",
-#     "http://127.0.0.1:8000",
-# ]
+# 在生产环境中设置具体的允许源
+CORS_ALLOWED_ORIGINS = [
+    "chrome-extension://donikojkgchpmgdbfodnpbjhfpiehfhd",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://192.168.3.16:8000",
+    "https://www.kxianjunshi.com",
+    "https://kxianjunshi.com"
+]
+
+# 生产环境中关闭允许所有源
+if not DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = False

@@ -476,7 +476,9 @@ class TechnicalIndicatorsAPIView(APIView):
                                 'level': latest_report.risk_level,
                                 'score': int(latest_report.risk_score),
                                 'details': latest_report.risk_details
-                            }
+                            },
+                            'current_price': float(latest_report.entry_price),
+                            'last_update_time': format_timestamp(latest_report.timestamp)
                         }
                     }
                     return Response(response_data)
@@ -553,6 +555,14 @@ class TechnicalIndicatorsAPIView(APIView):
                 # 保存分析报告
                 try:
                     await sync_to_async(self.report_service.save_analysis_report)(symbol, coze_analysis)
+                    
+                    # 添加时间戳字段，使用当前时间
+                    coze_analysis['last_update_time'] = format_timestamp(datetime.now(timezone.utc))
+                    
+                    # 添加当前价格字段，使用entry_price
+                    if 'trading_advice' in coze_analysis and 'entry_price' in coze_analysis['trading_advice']:
+                        coze_analysis['current_price'] = coze_analysis['trading_advice']['entry_price']
+                    
                 except Exception as e:
                     logger.error(f"保存分析报告失败: {str(e)}")
                     return Response({
