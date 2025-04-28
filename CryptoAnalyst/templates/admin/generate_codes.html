@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div id="content-main">
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                <div class="form-row">
+                    <div>
+                        <label for="count">生成数量：</label>
+                        <input type="number" name="count" id="count" value="10" min="1" max="100" required>
+                        <p class="help">请输入要生成的邀请码数量（1-100）</p>
+                    </div>
+                </div>
+            </fieldset>
+            
+            <div class="submit-row">
+                <input type="submit" value="生成" class="default" name="_save">
+                <a href="../" class="button cancel-link">取消</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %} 

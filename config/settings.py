@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 import pymysql
+from dotenv import load_dotenv
+
+# 加载.env文件
+load_dotenv()
 
 pymysql.install_as_MySQLdb()
 
@@ -42,11 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
     'CryptoAnalyst',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,7 +67,9 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'CryptoAnalyst', 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,12 +149,53 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# REST Framework settings
+# 用户模型配置
+AUTH_USER_MODEL = 'CryptoAnalyst.User'
+
+# 邮件配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # 使用Gmail SMTP服务器
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # 从环境变量获取
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  # 从环境变量获取
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@kxianjunshi.com')
+
+# 检查邮件配置
+if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
+    raise ValueError("""
+    邮件配置错误！请设置以下环境变量：
+    EMAIL_HOST_USER=your_gmail@gmail.com
+    EMAIL_HOST_PASSWORD=your_app_password
+    DEFAULT_FROM_EMAIL=your_gmail@gmail.com
+    """)
+
+# 邮件调试
+EMAIL_DEBUG = True
+EMAIL_TIMEOUT = 30  # 设置超时时间
+
+# 邮件模板
+EMAIL_TEMPLATE = """
+尊敬的用户：
+
+您的验证码是：{code}
+
+验证码有效期为10分钟，请尽快使用。
+
+如果这不是您的操作，请忽略此邮件。
+
+K线军师团队
+"""
+
+# REST Framework配置
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     'DEFAULT_RENDERER_CLASSES': [
@@ -182,3 +232,72 @@ COZE_API_KEY = os.getenv('COZE_API_KEY', 'pat_mGFYEurP7DS6f9XMW8ZHtAxZwghcYCWfay
 COZE_BOT_ID = os.getenv('COZE_BOT_ID', '7494575252253720584')
 COZE_SPACE_ID = os.getenv('COZE_SPACE_ID', '7494574941820633105')
 COZE_API_URL = os.getenv('COZE_API_URL', 'https://api.coze.com')
+
+# 日志配置
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'CryptoAnalyst': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+# CORS 配置
+CORS_ALLOW_ALL_ORIGINS = True  # 临时设置为 True 以调试
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# 添加额外的 CORS 配置
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24小时
+
+# 在生产环境中应该设置具体的允许源
+# CORS_ALLOWED_ORIGINS = [
+#     "chrome-extension://donikojkgchpmgdbfodnpbjhfpiehfhd",
+#     "http://localhost:8000",
+#     "http://127.0.0.1:8000",
+# ]

@@ -20,25 +20,36 @@ class BinanceAPI:
     """币安API服务类"""
     
     def __init__(self):
-        """初始化币安API客户端"""
-        load_dotenv()
-        api_key = os.getenv('BINANCE_API_KEY')
-        api_secret = os.getenv('BINANCE_API_SECRET')
-        
-        if not api_key or not api_secret:
-            logger.warning("未找到币安API密钥，将使用公共API")
-            self.client = Client()
-        else:
-            self.client = Client(api_key, api_secret)
-            
-        # 初始化价格缓存
+        self.client = None
+        self._client_initialized = False
         self.price_cache = {}
         self.price_cache_lock = threading.Lock()
-        
-        # 启动WebSocket连接
-        self.start_websocket()
-        
-        logger.info("币安API服务初始化完成")
+        # WebSocket 相关可选，建议也延迟初始化
+        self._websocket_started = False
+        logger.info("BinanceAPI 实例创建，尚未初始化 client")
+    
+    def _init_client(self):
+        if not self._client_initialized:
+            try:
+                load_dotenv()
+                api_key = os.getenv('BINANCE_API_KEY')
+                api_secret = os.getenv('BINANCE_API_SECRET')
+                if not api_key or not api_secret:
+                    logger.warning("未找到币安API密钥，将使用公共API")
+                    self.client = Client()
+                else:
+                    self.client = Client(api_key, api_secret)
+                self._client_initialized = True
+                logger.info("BinanceAPI 客户端初始化完成")
+            except Exception as e:
+                logger.error(f"BinanceAPI 客户端初始化失败: {e}")
+                self.client = None
+                self._client_initialized = False
+
+    def _ensure_client(self):
+        if not self._client_initialized or self.client is None:
+            self._init_client()
+        return self.client is not None
     
     def start_websocket(self):
         """启动WebSocket连接"""
@@ -110,6 +121,9 @@ class BinanceAPI:
         Returns:
             float: 实时价格，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取实时价格")
+            return None
         try:
             # 首先检查缓存
             with self.price_cache_lock:
@@ -178,6 +192,9 @@ class BinanceAPI:
         Returns:
             List: K线数据列表，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取K线数据")
+            return None
         try:
             klines = self.client.get_klines(
                 symbol=symbol,
@@ -200,6 +217,9 @@ class BinanceAPI:
         Returns:
             float: 资金费率，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取资金费率")
+            return None
         try:
             funding_rate = self.client.futures_funding_rate(symbol=symbol)
             return float(funding_rate[0]['fundingRate'])
@@ -220,6 +240,9 @@ class BinanceAPI:
         Returns:
             List: 历史K线数据列表，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取历史K线数据")
+            return None
         try:
             klines = self.client.get_historical_klines(
                 symbol=symbol,
@@ -242,6 +265,9 @@ class BinanceAPI:
         Returns:
             Dict: 24小时交易数据，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取ticker")
+            return None
         try:
             ticker = self.client.get_ticker(symbol=symbol)
             # 计算买入和卖出量
@@ -268,6 +294,9 @@ class BinanceAPI:
         Returns:
             float: 当前价格，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取当前价格")
+            return None
         try:
             ticker = self.client.get_symbol_ticker(symbol=symbol)
             return float(ticker['price'])
@@ -286,6 +315,9 @@ class BinanceAPI:
         Returns:
             float: 24小时交易量，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取24小时交易量")
+            return None
         try:
             ticker = self.client.get_ticker(symbol=symbol)
             return float(ticker['volume'])
@@ -304,6 +336,9 @@ class BinanceAPI:
         Returns:
             float: 24小时价格变化百分比，如果获取失败则返回None
         """
+        if not self._ensure_client():
+            logger.error("Binance 客户端不可用，无法获取24小时价格变化")
+            return None
         try:
             ticker = self.client.get_ticker(symbol=symbol)
             return float(ticker['priceChangePercent'])

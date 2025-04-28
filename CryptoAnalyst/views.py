@@ -6,11 +6,11 @@ from .services.technical_analysis import TechnicalAnalysisService
 from .services.token_data_service import TokenDataService
 from .services.market_data_service import MarketDataService
 from .services.analysis_report_service import AnalysisReportService
-from .models import Token, Chain, AnalysisReport, TechnicalAnalysis, MarketData
+from .models import Token as CryptoToken, Chain, AnalysisReport, TechnicalAnalysis, MarketData, User, VerificationCode, InvitationCode
 from .utils import logger, sanitize_indicators, format_timestamp, parse_timestamp, safe_json_loads
 import numpy as np
 from typing import Dict, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import requests
 import json
 import asyncio
@@ -20,9 +20,20 @@ import time
 import base64
 import traceback
 import os
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+import random
+import string
+from rest_framework.authtoken.models import Token
+from .serializers import (
+    UserSerializer, RegisterSerializer, LoginSerializer,
+    SendVerificationCodeSerializer
+)
 
 class TechnicalIndicatorsAPIView(APIView):
     """技术指标API视图"""
+    permission_classes = [IsAuthenticated]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -57,7 +68,7 @@ class TechnicalIndicatorsAPIView(APIView):
             if not self.coze_api_url:
                 logger.warning("COZE_API_URL 环境变量未设置，使用默认值")
 
-    def _update_analysis_data(self, token: Token, indicators: Dict, current_price: float) -> None:
+    def _update_analysis_data(self, token: CryptoToken, indicators: Dict, current_price: float) -> None:
         """更新技术分析数据"""
         try:
             # 处理指标数据
@@ -356,7 +367,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 )
 
                 # 获取或创建代币
-                token, _ = await sync_to_async(Token.objects.get_or_create)(
+                token, _ = await sync_to_async(CryptoToken.objects.get_or_create)(
                     symbol=symbol.replace('USDT', '').upper(),
                     chain=chain,
                     defaults={
@@ -469,7 +480,7 @@ class TechnicalIndicatorsAPIView(APIView):
                         }
                     }
                     return Response(response_data)
-            except Token.DoesNotExist:
+            except CryptoToken.DoesNotExist:
                 logger.info(f"未找到代币 {symbol} 的记录")
                 return Response({
                     'status': 'error',
@@ -518,7 +529,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 )
 
                 # 获取或创建 Token 记录
-                token, created = await sync_to_async(Token.objects.get_or_create)(
+                token, created = await sync_to_async(CryptoToken.objects.get_or_create)(
                     symbol=symbol.replace('USDT', '').upper(),
                     chain=chain,
                     defaults={
@@ -672,6 +683,7 @@ def _sanitize_indicators(self, indicators):
 
 class TechnicalIndicatorsDataAPIView(APIView):
     """技术指标数据API视图"""
+    permission_classes = [IsAuthenticated]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -736,3 +748,289 @@ class TechnicalIndicatorsDataAPIView(APIView):
     def get(self, request, symbol: str):
         """同步入口点，调用异步处理"""
         return asyncio.run(self.async_get(request, symbol))
+
+class SendVerificationCodeView(APIView):
+    """发送验证码视图"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        try:
+            serializer = SendVerificationCodeSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response({
+                    'status': 'error',
+                    'message': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            email = serializer.validated_data['email']
+            
+            # 生成6位数字验证码
+            code = ''.join(random.choices(string.digits, k=6))
+            
+            # 保存验证码
+            expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+            VerificationCode.objects.create(
+                email=email,
+                code=code,
+                expires_at=expires_at
+            )
+            
+            # 发送邮件
+            subject = 'K线军师 - 验证码'
+            message = settings.EMAIL_TEMPLATE.format(code=code)
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            try:
+                logger.info(f"尝试发送邮件到 {email}")
+                logger.info(f"使用邮箱: {settings.EMAIL_HOST_USER}")
+                logger.info(f"使用服务器: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
+                
+                send_mail(subject, message, from_email, recipient_list)
+                logger.info(f"成功发送验证码到 {email}")
+                
+                return Response({
+                    'status': 'success',
+                    'message': '验证码已发送'
+                })
+            except Exception as e:
+                logger.error(f"发送邮件失败: {str(e)}")
+                logger.error(f"错误类型: {type(e)}")
+                logger.error(f"错误详情: {str(e)}")
+                
+                error_message = '发送验证码失败，请稍后重试'
+                if 'Authentication Required' in str(e):
+                    error_message = '邮件服务器认证失败，请检查配置'
+                elif 'Connection refused' in str(e):
+                    error_message = '无法连接到邮件服务器，请检查网络'
+                
+                return Response({
+                    'status': 'error',
+                    'message': error_message
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        except Exception as e:
+            logger.error(f"发送验证码失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': '发送验证码失败'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class RegisterView(APIView):
+    """注册视图"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        try:
+            logger.info(f"开始注册流程，请求数据: {request.data}")
+            
+            serializer = RegisterSerializer(data=request.data)
+            if not serializer.is_valid():
+                logger.error(f"序列化器验证失败: {serializer.errors}")
+                return Response({
+                    'status': 'error',
+                    'message': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 验证验证码
+            email = serializer.validated_data['email']
+            code = serializer.validated_data['code']
+            
+            logger.info(f"验证验证码: email={email}, code={code}")
+            verification = VerificationCode.objects.filter(
+                email=email,
+                code=code,
+                is_used=False,
+                expires_at__gt=datetime.now(timezone.utc)
+            ).first()
+            
+            if not verification:
+                logger.error(f"验证码验证失败: email={email}, code={code}")
+                return Response({
+                    'status': 'error',
+                    'message': '验证码无效或已过期'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 验证邀请码
+            invitation_code = request.data.get('invitation_code')
+            if not invitation_code:
+                logger.error("邀请码为空")
+                return Response({
+                    'status': 'error',
+                    'message': '邀请码不能为空'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            try:
+                logger.info(f"验证邀请码: {invitation_code}")
+                invitation = InvitationCode.objects.get(code=invitation_code, is_used=False)
+            except InvitationCode.DoesNotExist:
+                logger.error(f"邀请码无效: {invitation_code}")
+                return Response({
+                    'status': 'error',
+                    'message': '无效的邀请码'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 生成随机用户名
+            username = f"user_{''.join(random.choices(string.ascii_lowercase + string.digits, k=8))}"
+            logger.info(f"生成随机用户名: {username}")
+            
+            # 创建用户
+            try:
+                logger.info(f"创建用户: email={email}, username={username}")
+                user = User.objects.create_user(
+                    email=email,
+                    password=serializer.validated_data['password']
+                )
+                user.username = username
+                user.is_active = True  # 设置用户为激活状态
+                user.save()
+            except Exception as e:
+                logger.error(f"创建用户失败: {str(e)}")
+                raise
+            
+            # 更新验证码状态
+            try:
+                logger.info("更新验证码状态")
+                verification.is_used = True
+                verification.save()
+            except Exception as e:
+                logger.error(f"更新验证码状态失败: {str(e)}")
+                raise
+            
+            # 更新邀请码状态
+            try:
+                logger.info("更新邀请码状态")
+                invitation.is_used = True
+                invitation.used_by = user
+                invitation.used_at = datetime.now(timezone.utc)
+                invitation.save()
+            except Exception as e:
+                logger.error(f"更新邀请码状态失败: {str(e)}")
+                raise
+            
+            # 关联邀请码到用户
+            try:
+                logger.info("关联邀请码到用户")
+                user.invitation_code = invitation
+                user.save()
+            except Exception as e:
+                logger.error(f"关联邀请码到用户失败: {str(e)}")
+                raise
+            
+            logger.info(f"注册成功: user_id={user.id}")
+            return Response({
+                'status': 'success',
+                'message': '注册成功',
+                'data': UserSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.error(f"注册失败，发生异常: {str(e)}")
+            logger.error(f"异常类型: {type(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class LoginView(APIView):
+    """登录视图"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        try:
+            serializer = LoginSerializer(data=request.data)
+            if not serializer.is_valid():
+                return Response({
+                    'status': 'error',
+                    'message': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+            
+            # 验证用户
+            user = User.objects.filter(email=email).first()
+            if not user or not user.check_password(password):
+                return Response({
+                    'status': 'error',
+                    'message': '邮箱或密码错误'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 生成token
+            token, _ = Token.objects.get_or_create(user=user)
+            
+            return Response({
+                'status': 'success',
+                'data': {
+                    'token': token.key,
+                    'user': UserSerializer(user).data
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"登录失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': '登录失败'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserProfileView(APIView):
+    """用户资料视图"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            return Response({
+                'status': 'success',
+                'data': UserSerializer(request.user).data
+            })
+            
+        except Exception as e:
+            logger.error(f"获取用户资料失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': '获取用户资料失败'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def put(self, request):
+        try:
+            serializer = UserSerializer(request.user, data=request.data, partial=True)
+            if not serializer.is_valid():
+                return Response({
+                    'status': 'error',
+                    'message': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            serializer.save()
+            
+            return Response({
+                'status': 'success',
+                'message': '更新成功',
+                'data': serializer.data
+            })
+            
+        except Exception as e:
+            logger.error(f"更新用户资料失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': '更新用户资料失败'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GenerateInvitationCodeView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        # 生成随机邀请码
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        
+        # 创建邀请码
+        invitation = InvitationCode.objects.create(
+            code=code,
+            created_by=request.user
+        )
+        
+        return Response({
+            'code': code,
+            'created_at': invitation.created_at
+        }, status=status.HTTP_201_CREATED)
