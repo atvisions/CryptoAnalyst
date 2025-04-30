@@ -53,8 +53,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # 必须在 CommonMiddleware 之前
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'CryptoAnalyst',
+        'NAME': 'kxianjunshi',
         'USER': 'root',
         'PASSWORD': '@Liuzhao-9575@',
         'HOST': 'localhost',
@@ -270,8 +270,12 @@ LOGGING = {
 }
 
 # CORS 配置
-CORS_ALLOW_ALL_ORIGINS = True  # 临时设置为 True 以调试
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOWED_ORIGINS = [
+    "chrome-extension://donikojkgchpmgdbfodnpbjhfpiehfhd",
+]
+
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -280,6 +284,7 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -292,20 +297,5 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# 添加额外的 CORS 配置
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 CORS_PREFLIGHT_MAX_AGE = 86400  # 24小时
-
-# 在生产环境中设置具体的允许源
-CORS_ALLOWED_ORIGINS = [
-    "chrome-extension://donikojkgchpmgdbfodnpbjhfpiehfhd",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://192.168.3.16:8000",
-    "https://www.kxianjunshi.com",
-    "https://kxianjunshi.com"
-]
-
-# 生产环境中关闭允许所有源
-if not DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = False

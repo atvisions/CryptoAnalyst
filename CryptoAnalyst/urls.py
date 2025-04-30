@@ -7,7 +7,8 @@ from .views import (
     RegisterView,
     LoginView,
     UserProfileView,
-    GenerateInvitationCodeView
+    GenerateInvitationCodeView,
+    TokenRefreshView
 )
 
 urlpatterns = [
@@ -21,6 +22,7 @@ urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='register'),
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/profile/', UserProfileView.as_view(), name='profile'),
+    path('auth/refresh-token/', TokenRefreshView.as_view(), name='refresh_token'),
     path('auth/generate-invitation-code/', GenerateInvitationCodeView.as_view(), name='generate_invitation_code'),
     
     # 代币数据

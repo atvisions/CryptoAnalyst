@@ -5138,3 +5138,429 @@ INFO 2025-04-28 10:29:47,723 autoreload 30472 8462421120 /Users/liuzhao/Document
 INFO 2025-04-28 10:29:48,189 autoreload 30497 8462421120 Watching for file changes with StatReloader
 INFO 2025-04-28 10:30:05,749 autoreload 30497 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/config/settings.py changed, reloading.
 INFO 2025-04-28 10:30:06,225 autoreload 30525 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-29 01:58:36,213 autoreload 75215 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-29 02:01:48,904 autoreload 75475 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-29 02:02:23,768 binance_api 75475 6134640640 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:02:23,769 technical_analysis 75475 6134640640 技术分析服务初始化完成
+INFO 2025-04-29 02:02:23,769 binance_api 75475 6134640640 BinanceAPI 实例创建，尚未初始化 client
+WARNING 2025-04-29 02:02:24,330 log 75475 6134640640 Unauthorized: /api/crypto/technical-indicators/BTCUSDT/
+WARNING 2025-04-29 02:02:24,331 basehttp 75475 6134640640 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 401 34
+WARNING 2025-04-29 02:02:29,597 log 75475 6134640640 Bad Request: /api/auth/login/
+WARNING 2025-04-29 02:02:29,598 basehttp 75475 6134640640 "POST /api/auth/login/ HTTP/1.1" 400 52
+INFO 2025-04-29 02:02:37,580 views 75475 6134640640 尝试发送邮件到 liu.zhao@qq.com
+INFO 2025-04-29 02:02:37,581 views 75475 6134640640 使用邮箱: liuzhao5556@gmail.com
+INFO 2025-04-29 02:02:37,581 views 75475 6134640640 使用服务器: smtp.gmail.com:587
+INFO 2025-04-29 02:02:42,894 views 75475 6134640640 成功发送验证码到 liu.zhao@qq.com
+INFO 2025-04-29 02:02:42,895 basehttp 75475 6134640640 "POST /api/auth/send-code/ HTTP/1.1" 200 51
+INFO 2025-04-29 02:03:59,757 autoreload 75604 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-29 02:04:05,303 basehttp 75604 6128300032 "GET /admin/ HTTP/1.1" 302 0
+INFO 2025-04-29 02:04:05,325 basehttp 75604 6128300032 "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4165
+INFO 2025-04-29 02:04:05,337 basehttp 75604 6145126400 "GET /static/admin/css/dark_mode.css HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:05,338 basehttp 75604 6128300032 "GET /static/admin/css/base.css HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:05,339 basehttp 75604 6161952768 "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:05,497 basehttp 75604 6161952768 "GET /static/admin/css/login.css HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:05,497 basehttp 75604 6128300032 "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:05,497 basehttp 75604 6145126400 "GET /static/admin/js/theme.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:05,500 basehttp 75604 6145126400 "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:14,768 basehttp 75604 6128300032 "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+INFO 2025-04-29 02:04:14,781 basehttp 75604 6128300032 "GET /admin/ HTTP/1.1" 200 9817
+INFO 2025-04-29 02:04:14,797 basehttp 75604 6128300032 "GET /static/admin/css/dashboard.css HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:14,868 basehttp 75604 6128300032 "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:14,869 basehttp 75604 6145126400 "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,222 basehttp 75604 6145126400 "GET /admin/CryptoAnalyst/invitationcode/ HTTP/1.1" 200 11985
+INFO 2025-04-29 02:04:17,238 basehttp 75604 6145126400 "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,251 basehttp 75604 6128300032 "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,254 basehttp 75604 6161952768 "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,255 basehttp 75604 6128300032 "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,255 basehttp 75604 12901707776 "GET /static/admin/js/core.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,256 basehttp 75604 6161952768 "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,258 basehttp 75604 12918534144 "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,259 basehttp 75604 12935360512 "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,261 basehttp 75604 12901707776 "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,261 basehttp 75604 12918534144 "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,270 basehttp 75604 6145126400 "GET /admin/jsi18n/ HTTP/1.1" 200 9327
+INFO 2025-04-29 02:04:17,323 basehttp 75604 6145126400 "GET /static/admin/js/filters.js HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,329 basehttp 75604 6145126400 "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:17,330 basehttp 75604 12918534144 "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:18,841 basehttp 75604 12918534144 "GET /admin/CryptoAnalyst/invitationcode/generate-codes/ HTTP/1.1" 200 3648
+INFO 2025-04-29 02:04:20,185 basehttp 75604 6128300032 "POST /admin/CryptoAnalyst/invitationcode/generate-codes/ HTTP/1.1" 302 0
+INFO 2025-04-29 02:04:20,203 basehttp 75604 6128300032 "GET /admin/CryptoAnalyst/invitationcode/ HTTP/1.1" 200 19622
+INFO 2025-04-29 02:04:20,217 basehttp 75604 6145126400 "GET /static/admin/img/icon-no.svg HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:20,249 basehttp 75604 6128300032 "GET /admin/jsi18n/ HTTP/1.1" 200 9327
+INFO 2025-04-29 02:04:20,284 basehttp 75604 6128300032 "GET /static/admin/img/icon-yes.svg HTTP/1.1" 304 0
+INFO 2025-04-29 02:04:28,982 views 75604 6128300032 开始注册流程，请求数据: {'email': 'liu.zhao@qq.com', 'password': 'liuzhao9575', 'code': '656379', 'invitation_code': 'OA0B3KJE'}
+INFO 2025-04-29 02:04:28,995 views 75604 6128300032 验证验证码: email=liu.zhao@qq.com, code=656379
+INFO 2025-04-29 02:04:28,996 views 75604 6128300032 验证邀请码: OA0B3KJE
+INFO 2025-04-29 02:04:28,996 views 75604 6128300032 生成随机用户名: user_509mblqd
+INFO 2025-04-29 02:04:28,996 views 75604 6128300032 创建用户: email=liu.zhao@qq.com, username=user_509mblqd
+INFO 2025-04-29 02:04:29,114 views 75604 6128300032 更新验证码状态
+INFO 2025-04-29 02:04:29,116 views 75604 6128300032 更新邀请码状态
+INFO 2025-04-29 02:04:29,118 views 75604 6128300032 关联邀请码到用户
+INFO 2025-04-29 02:04:29,119 views 75604 6128300032 注册成功: user_id=2
+INFO 2025-04-29 02:04:29,119 basehttp 75604 6128300032 "POST /api/auth/register/ HTTP/1.1" 201 200
+INFO 2025-04-29 02:04:35,430 basehttp 75604 6128300032 "POST /api/auth/login/ HTTP/1.1" 200 235
+INFO 2025-04-29 02:04:42,046 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:04:42,047 technical_analysis 75604 6128300032 技术分析服务初始化完成
+INFO 2025-04-29 02:04:42,047 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:04:43,323 views 75604 6128300032 === 测试认证响应详情 ===
+INFO 2025-04-29 02:04:43,323 views 75604 6128300032 响应状态码: 200
+INFO 2025-04-29 02:04:43,323 views 75604 6128300032 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '202504290204422D981FE7F2E4F7993F2D', 'Server-Timing': 'inner; dur=136', 'x-tt-trace-host': '011556b6b4dcc22c525375fb30bd7733bee1e10458690e4d97792a652755ba5047248b60874bb9a3123c134c38346ae94b20de8c71231a151660955b1f1186b3970f9773e5d16d7f0086eeeb30285b16579d2d8814667733b103b0ccfc0ce77bb0', 'x-tt-trace-id': '00-2504290204422D981FE7F2E4F7993F2D-7E94B0582AD6BEC1-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Expires': 'Tue, 29 Apr 2025 02:04:43 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Tue, 29 Apr 2025 02:04:43 GMT', 'Content-Length': '162', 'X-Cache': 'TCP_MISS from a23-51-15-81.deploy.akamaitechnologies.com (AkamaiGHost/22.1.1.1-d05c6443fdf0ef1ad227a2aacc363f6e) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'X-Origin-Response-Time': '347,23.51.15.81', 'X-Akamai-Request-ID': '96fd9e5'}
+INFO 2025-04-29 02:04:43,323 views 75604 6128300032 响应内容: {"data":{"id":"7498550164055949319","conversation_id":"7498550164055932935","bot_id":"7494575252253720584","created_at":1745892283,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+INFO 2025-04-29 02:04:43,548 binance_api 75604 6146273280 BinanceAPI 客户端初始化完成
+INFO 2025-04-29 02:04:43,990 technical_analysis 75604 6146273280 获取到的K线数据:
+INFO 2025-04-29 02:04:43,990 technical_analysis 75604 6146273280 数据长度: 1000
+INFO 2025-04-29 02:04:43,992 technical_analysis 75604 6146273280 时间范围: 1659571200000 到 1745884800000
+INFO 2025-04-29 02:04:43,993 technical_analysis 75604 6146273280 价格范围: 100004.29000000 到 99987.30000000
+INFO 2025-04-29 02:04:44,007 technical_analysis 75604 6146273280 计算梅耶倍数的原始数据:
+INFO 2025-04-29 02:04:44,007 technical_analysis 75604 6146273280 数据长度: 1000
+INFO 2025-04-29 02:04:44,007 technical_analysis 75604 6146273280 最新价格: 94826.08
+INFO 2025-04-29 02:04:44,009 technical_analysis 75604 6146273280 MA200值: 89531.27545
+INFO 2025-04-29 02:04:44,009 technical_analysis 75604 6146273280 梅耶倍数计算结果: 1.0591391614090984
+INFO 2025-04-29 02:04:44,899 binance_api 75604 6146273280 BinanceAPI 客户端初始化完成
+INFO 2025-04-29 02:04:47,053 signals 75604 6146273280 更新代币 BTC 的技术分析数据
+INFO 2025-04-29 02:04:47,057 signals 75604 6146273280 更新代币 BTC 的市场数据
+INFO 2025-04-29 02:04:47,058 views 75604 6146273280 成功更新代币 BTC 的技术分析数据
+INFO 2025-04-29 02:04:49,581 views 75604 6128300032 第 1 次尝试获取对话状态
+INFO 2025-04-29 02:04:49,842 views 75604 6128300032 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498550135761371154","created_at":1745892290,"id":"7498550135761387538","status":"in_progress"},"detail":{"logid":"20250429020448F66C5FCB7804B1AC491C"},"msg":""}
+INFO 2025-04-29 02:04:50,844 views 75604 6128300032 第 2 次尝试获取对话状态
+INFO 2025-04-29 02:04:51,210 views 75604 6128300032 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498550135761371154","created_at":1745892290,"id":"7498550135761387538","status":"in_progress"},"detail":{"logid":"20250429020450F66C5FCB7804B1AC49EF"},"msg":""}
+INFO 2025-04-29 02:04:52,712 views 75604 6128300032 第 3 次尝试获取对话状态
+INFO 2025-04-29 02:04:52,958 views 75604 6128300032 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498550135761371154","created_at":1745892290,"id":"7498550135761387538","status":"in_progress"},"detail":{"logid":"20250429020451F66C5FCB7804B1AC4AF4"},"msg":""}
+INFO 2025-04-29 02:04:55,209 views 75604 6128300032 第 4 次尝试获取对话状态
+INFO 2025-04-29 02:04:55,479 views 75604 6128300032 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498550135761371154","created_at":1745892290,"id":"7498550135761387538","status":"in_progress"},"detail":{"logid":"20250429020454F66C5FCB7804B1AC4C0D"},"msg":""}
+INFO 2025-04-29 02:04:58,856 views 75604 6128300032 第 5 次尝试获取对话状态
+INFO 2025-04-29 02:04:59,109 views 75604 6128300032 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498550135761371154","created_at":1745892290,"id":"7498550135761387538","status":"in_progress"},"detail":{"logid":"20250429020458F66C5FCB7804B1AC4DEE"},"msg":""}
+INFO 2025-04-29 02:05:04,110 views 75604 6128300032 第 6 次尝试获取对话状态
+INFO 2025-04-29 02:05:04,375 views 75604 6128300032 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","completed_at":1745892302,"conversation_id":"7498550135761371154","created_at":1745892290,"id":"7498550135761387538","status":"completed","usage":{"input_count":678,"output_count":857,"token_count":1535}},"detail":{"logid":"20250429020503F66C5FCB7804B1AC5148"},"msg":""}
+INFO 2025-04-29 02:05:04,638 views 75604 6128300032 消息列表响应: {"code":0,"data":[{"bot_id":"7494575252253720584","chat_id":"7498550135761387538","content":"```json\n{\n    \"trend_analysis\": {\n        \"probabilities\": {\n            \"up\": 80,\n            \"sideways\": 10,\n            \"down\": 10\n        },\n        \"summary\": \"当前市场趋势强劲上涨。大多数技术指标显示出强烈的买入信号，表明市场仍有进一步上涨的潜力。\"\n    },\n    \"indicators_analysis\": {\n        \"RSI\": {\n            \"value\": 89.16,\n            \"analysis\": \"RSI指标显示超买状态，市场可能存在回调风险。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"MACD\": {\n            \"value\": {\"line\": 2987.13, \"signal\": 2117.51, \"histogram\": 869.62},\n            \"analysis\": \"MACD指标显示出强烈的买入信号，市场动能强劲。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"BollingerBands\": {\n            \"value\": {\"upper\": 98684.13, \"middle\": 88274.84, \"lower\": 77865.56},\n            \"analysis\": \"价格接近布林带上轨，市场可能存在短期回调风险。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"BIAS\": {\n            \"value\": 0.37,\n            \"analysis\": \"BIAS值显示市场略微偏离均线，存在一定回调风险。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"PSY\": {\n            \"value\": 66.7,\n            \"analysis\": \"PSY指标显示市场情绪乐观，买盘强劲。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"DMI\": {\n            \"value\": {\"plus_di\": 36.0, \"minus_di\": 6.9, \"adx\": 57.0},\n            \"analysis\": \"DMI指标显示出强烈的趋势动能，市场处于上涨趋势中。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"VWAP\": {\n            \"value\": 30891.02,\n            \"analysis\": \"VWAP值表明市场价格远高于成交量加权平均价，买盘强劲。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"FundingRate\": {\n            \"value\": 3.1e-05,\n            \"analysis\": \"资金费率较低，表明市场情绪稳定。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"ExchangeNetflow\": {\n            \"value\": -93.78,\n            \"analysis\": \"净流出显示投资者倾向于持有，市场看涨情绪浓厚。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"NUPL\": {\n            \"value\": 100.0,\n            \"analysis\": \"NUPL值显示市场处于极度乐观状态，投资者普遍盈利。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"MayerMultiple\": {\n            \"value\": 1.06,\n            \"analysis\": \"Mayer Multiple显示市场价格高于长期移动平均线，市场看涨。\",\n            \"support_trend\": \"支持当前趋势\"\n        }\n    },\n    \"trading_advice\": {\n        \"action\": \"买入\",\n        \"reason\": \"大多数技术指标显示出强烈的买入信号，市场趋势强劲上涨。\",\n        \"entry_price\": 94800.05,\n        \"stop_loss\": 90000.00,\n        \"take_profit\": 100000.00\n    },\n    \"risk_assessment\": {\n        \"level\": \"中\",\n        \"score\": 60,\n        \"details\": [\"RSI显示超买状态，存在回调风险\", \"价格接近布林带上轨，短期可能回调\"]\n    }\n}\n```","content_type":"text","conversation_id":"7498550135761371154","created_at":1745892290,"id":"7498550135761420306","reasoning_content":"","role":"assistant","type":"answer","updated_at":1745892299},{"bot_id":"7494575252253720584","chat_id":"7498550135761387538","content":"{\"msg_type\":\"generate_answer_finish\",\"data\":\"{\\\"finish_reason\\\":0,\\\"FinData\\\":\\\"\\\"}\",\"from_module\":null,\"from_unit\":null}","content_type":"text","conversation_id":"7498550135761371154","created_at":1745892302,"id":"7498550222558216199","role":"assistant","type":"verbose","updated_at":1745892301},{"bot_id":"7494575252253720584","chat_id":"7498550135761387538","content":"Can you provide more details on the Bollinger Bands for the BTCUSDT symbol?","content_type":"text","conversation_id":"7498550135761371154","created_at":1745892302,"id":"7498550222558232583","role":"assistant","type":"follow_up","updated_at":1745892301},{"bot_id":"7494575252253720584","chat_id":"7498550135761387538","content":"What is the significance of the DMI indicators' values for the current market trend?","content_type":"text","conversation_id":"7498550135761371154","created_at":1745892302,"id":"7498550222558248967","role":"assistant","type":"follow_up","updated_at":1745892301},{"bot_id":"7494575252253720584","chat_id":"7498550135761387538","content":"How does the VWAP value impact the overall analysis of the market trend for BTCUSDT?","content_type":"text","conversation_id":"7498550135761371154","created_at":1745892302,"id":"7498550222558265351","role":"assistant","type":"follow_up","updated_at":1745892301}],"detail":{"logid":"20250429020503F66C5FCB7804B1AC518B"},"msg":""}
+INFO 2025-04-29 02:05:04,654 analysis_report_service 75604 6146273280 成功保存BTCUSDT的分析报告
+INFO 2025-04-29 02:05:04,656 basehttp 75604 6128300032 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 200 2394
+INFO 2025-04-29 02:05:11,487 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:05:11,489 technical_analysis 75604 6128300032 技术分析服务初始化完成
+INFO 2025-04-29 02:05:11,489 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+WARNING 2025-04-29 02:05:11,741 log 75604 6128300032 Unauthorized: /api/crypto/technical-indicators/BTCUSDT/
+WARNING 2025-04-29 02:05:11,742 basehttp 75604 6128300032 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 401 34
+INFO 2025-04-29 02:05:15,519 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:05:15,519 technical_analysis 75604 6128300032 技术分析服务初始化完成
+INFO 2025-04-29 02:05:15,519 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:05:15,782 basehttp 75604 6128300032 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2404
+INFO 2025-04-29 02:05:21,167 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:05:21,167 technical_analysis 75604 6128300032 技术分析服务初始化完成
+INFO 2025-04-29 02:05:21,167 binance_api 75604 6128300032 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-29 02:05:21,422 basehttp 75604 6128300032 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2404
+INFO 2025-04-29 02:05:49,251 basehttp 75604 6163099648 "GET /admin/CryptoAnalyst/invitationcode/ HTTP/1.1" 200 19417
+INFO 2025-04-29 02:05:49,285 basehttp 75604 6163099648 "GET /admin/jsi18n/ HTTP/1.1" 200 9327
+INFO 2025-04-30 01:04:37,198 autoreload 39249 8462421120 Watching for file changes with StatReloader
+ERROR 2025-04-30 01:04:48,336 log 39249 6140047360 Internal Server Error: /api/crypto/technical-indicators/BTCUSDT/
+Traceback (most recent call last):
+  File "/opt/anaconda3/envs/crypto_analyst/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/crypto_analyst/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/crypto_analyst/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/anaconda3/envs/crypto_analyst/lib/python3.12/site-packages/django/views/generic/base.py", line 97, in view
+    self = cls(**initkwargs)
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py", line 38, in __init__
+    self.ta_service = TechnicalAnalysisService()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/technical_analysis.py", line 17, in __init__
+    self.binance_api = BinanceAPI(
+                       ^^^^^^^^^^^
+TypeError: BinanceAPI.__init__() got an unexpected keyword argument 'api_key'
+ERROR 2025-04-30 01:04:48,339 basehttp 39249 6140047360 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 500 85018
+INFO 2025-04-30 01:05:10,745 autoreload 39249 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/technical_analysis.py changed, reloading.
+INFO 2025-04-30 01:05:11,213 autoreload 39299 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:05:21,527 autoreload 39299 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/technical_analysis.py changed, reloading.
+INFO 2025-04-30 01:05:21,971 autoreload 39313 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:05:49,776 autoreload 39313 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/technical_analysis.py changed, reloading.
+INFO 2025-04-30 01:05:50,222 autoreload 39340 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:06:18,212 autoreload 39340 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/technical_analysis.py changed, reloading.
+INFO 2025-04-30 01:06:18,661 autoreload 39369 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:06:30,209 binance_api 39369 6204452864 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:06:30,210 technical_analysis 39369 6204452864 技术分析服务初始化完成
+INFO 2025-04-30 01:06:30,210 binance_api 39369 6204452864 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:06:30,676 basehttp 39369 6204452864 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2404
+INFO 2025-04-30 01:07:34,114 autoreload 39369 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 01:07:34,610 autoreload 39420 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:07:49,667 binance_api 39420 6175928320 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:07:49,667 technical_analysis 39420 6175928320 技术分析服务初始化完成
+INFO 2025-04-30 01:07:49,667 binance_api 39420 6175928320 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:07:49,981 basehttp 39420 6175928320 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2404
+INFO 2025-04-30 01:07:55,120 binance_api 39420 6175928320 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:07:55,121 technical_analysis 39420 6175928320 技术分析服务初始化完成
+INFO 2025-04-30 01:07:55,121 binance_api 39420 6175928320 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:07:55,440 basehttp 39420 6175928320 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2404
+INFO 2025-04-30 01:10:25,337 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:10:25,338 technical_analysis 39420 6210727936 技术分析服务初始化完成
+INFO 2025-04-30 01:10:25,338 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:10:25,810 binance_api 39420 6193901568 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:10:26,789 technical_analysis 39420 6193901568 计算梅耶倍数的原始数据:
+INFO 2025-04-30 01:10:26,790 technical_analysis 39420 6193901568 数据长度: 1000
+INFO 2025-04-30 01:10:26,790 technical_analysis 39420 6193901568 最新价格: 94426.44
+INFO 2025-04-30 01:10:26,791 technical_analysis 39420 6193901568 MA200值: 89684.53025000001
+INFO 2025-04-30 01:10:26,792 technical_analysis 39420 6193901568 梅耶倍数计算结果: 1.0528732183441412
+INFO 2025-04-30 01:10:27,019 binance_api 39420 6193901568 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:10:29,296 basehttp 39420 6210727936 "GET /api/crypto/technical-indicators-data/BTCUSDT/ HTTP/1.1" 200 411
+INFO 2025-04-30 01:10:44,209 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:10:44,210 technical_analysis 39420 6210727936 技术分析服务初始化完成
+INFO 2025-04-30 01:10:44,210 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:10:44,666 binance_api 39420 6193901568 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:10:45,245 technical_analysis 39420 6193901568 计算梅耶倍数的原始数据:
+INFO 2025-04-30 01:10:45,245 technical_analysis 39420 6193901568 数据长度: 462
+INFO 2025-04-30 01:10:45,246 technical_analysis 39420 6193901568 最新价格: 0.03187
+INFO 2025-04-30 01:10:45,246 technical_analysis 39420 6193901568 MA200值: 0.08246655
+INFO 2025-04-30 01:10:45,246 technical_analysis 39420 6193901568 梅耶倍数计算结果: 0.3864597221540128
+INFO 2025-04-30 01:10:45,474 binance_api 39420 6193901568 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:10:47,406 basehttp 39420 6210727936 "GET /api/crypto/technical-indicators-data/ALTUSDT/ HTTP/1.1" 200 383
+INFO 2025-04-30 01:11:11,706 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:11:11,707 technical_analysis 39420 6210727936 技术分析服务初始化完成
+INFO 2025-04-30 01:11:11,707 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:11:12,458 basehttp 39420 6210727936 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2404
+INFO 2025-04-30 01:11:15,984 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:11:15,984 technical_analysis 39420 6210727936 技术分析服务初始化完成
+INFO 2025-04-30 01:11:15,984 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+WARNING 2025-04-30 01:11:16,293 log 39420 6210727936 Unauthorized: /api/crypto/technical-indicators/BTCUSDT/
+WARNING 2025-04-30 01:11:16,294 basehttp 39420 6210727936 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 401 34
+INFO 2025-04-30 01:11:23,189 basehttp 39420 6210727936 "POST /api/auth/login/ HTTP/1.1" 200 235
+INFO 2025-04-30 01:11:30,501 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:11:30,501 technical_analysis 39420 6210727936 技术分析服务初始化完成
+INFO 2025-04-30 01:11:30,501 binance_api 39420 6210727936 BinanceAPI 实例创建，尚未初始化 client
+ERROR 2025-04-30 01:11:30,750 views 39420 6210727936 测试认证失败: 'TechnicalIndicatorsAPIView' object has no attribute 'coze_api_url'
+ERROR 2025-04-30 01:11:30,750 views 39420 6210727936 Coze API认证失败
+ERROR 2025-04-30 01:11:30,751 log 39420 6210727936 Internal Server Error: /api/crypto/technical-indicators/BTCUSDT/
+ERROR 2025-04-30 01:11:30,751 basehttp 39420 6210727936 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 500 51
+INFO 2025-04-30 01:12:21,899 autoreload 39420 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 01:12:22,430 autoreload 39641 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:12:38,936 autoreload 39641 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-04-30 01:12:39,383 autoreload 39667 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:12:43,477 autoreload 39667 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-04-30 01:12:43,818 autoreload 39674 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:12:56,676 binance_api 39674 6206205952 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:12:56,676 technical_analysis 39674 6206205952 技术分析服务初始化完成
+INFO 2025-04-30 01:12:56,676 binance_api 39674 6206205952 BinanceAPI 实例创建，尚未初始化 client
+ERROR 2025-04-30 01:12:56,934 views 39674 6206205952 测试认证失败: 'TechnicalIndicatorsAPIView' object has no attribute 'coze_api_url'
+ERROR 2025-04-30 01:12:56,934 views 39674 6206205952 Coze API认证失败
+ERROR 2025-04-30 01:12:56,936 log 39674 6206205952 Internal Server Error: /api/crypto/technical-indicators/BTCUSDT/
+ERROR 2025-04-30 01:12:56,936 basehttp 39674 6206205952 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 500 51
+INFO 2025-04-30 01:13:17,854 autoreload 39674 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-04-30 01:13:18,351 autoreload 39703 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:13:51,369 autoreload 39703 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-04-30 01:13:51,858 autoreload 39728 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:15:02,122 autoreload 39728 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 01:15:02,621 autoreload 39783 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:16:12,998 autoreload 39783 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 01:16:13,487 autoreload 39847 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:17:31,044 autoreload 39847 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 01:17:31,582 autoreload 39899 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:18:01,582 autoreload 39899 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 01:18:02,068 autoreload 39934 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:20:52,518 binance_api 39934 6164426752 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:20:52,518 technical_analysis 39934 6164426752 技术分析服务初始化完成
+INFO 2025-04-30 01:20:52,518 binance_api 39934 6164426752 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:20:53,072 binance_api 39934 6182400000 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:20:54,026 technical_analysis 39934 6182400000 计算梅耶倍数的原始数据:
+INFO 2025-04-30 01:20:54,026 technical_analysis 39934 6182400000 数据长度: 1000
+INFO 2025-04-30 01:20:54,027 technical_analysis 39934 6182400000 最新价格: 94555.99
+INFO 2025-04-30 01:20:54,027 technical_analysis 39934 6182400000 MA200值: 89685.17800000001
+INFO 2025-04-30 01:20:54,027 technical_analysis 39934 6182400000 梅耶倍数计算结果: 1.0543101113095854
+INFO 2025-04-30 01:20:54,268 binance_api 39934 6182400000 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:20:56,283 signals 39934 6182400000 更新代币 BTC 的技术分析数据
+INFO 2025-04-30 01:20:56,292 signals 39934 6182400000 更新代币 BTC 的市场数据
+INFO 2025-04-30 01:20:56,296 views 39934 6182400000 成功更新代币 BTC 的技术分析数据
+INFO 2025-04-30 01:20:57,145 views 39934 6164426752 === 测试认证响应详情 ===
+INFO 2025-04-30 01:20:57,145 views 39934 6164426752 响应状态码: 200
+INFO 2025-04-30 01:20:57,145 views 39934 6164426752 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '202504300120564CF599EC776AAFADE3E0', 'Server-Timing': 'inner; dur=142', 'x-tt-trace-host': '01e94a3461a9a1740bc1466a29080456ef172b50c7a994663662deed34ed35f9904f018db9c434d1e6f64d1b7bf171e7d5c2aca016c577a6b01ab2ca93c4dd057fffb76ddc2fbaf7a19d0ebfc0c209cd575a084894de8b4f437ea7a9810febff0b', 'x-tt-trace-id': '00-2504300120564CF599EC776AAFADE3E0-27FC893A4C17E1E8-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Expires': 'Wed, 30 Apr 2025 01:20:57 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Wed, 30 Apr 2025 01:20:57 GMT', 'Content-Length': '162', 'X-Cache': 'TCP_MISS from a23-202-34-167.deploy.akamaitechnologies.com (AkamaiGHost/22.1.1.1-d05c6443fdf0ef1ad227a2aacc363f6e) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'X-Origin-Response-Time': '282,23.202.34.167', 'X-Akamai-Request-ID': '2856a745'}
+INFO 2025-04-30 01:20:57,145 views 39934 6164426752 响应内容: {"data":{"id":"7498909866916970504","conversation_id":"7498909866916954120","bot_id":"7494575252253720584","created_at":1745976057,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+ERROR 2025-04-30 01:20:57,146 views 39934 6164426752 获取Coze分析时发生错误: 'TechnicalIndicatorsAPIView' object has no attribute '_init_coze_api'
+ERROR 2025-04-30 01:20:57,146 analysis_report_service 39934 6182400000 保存BTCUSDT的分析报告失败: 缺少必要的键: indicators_analysis
+ERROR 2025-04-30 01:20:57,147 views 39934 6164426752 保存分析报告失败: 缺少必要的键: indicators_analysis
+ERROR 2025-04-30 01:20:57,149 log 39934 6164426752 Internal Server Error: /api/crypto/technical-indicators/BTCUSDT/
+ERROR 2025-04-30 01:20:57,149 basehttp 39934 6164426752 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 500 96
+INFO 2025-04-30 01:21:50,812 autoreload 39934 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 01:21:51,444 autoreload 40097 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 01:22:02,631 binance_api 40097 6128627712 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:22:02,631 technical_analysis 40097 6128627712 技术分析服务初始化完成
+INFO 2025-04-30 01:22:02,632 binance_api 40097 6128627712 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:22:03,156 binance_api 40097 6146600960 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:22:03,935 technical_analysis 40097 6146600960 计算梅耶倍数的原始数据:
+INFO 2025-04-30 01:22:03,935 technical_analysis 40097 6146600960 数据长度: 1000
+INFO 2025-04-30 01:22:03,935 technical_analysis 40097 6146600960 最新价格: 94534.99
+INFO 2025-04-30 01:22:03,935 technical_analysis 40097 6146600960 MA200值: 89685.073
+INFO 2025-04-30 01:22:03,935 technical_analysis 40097 6146600960 梅耶倍数计算结果: 1.0540771929794828
+INFO 2025-04-30 01:22:04,159 binance_api 40097 6146600960 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:22:06,215 signals 40097 6146600960 更新代币 BTC 的技术分析数据
+INFO 2025-04-30 01:22:06,221 signals 40097 6146600960 更新代币 BTC 的市场数据
+INFO 2025-04-30 01:22:06,223 views 40097 6146600960 成功更新代币 BTC 的技术分析数据
+INFO 2025-04-30 01:22:06,625 views 40097 6128627712 === 测试认证响应详情 ===
+INFO 2025-04-30 01:22:06,625 views 40097 6128627712 响应状态码: 200
+INFO 2025-04-30 01:22:06,625 views 40097 6128627712 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '202504300122055C91E3A812261C98373F', 'x-tt-trace-host': '01eeb80b75c39159ae20c35ecc031ae96e8aff50f6f74ae6cb53afa1c36adaba35deb77df115457f02041101ee59926eba4d0c9f5de3d41cf1bb9a1fa0a89ffa9ad6560a6aef497ded9957cd1c5515da28e7e02b8e3749ae5309c0e1e2082b440ef76ab285250ae76f772c5f4a8c3edc07', 'x-tt-trace-id': '00-2504300122055C91E3A812261C98373F-1BAB28CA1D433FD7-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Content-Length': '162', 'X-Origin-Response-Time': '102,23.210.250.133', 'X-Akamai-Request-ID': 'f2406c68.96192561', 'Expires': 'Wed, 30 Apr 2025 01:22:06 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Wed, 30 Apr 2025 01:22:06 GMT', 'X-Cache': 'TCP_MISS from a23-33-91-120.deploy.akamaitechnologies.com (AkamaiGHost/22.1.0-0ca00c147d19d7f8aed87fe96e7f5f75) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'X-Cache-Remote': 'TCP_MISS from a23-210-250-133.deploy.akamaitechnologies.com (AkamaiGHost/22.1.0-0ca00c147d19d7f8aed87fe96e7f5f75) (-)', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'Server-Timing': 'cdn-cache; desc=MISS, edge; dur=33, origin; dur=101', 'X-Parent-Response-Time': '133,23.33.91.120'}
+INFO 2025-04-30 01:22:06,625 views 40097 6128627712 响应内容: {"data":{"id":"7498910168785321991","conversation_id":"7498910168785305607","bot_id":"7494575252253720584","created_at":1745976126,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+INFO 2025-04-30 01:22:08,982 views 40097 6128627712 第 1 次尝试获取对话状态
+INFO 2025-04-30 01:22:09,181 views 40097 6128627712 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498910182127288328","created_at":1745976129,"id":"7498910182127304712","status":"in_progress"},"detail":{"logid":"20250430012208817DD2ED7B064E8B8749"},"msg":""}
+INFO 2025-04-30 01:22:10,182 views 40097 6128627712 第 2 次尝试获取对话状态
+INFO 2025-04-30 01:22:10,452 views 40097 6128627712 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498910182127288328","created_at":1745976129,"id":"7498910182127304712","status":"in_progress"},"detail":{"logid":"20250430012209817DD2ED7B064E8B8815"},"msg":""}
+INFO 2025-04-30 01:22:11,953 views 40097 6128627712 第 3 次尝试获取对话状态
+INFO 2025-04-30 01:22:12,220 views 40097 6128627712 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498910182127288328","created_at":1745976129,"id":"7498910182127304712","status":"in_progress"},"detail":{"logid":"20250430012211E5A772A268F0E79761C3"},"msg":""}
+INFO 2025-04-30 01:22:14,472 views 40097 6128627712 第 4 次尝试获取对话状态
+INFO 2025-04-30 01:22:14,644 views 40097 6128627712 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498910182127288328","created_at":1745976129,"id":"7498910182127304712","status":"in_progress"},"detail":{"logid":"20250430012213E5A772A268F0E79763DE"},"msg":""}
+INFO 2025-04-30 01:22:18,020 views 40097 6128627712 第 5 次尝试获取对话状态
+INFO 2025-04-30 01:22:18,191 views 40097 6128627712 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7498910182127288328","created_at":1745976129,"id":"7498910182127304712","status":"in_progress"},"detail":{"logid":"20250430012217E5A772A268F0E7976607"},"msg":""}
+INFO 2025-04-30 01:22:23,192 views 40097 6128627712 第 6 次尝试获取对话状态
+INFO 2025-04-30 01:22:23,382 views 40097 6128627712 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","completed_at":1745976143,"conversation_id":"7498910182127288328","created_at":1745976129,"id":"7498910182127304712","status":"completed","usage":{"input_count":678,"output_count":912,"token_count":1590}},"detail":{"logid":"20250430012222E5A772A268F0E79768D8"},"msg":""}
+INFO 2025-04-30 01:22:23,570 views 40097 6128627712 消息列表响应: {"code":0,"data":[{"bot_id":"7494575252253720584","chat_id":"7498910182127304712","content":"```json\n{\n    \"trend_analysis\": {\n        \"probabilities\": {\n            \"up\": 75,\n            \"sideways\": 15,\n            \"down\": 10\n        },\n        \"summary\": \"市场显示出强烈的上涨趋势，尽管存在一些短期回调的可能性。\"\n    },\n    \"indicators_analysis\": {\n        \"RSI\": {\n            \"value\": 85.64,\n            \"analysis\": \"RSI处于超买区间，表明价格可能会出现回调。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MACD\": {\n            \"value\": {\n                \"line\": 2948.19,\n                \"signal\": 2276.38,\n                \"histogram\": 671.81\n            },\n            \"analysis\": \"MACD线高于信号线，并且柱状图为正，表明强烈的上涨趋势。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"BollingerBands\": {\n            \"value\": {\n                \"upper\": 98847.48,\n                \"middle\": 88992.76,\n                \"lower\": 79138.05\n            },\n            \"analysis\": \"价格接近布林带的上轨，表明市场可能存在超买现象。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"BIAS\": {\n            \"value\": 0.07,\n            \"analysis\": \"BIAS值较高，表明市场可能出现短期回调。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"PSY\": {\n            \"value\": 75.0,\n            \"analysis\": \"PSY值高于50，表明市场情绪偏向买方。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"DMI\": {\n            \"value\": {\n                \"plus_di\": 37.0,\n                \"minus_di\": 5.6,\n                \"adx\": 61.4\n            },\n            \"analysis\": \"DMI显示出强烈的买方趋势。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"VWAP\": {\n            \"value\": 30916.38,\n            \"analysis\": \"VWAP值显示当前价格远高于均价，表明强烈的买方趋势。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"FundingRate\": {\n            \"value\": 1.6e-05,\n            \"analysis\": \"资金费率较低，表明市场情绪稳定。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"ExchangeNetflow\": {\n            \"value\": -97.2,\n            \"analysis\": \"净流出量较大，表明投资者倾向于持有而非出售。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"NUPL\": {\n            \"value\": 100.0,\n            \"analysis\": \"NUPL值较高，表明市场处于盈利状态，可能存在获利回吐的风险。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MayerMultiple\": {\n            \"value\": 1.05,\n            \"analysis\": \"Mayer Multiple略高于1，表明市场处于合理估值区间。\",\n            \"support_trend\": \"支持当前趋势\"\n        }\n    },\n    \"trading_advice\": {\n        \"action\": \"持有\",\n        \"reason\": \"尽管市场显示强烈的上涨趋势，但多个技术指标显示短期内可能出现回调，建议持有观望。\",\n        \"entry_price\": 94534.99,\n        \"stop_loss\": 90000.00,\n        \"take_profit\": 100000.00\n    },\n    \"risk_assessment\": {\n        \"level\": \"中\",\n        \"score\": 60,\n        \"details\": [\n            \"RSI处于超买区间，短期回调风险较高。\",\n            \"NUPL值较高，可能存在获利回吐的风险。\",\n            \"价格接近布林带上轨，存在超买现象。\"\n        ]\n    }\n}\n```","content_type":"text","conversation_id":"7498910182127288328","created_at":1745976129,"id":"7498910182127337480","reasoning_content":"","role":"assistant","type":"answer","updated_at":1745976140},{"bot_id":"7494575252253720584","chat_id":"7498910182127304712","content":"{\"msg_type\":\"generate_answer_finish\",\"data\":\"{\\\"finish_reason\\\":0,\\\"FinData\\\":\\\"\\\"}\",\"from_module\":null,\"from_unit\":null}","content_type":"text","conversation_id":"7498910182127288328","created_at":1745976143,"id":"7498910357679996935","role":"assistant","type":"verbose","updated_at":1745976142},{"bot_id":"7494575252253720584","chat_id":"7498910182127304712","content":"Can you explain how the Bollinger Bands are currently positioned for the symbol BTCUSDT?","content_type":"text","conversation_id":"7498910182127288328","created_at":1745976143,"id":"7498910357680013319","role":"assistant","type":"follow_up","updated_at":1745976142},{"bot_id":"7494575252253720584","chat_id":"7498910182127304712","content":"What is the analysis for the DMI indicators in the provided data?","content_type":"text","conversation_id":"7498910182127288328","created_at":1745976143,"id":"7498910357680029703","role":"assistant","type":"follow_up","updated_at":1745976142},{"bot_id":"7494575252253720584","chat_id":"7498910182127304712","content":"Based on the trend analysis, what is the probability of the market showing a downward trend?","content_type":"text","conversation_id":"7498910182127288328","created_at":1745976143,"id":"7498910357680046087","role":"assistant","type":"follow_up","updated_at":1745976142}],"detail":{"logid":"20250430012222E5A772A268F0E7976904"},"msg":""}
+INFO 2025-04-30 01:22:23,591 analysis_report_service 40097 6146600960 成功保存BTCUSDT的分析报告
+INFO 2025-04-30 01:22:23,596 basehttp 40097 6128627712 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 200 2440
+INFO 2025-04-30 01:22:36,691 binance_api 40097 6128627712 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:22:36,691 technical_analysis 40097 6128627712 技术分析服务初始化完成
+INFO 2025-04-30 01:22:36,691 binance_api 40097 6128627712 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:22:36,947 basehttp 40097 6128627712 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2425
+INFO 2025-04-30 01:22:40,317 binance_api 40097 6128627712 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:22:40,318 technical_analysis 40097 6128627712 技术分析服务初始化完成
+INFO 2025-04-30 01:22:40,318 binance_api 40097 6128627712 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 01:22:40,865 binance_api 40097 6146600960 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:22:41,523 technical_analysis 40097 6146600960 计算梅耶倍数的原始数据:
+INFO 2025-04-30 01:22:41,524 technical_analysis 40097 6146600960 数据长度: 462
+INFO 2025-04-30 01:22:41,524 technical_analysis 40097 6146600960 最新价格: 0.03174
+INFO 2025-04-30 01:22:41,524 technical_analysis 40097 6146600960 MA200值: 0.08246590000000001
+INFO 2025-04-30 01:22:41,524 technical_analysis 40097 6146600960 梅耶倍数计算结果: 0.38488635908902946
+INFO 2025-04-30 01:22:41,744 binance_api 40097 6146600960 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 01:22:43,735 basehttp 40097 6128627712 "GET /api/crypto/technical-indicators-data/ALTUSDT/ HTTP/1.1" 200 383
+INFO 2025-04-30 08:08:23,025 autoreload 61326 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:08:28,081 binance_api 61326 6197358592 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:08:28,081 technical_analysis 61326 6197358592 技术分析服务初始化完成
+INFO 2025-04-30 08:08:28,081 binance_api 61326 6197358592 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:08:28,564 binance_api 61326 6215331840 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:08:29,383 technical_analysis 61326 6215331840 计算梅耶倍数的原始数据:
+INFO 2025-04-30 08:08:29,383 technical_analysis 61326 6215331840 数据长度: 462
+INFO 2025-04-30 08:08:29,384 technical_analysis 61326 6215331840 最新价格: 0.03112
+INFO 2025-04-30 08:08:29,385 technical_analysis 61326 6215331840 MA200值: 0.0824628
+INFO 2025-04-30 08:08:29,385 technical_analysis 61326 6215331840 梅耶倍数计算结果: 0.37738228631576903
+INFO 2025-04-30 08:08:29,637 binance_api 61326 6215331840 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:08:31,631 basehttp 61326 6197358592 "GET /api/crypto/technical-indicators-data/ALTUSDT/ HTTP/1.1" 200 387
+INFO 2025-04-30 08:20:53,163 autoreload 61326 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:20:53,681 autoreload 61813 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:30:04,028 binance_api 61813 6131445760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:30:04,028 technical_analysis 61813 6131445760 技术分析服务初始化完成
+INFO 2025-04-30 08:30:04,029 binance_api 61813 6131445760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:30:04,554 binance_api 61813 6149419008 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:30:05,305 technical_analysis 61813 6149419008 计算梅耶倍数的原始数据:
+INFO 2025-04-30 08:30:05,305 technical_analysis 61813 6149419008 数据长度: 729
+INFO 2025-04-30 08:30:05,305 technical_analysis 61813 6149419008 最新价格: 3.5378
+INFO 2025-04-30 08:30:05,305 technical_analysis 61813 6149419008 MA200值: 3.226169
+INFO 2025-04-30 08:30:05,306 technical_analysis 61813 6149419008 梅耶倍数计算结果: 1.0965947537156298
+INFO 2025-04-30 08:30:06,100 binance_api 61813 6149419008 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:30:09,551 basehttp 61813 6131445760 "GET /api/crypto/technical-indicators-data/SUIUSDT/ HTTP/1.1" 200 382
+INFO 2025-04-30 08:31:21,456 binance_api 61813 6166245376 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:31:21,458 technical_analysis 61813 6166245376 技术分析服务初始化完成
+INFO 2025-04-30 08:31:21,458 binance_api 61813 6166245376 BinanceAPI 实例创建，尚未初始化 client
+ERROR 2025-04-30 08:31:21,756 views 61813 6166245376 从数据库读取数据时发生错误: 'coroutine' object has no attribute 'first'
+ERROR 2025-04-30 08:31:21,764 log 61813 6166245376 Internal Server Error: /api/crypto/technical-indicators/SUIUSDT/
+ERROR 2025-04-30 08:31:21,764 basehttp 61813 6166245376 "GET /api/crypto/technical-indicators/SUIUSDT/ HTTP/1.1" 500 94
+INFO 2025-04-30 08:34:37,303 autoreload 61813 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:34:37,854 autoreload 62315 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:35:56,294 autoreload 62315 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:35:56,889 autoreload 62378 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:37:15,336 autoreload 62378 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:37:15,939 autoreload 62436 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:37:50,956 autoreload 62436 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:37:51,465 autoreload 62475 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:38:32,754 autoreload 62475 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:38:33,325 autoreload 62510 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:38:53,976 binance_api 62510 6203961344 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:38:53,976 technical_analysis 62510 6203961344 技术分析服务初始化完成
+INFO 2025-04-30 08:38:53,977 binance_api 62510 6203961344 BinanceAPI 实例创建，尚未初始化 client
+ERROR 2025-04-30 08:38:54,268 views 62510 6203961344 从数据库读取数据时发生错误: 'coroutine' object has no attribute 'first'
+WARNING 2025-04-30 08:38:54,271 log 62510 6203961344 Not Found: /api/crypto/technical-indicators/SUIUSDT/
+WARNING 2025-04-30 08:38:54,271 basehttp 62510 6203961344 "GET /api/crypto/technical-indicators/SUIUSDT/ HTTP/1.1" 404 95
+INFO 2025-04-30 08:38:58,606 binance_api 62510 6203961344 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:38:58,606 technical_analysis 62510 6203961344 技术分析服务初始化完成
+INFO 2025-04-30 08:38:58,606 binance_api 62510 6203961344 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:38:59,311 binance_api 62510 6221934592 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:38:59,976 technical_analysis 62510 6221934592 计算梅耶倍数的原始数据:
+INFO 2025-04-30 08:38:59,976 technical_analysis 62510 6221934592 数据长度: 729
+INFO 2025-04-30 08:38:59,976 technical_analysis 62510 6221934592 最新价格: 3.5337
+INFO 2025-04-30 08:38:59,977 technical_analysis 62510 6221934592 MA200值: 3.2261485
+INFO 2025-04-30 08:38:59,977 technical_analysis 62510 6221934592 梅耶倍数计算结果: 1.0953308565926212
+INFO 2025-04-30 08:39:00,746 binance_api 62510 6221934592 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:39:04,577 basehttp 62510 6203961344 "GET /api/crypto/technical-indicators-data/SUIUSDT/ HTTP/1.1" 200 382
+INFO 2025-04-30 08:39:08,296 binance_api 62510 6203961344 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:39:08,297 technical_analysis 62510 6203961344 技术分析服务初始化完成
+INFO 2025-04-30 08:39:08,297 binance_api 62510 6203961344 BinanceAPI 实例创建，尚未初始化 client
+ERROR 2025-04-30 08:39:08,529 views 62510 6203961344 从数据库读取数据时发生错误: 'coroutine' object has no attribute 'first'
+WARNING 2025-04-30 08:39:08,530 log 62510 6203961344 Not Found: /api/crypto/technical-indicators/SUIUSDT/
+WARNING 2025-04-30 08:39:08,530 basehttp 62510 6203961344 "GET /api/crypto/technical-indicators/SUIUSDT/?force_refresh=true HTTP/1.1" 404 95
+INFO 2025-04-30 08:40:27,415 autoreload 62510 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:40:27,948 autoreload 62587 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:40:45,514 autoreload 62587 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:40:45,943 autoreload 62606 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:40:50,293 binance_api 62606 6171078656 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:40:50,293 technical_analysis 62606 6171078656 技术分析服务初始化完成
+INFO 2025-04-30 08:40:50,293 binance_api 62606 6171078656 BinanceAPI 实例创建，尚未初始化 client
+WARNING 2025-04-30 08:40:50,545 log 62606 6171078656 Not Found: /api/crypto/technical-indicators/SUIUSDT/
+WARNING 2025-04-30 08:40:50,546 basehttp 62606 6171078656 "GET /api/crypto/technical-indicators/SUIUSDT/?force_refresh=true HTTP/1.1" 404 95
+INFO 2025-04-30 08:40:54,605 binance_api 62606 6171078656 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:40:54,606 technical_analysis 62606 6171078656 技术分析服务初始化完成
+INFO 2025-04-30 08:40:54,606 binance_api 62606 6171078656 BinanceAPI 实例创建，尚未初始化 client
+WARNING 2025-04-30 08:40:54,840 log 62606 6171078656 Not Found: /api/crypto/technical-indicators/SUIUSDT/
+WARNING 2025-04-30 08:40:54,840 basehttp 62606 6171078656 "GET /api/crypto/technical-indicators/SUIUSDT/?force_refresh=true HTTP/1.1" 404 95
+INFO 2025-04-30 08:42:09,439 autoreload 62606 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:42:09,997 autoreload 62669 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:42:43,262 autoreload 62669 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-04-30 08:42:43,847 autoreload 62693 8462421120 Watching for file changes with StatReloader
+INFO 2025-04-30 08:42:46,874 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:42:46,875 technical_analysis 62693 6199537664 技术分析服务初始化完成
+INFO 2025-04-30 08:42:46,875 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+WARNING 2025-04-30 08:42:47,191 log 62693 6199537664 Not Found: /api/crypto/technical-indicators/SUIUSDT/
+WARNING 2025-04-30 08:42:47,192 basehttp 62693 6199537664 "GET /api/crypto/technical-indicators/SUIUSDT/ HTTP/1.1" 404 95
+INFO 2025-04-30 08:42:52,164 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:42:52,164 technical_analysis 62693 6199537664 技术分析服务初始化完成
+INFO 2025-04-30 08:42:52,164 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:42:52,645 binance_api 62693 6217510912 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:42:53,370 technical_analysis 62693 6217510912 计算梅耶倍数的原始数据:
+INFO 2025-04-30 08:42:53,371 technical_analysis 62693 6217510912 数据长度: 729
+INFO 2025-04-30 08:42:53,371 technical_analysis 62693 6217510912 最新价格: 3.5283
+INFO 2025-04-30 08:42:53,371 technical_analysis 62693 6217510912 MA200值: 3.2261214999999996
+INFO 2025-04-30 08:42:53,371 technical_analysis 62693 6217510912 梅耶倍数计算结果: 1.0936661870918378
+INFO 2025-04-30 08:42:54,148 binance_api 62693 6217510912 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:42:57,481 basehttp 62693 6199537664 "GET /api/crypto/technical-indicators-data/SUIUSDT/ HTTP/1.1" 200 384
+INFO 2025-04-30 08:42:59,654 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:42:59,655 technical_analysis 62693 6199537664 技术分析服务初始化完成
+INFO 2025-04-30 08:42:59,655 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:43:00,478 binance_api 62693 6217510912 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:43:01,161 technical_analysis 62693 6217510912 计算梅耶倍数的原始数据:
+INFO 2025-04-30 08:43:01,162 technical_analysis 62693 6217510912 数据长度: 729
+INFO 2025-04-30 08:43:01,162 technical_analysis 62693 6217510912 最新价格: 3.5301
+INFO 2025-04-30 08:43:01,162 technical_analysis 62693 6217510912 MA200值: 3.2261305
+INFO 2025-04-30 08:43:01,162 technical_analysis 62693 6217510912 梅耶倍数计算结果: 1.0942210800214065
+INFO 2025-04-30 08:43:01,408 binance_api 62693 6217510912 BinanceAPI 客户端初始化完成
+INFO 2025-04-30 08:43:03,586 signals 62693 6217510912 更新代币 SUI 的技术分析数据
+INFO 2025-04-30 08:43:03,590 signals 62693 6217510912 更新代币 SUI 的市场数据
+INFO 2025-04-30 08:43:03,592 views 62693 6217510912 成功更新代币 SUI 的技术分析数据
+INFO 2025-04-30 08:43:04,062 views 62693 6199537664 === 测试认证响应详情 ===
+INFO 2025-04-30 08:43:04,062 views 62693 6199537664 响应状态码: 200
+INFO 2025-04-30 08:43:04,062 views 62693 6199537664 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '20250430084303A659B133F9238907A9BB', 'Server-Timing': 'inner; dur=125', 'x-tt-trace-host': '01eeb80b75c39159ae20c35ecc031ae96e8aff50f6f74ae6cb53afa1c36adaba357b93b256bbbf3f6278199f8a3739754a354feb3f70c07249663768563510b8a781763de69b3352188b39551f567b3bc4c482ca5447201e264e1d94b5501fe6eb', 'x-tt-trace-id': '00-250430084303A659B133F9238907A9BB-1E90238461B5B8A7-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Expires': 'Wed, 30 Apr 2025 08:43:04 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Wed, 30 Apr 2025 08:43:04 GMT', 'Content-Length': '162', 'X-Cache': 'TCP_MISS from a23-33-91-122.deploy.akamaitechnologies.com (AkamaiGHost/22.1.0-0ca00c147d19d7f8aed87fe96e7f5f75) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'X-Origin-Response-Time': '163,23.33.91.122', 'X-Akamai-Request-ID': '6beb5576'}
+INFO 2025-04-30 08:43:04,063 views 62693 6199537664 响应内容: {"data":{"id":"7499023800076550162","conversation_id":"7499023800076533778","bot_id":"7494575252253720584","created_at":1746002584,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+INFO 2025-04-30 08:43:06,664 views 62693 6199537664 第 1 次尝试获取对话状态
+INFO 2025-04-30 08:43:06,860 views 62693 6199537664 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7499023958013165575","created_at":1746002587,"id":"7499023977851912200","status":"in_progress"},"detail":{"logid":"202504300843064338A049D85FE8027D40"},"msg":""}
+INFO 2025-04-30 08:43:07,861 views 62693 6199537664 第 2 次尝试获取对话状态
+INFO 2025-04-30 08:43:08,051 views 62693 6199537664 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7499023958013165575","created_at":1746002587,"id":"7499023977851912200","status":"in_progress"},"detail":{"logid":"202504300843074338A049D85FE8027E3C"},"msg":""}
+INFO 2025-04-30 08:43:09,553 views 62693 6199537664 第 3 次尝试获取对话状态
+INFO 2025-04-30 08:43:09,723 views 62693 6199537664 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7499023958013165575","created_at":1746002587,"id":"7499023977851912200","status":"in_progress"},"detail":{"logid":"202504300843094338A049D85FE8027FD3"},"msg":""}
+INFO 2025-04-30 08:43:11,974 views 62693 6199537664 第 4 次尝试获取对话状态
+INFO 2025-04-30 08:43:12,164 views 62693 6199537664 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7499023958013165575","created_at":1746002587,"id":"7499023977851912200","status":"in_progress"},"detail":{"logid":"20250430084311261D46074AE830FDED55"},"msg":""}
+INFO 2025-04-30 08:43:15,541 views 62693 6199537664 第 5 次尝试获取对话状态
+INFO 2025-04-30 08:43:15,727 views 62693 6199537664 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7499023958013165575","created_at":1746002587,"id":"7499023977851912200","status":"in_progress"},"detail":{"logid":"202504300843154338A049D85FE80284E3"},"msg":""}
+INFO 2025-04-30 08:43:20,729 views 62693 6199537664 第 6 次尝试获取对话状态
+INFO 2025-04-30 08:43:20,914 views 62693 6199537664 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","completed_at":1746002599,"conversation_id":"7499023958013165575","created_at":1746002587,"id":"7499023977851912200","status":"completed","usage":{"input_count":671,"output_count":846,"token_count":1517}},"detail":{"logid":"202504300843204338A049D85FE80288C5"},"msg":""}
+INFO 2025-04-30 08:43:21,109 views 62693 6199537664 消息列表响应: {"code":0,"data":[{"bot_id":"7494575252253720584","chat_id":"7499023977851912200","content":"{\n    \"trend_analysis\": {\n        \"probabilities\": {\n            \"up\": 60,\n            \"sideways\": 20,\n            \"down\": 20\n        },\n        \"summary\": \"根据当前的技术指标，市场有较高的概率继续上涨，但也存在一定的横盘和下跌风险。\"\n    },\n    \"indicators_analysis\": {\n        \"RSI\": {\n            \"value\": 95.24,\n            \"analysis\": \"RSI指标显示市场处于极度超买状态，短期内可能会有回调压力。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MACD\": {\n            \"value\": {\"line\": 0.35, \"signal\": 0.22, \"histogram\": 0.12},\n            \"analysis\": \"MACD指标显示市场处于上升趋势，但柱状图显示动能有所减弱。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"BollingerBands\": {\n            \"value\": {\"upper\": 3.98, \"middle\": 2.82, \"lower\": 1.77},\n            \"analysis\": \"价格接近布林带上轨，可能会有回调压力。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"BIAS\": {\n            \"value\": -0.02,\n            \"analysis\": \"BIAS指标接近零，市场无明显偏离。\",\n            \"support_trend\": \"中性\"\n        },\n        \"PSY\": {\n            \"value\": 75.0,\n            \"analysis\": \"心理线指标显示市场情绪较为乐观，但可能存在短期回调风险。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"DMI\": {\n            \"value\": {\"plus_di\": 49.7, \"minus_di\": 0.7, \"adx\": 59.7},\n            \"analysis\": \"DMI指标显示市场处于强劲的上升趋势中。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"VWAP\": {\n            \"value\": 1.81,\n            \"analysis\": \"当前价格高于VWAP，表明市场处于上升趋势。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"FundingRate\": {\n            \"value\": 0.0001,\n            \"analysis\": \"资金费率较低，表明市场情绪中性。\",\n            \"support_trend\": \"中性\"\n        },\n        \"ExchangeNetflow\": {\n            \"value\": -75.12,\n            \"analysis\": \"净流出量较大，表明投资者可能在获利了结。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"NUPL\": {\n            \"value\": 95.01,\n            \"analysis\": \"NUPL指标显示市场处于极度盈利状态，短期内可能会有回调。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MayerMultiple\": {\n            \"value\": 1.09,\n            \"analysis\": \"Mayer Multiple显示市场价格适中，尚未过热。\",\n            \"support_trend\": \"中性\"\n        }\n    },\n    \"trading_advice\": {\n        \"action\": \"持有\",\n        \"reason\": \"尽管市场有较高的上涨概率，但多项指标显示短期内可能会有回调压力，建议暂时持有观望。\",\n        \"entry_price\": 3.5294,\n        \"stop_loss\": 3.20,\n        \"take_profit\": 4.00\n    },\n    \"risk_assessment\": {\n        \"level\": \"中\",\n        \"score\": 60,\n        \"details\": [\"市场处于极度超买状态\", \"投资者可能在获利了结\", \"短期内存在回调压力\"]\n    }\n}","content_type":"text","conversation_id":"7499023958013165575","created_at":1746002587,"id":"7499023977851944968","reasoning_content":"","role":"assistant","type":"answer","updated_at":1746002596},{"bot_id":"7494575252253720584","chat_id":"7499023977851912200","content":"{\"msg_type\":\"generate_answer_finish\",\"data\":\"{\\\"finish_reason\\\":0,\\\"FinData\\\":\\\"\\\"}\",\"from_module\":null,\"from_unit\":null}","content_type":"text","conversation_id":"7499023958013165575","created_at":1746002599,"id":"7499023977852108808","role":"assistant","type":"verbose","updated_at":1746002598},{"bot_id":"7494575252253720584","chat_id":"7499023977851912200","content":"Can you provide more details on the RSI indicator for the symbol SUIUSDT?","content_type":"text","conversation_id":"7499023958013165575","created_at":1746002599,"id":"7499023977852125192","role":"assistant","type":"follow_up","updated_at":1746002598},{"bot_id":"7494575252253720584","chat_id":"7499023977851912200","content":"How does the MACD indicator suggest the market trend for SUIUSDT?","content_type":"text","conversation_id":"7499023958013165575","created_at":1746002599,"id":"7499023977852141576","role":"assistant","type":"follow_up","updated_at":1746002598},{"bot_id":"7494575252253720584","chat_id":"7499023977851912200","content":"What is the significance of the Bollinger Bands upper, middle, and lower values for the symbol SUIUSDT?","content_type":"text","conversation_id":"7499023958013165575","created_at":1746002599,"id":"7499023977852157960","role":"assistant","type":"follow_up","updated_at":1746002598}],"detail":{"logid":"202504300843204338A049D85FE80288E9"},"msg":""}
+INFO 2025-04-30 08:43:21,121 analysis_report_service 62693 6217510912 成功保存SUIUSDT的分析报告
+INFO 2025-04-30 08:43:21,122 basehttp 62693 6199537664 "GET /api/crypto/technical-indicators/SUIUSDT/?force_refresh=true HTTP/1.1" 200 2352
+INFO 2025-04-30 08:43:30,422 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:43:30,423 technical_analysis 62693 6199537664 技术分析服务初始化完成
+INFO 2025-04-30 08:43:30,423 binance_api 62693 6199537664 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-04-30 08:43:30,690 basehttp 62693 6199537664 "GET /api/crypto/technical-indicators/SUIUSDT/ HTTP/1.1" 200 2337

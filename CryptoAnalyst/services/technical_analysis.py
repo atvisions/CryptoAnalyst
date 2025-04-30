@@ -4,6 +4,8 @@ import pandas as pd
 from typing import Dict, List, Optional, Union
 from datetime import datetime, timedelta
 from CryptoAnalyst.services.binance_api import BinanceAPI
+import requests
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -12,36 +14,40 @@ class TechnicalAnalysisService:
     
     def __init__(self):
         """初始化技术分析服务"""
-        self.binance_api = BinanceAPI()
+        self.binance_api = BinanceAPI()  # 使用新的初始化方式
         logger.info("技术分析服务初始化完成")
     
     def get_all_indicators(self, symbol: str, interval: str = '1d', limit: int = 1000) -> Dict:
-        """
-        获取所有技术指标
+        """获取所有技术指标数据
         
         Args:
-            symbol: 交易对符号，例如 'BTCUSDT'
-            interval: K线间隔，例如 '1d', '4h', '1h'
-            limit: 获取的K线数量，默认为1000（确保有足够数据计算梅耶倍数）
+            symbol: 交易对符号
+            interval: K线间隔
+            limit: 获取的K线数量限制
             
         Returns:
             Dict: 包含所有技术指标的字典
         """
         try:
+            # 确保 binance_api 客户端已初始化
+            if not self.binance_api._ensure_client():
+                logger.error("无法初始化 Binance API 客户端")
+                return {
+                    'status': 'error',
+                    'message': "无法连接到 Binance API"
+                }
+                
             # 获取历史K线数据
             klines = self.binance_api.get_historical_klines(symbol, interval, '1000 days ago UTC')
             if not klines:
                 logger.warning(f"无法获取{symbol}的K线数据")
-                return {}
+                return {
+                    'status': 'error',
+                    'message': f"无法获取{symbol}的K线数据"
+                }
                 
             # 转换为DataFrame
             df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_volume', 'trades', 'taker_buy_base', 'taker_buy_quote', 'ignore'])
-            
-            # 打印原始K线数据
-            logger.info(f"获取到的K线数据:")
-            logger.info(f"数据长度: {len(df)}")
-            logger.info(f"时间范围: {df['timestamp'].iloc[0]} 到 {df['timestamp'].iloc[-1]}")
-            logger.info(f"价格范围: {df['close'].min()} 到 {df['close'].max()}")
             
             # 确保数据类型正确
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -51,24 +57,9 @@ class TechnicalAnalysisService:
             # 按时间排序
             df = df.sort_values('timestamp')
             
-            # 检查数据是否连续
-            df['time_diff'] = df['timestamp'].diff()
-            expected_diff = pd.Timedelta(days=1) if interval == '1d' else pd.Timedelta(hours=1) if interval == '1h' else pd.Timedelta(minutes=1)
-            missing_data = df[df['time_diff'] > expected_diff * 1.5]  # 允许50%的时间差
-            
-            if not missing_data.empty:
-                logger.warning(f"发现数据缺失: {len(missing_data)} 个时间点")
-                for _, row in missing_data.iterrows():
-                    logger.warning(f"缺失数据时间点: {row['timestamp']}")
-            
             # 检查数据长度
             if len(df) < 200:
-                logger.warning(f"数据长度不足200天，无法计算NUPL和MayerMultiple")
-                nupl = 0.0
-                mayer_multiple = 1.0
-            else:
-                nupl = self._calculate_nupl(df)
-                mayer_multiple = self._calculate_mayer_multiple(df)
+                logger.warning(f"数据长度不足200天，可能影响某些指标的计算准确性")
             
             # 计算技术指标
             indicators = {
@@ -81,8 +72,8 @@ class TechnicalAnalysisService:
                 'VWAP': self._calculate_vwap(df),
                 'FundingRate': self._get_funding_rate(symbol),
                 'ExchangeNetflow': self._calculate_exchange_netflow(df),
-                'NUPL': nupl,
-                'MayerMultiple': mayer_multiple
+                'NUPL': self._calculate_nupl(df) if len(df) >= 200 else 0.0,
+                'MayerMultiple': self._calculate_mayer_multiple(df) if len(df) >= 200 else 1.0
             }
             
             # 检查所有指标是否有效
@@ -108,6 +99,18 @@ class TechnicalAnalysisService:
                 }
             }
             
+        except requests.exceptions.Timeout:
+            logger.error(f"请求Binance API超时")
+            return {
+                'status': 'error',
+                'message': "连接Binance API超时，请稍后重试"
+            }
+        except requests.exceptions.RequestException as e:
+            logger.error(f"请求Binance API失败: {str(e)}")
+            return {
+                'status': 'error',
+                'message': f"连接Binance API失败: {str(e)}"
+            }
         except Exception as e:
             logger.error(f"计算技术指标时发生错误: {str(e)}")
             return {
@@ -581,67 +584,4 @@ class TechnicalAnalysisService:
             
         except Exception as e:
             logger.error(f"计算梅耶倍数时发生错误: {str(e)}")
-            return 1.0
-
-    def calculate_vwap(self, klines):
-        """计算成交量加权平均价格
-        
-        Args:
-            klines: K线数据列表
-            
-        Returns:
-            float: VWAP值
-        """
-        try:
-            total_volume = sum(float(k[5]) for k in klines)  # 成交量
-            if total_volume == 0:
-                return 0.0
-                
-            weighted_sum = sum(float(k[4]) * float(k[5]) for k in klines)  # 收盘价 * 成交量
-            return weighted_sum / total_volume
-            
-        except Exception as e:
-            logger.error(f"计算VWAP时出错: {str(e)}")
-            return 0.0
-            
-    def calculate_nupl(self, current_price, realized_price):
-        """计算未实现盈亏比例
-        
-        Args:
-            current_price: 当前价格
-            realized_price: 已实现价格
-            
-        Returns:
-            float: NUPL值
-        """
-        try:
-            if realized_price == 0:
-                return 0.0
-                
-            nupl = ((current_price - realized_price) / realized_price) * 100
-            return max(min(nupl, 100), -100)  # 限制在-100到100之间
-            
-        except Exception as e:
-            logger.error(f"计算NUPL时出错: {str(e)}")
-            return 0.0
-            
-    def calculate_mayer_multiple(self, current_price, ma_200):
-        """计算Mayer倍数
-        
-        Args:
-            current_price: 当前价格
-            ma_200: 200日移动平均线
-            
-        Returns:
-            float: Mayer倍数
-        """
-        try:
-            if ma_200 == 0:
-                return 1.0
-                
-            multiple = current_price / ma_200
-            return max(min(multiple, 10), 0.1)  # 限制在0.1到10之间
-            
-        except Exception as e:
-            logger.error(f"计算Mayer倍数时出错: {str(e)}")
             return 1.0 

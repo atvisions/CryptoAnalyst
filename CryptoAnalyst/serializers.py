@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
 from .models import User, VerificationCode
 from datetime import datetime, timezone
 
@@ -59,4 +60,22 @@ class SendVerificationCodeSerializer(serializers.Serializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("该邮箱已被注册")
             
-        return value 
+        return value
+
+class TokenRefreshSerializer(serializers.Serializer):
+    """Token刷新序列化器"""
+    token = serializers.CharField(read_only=True)
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            raise serializers.ValidationError('认证失败')
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        # 删除旧token
+        Token.objects.filter(user=user).delete()
+        # 创建新token
+        token = Token.objects.create(user=user)
+        return {'token': token.key} 
