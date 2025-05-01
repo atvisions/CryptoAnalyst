@@ -6,10 +6,12 @@ from .services.technical_analysis import TechnicalAnalysisService
 from .services.token_data_service import TokenDataService
 from .services.market_data_service import MarketDataService
 from .services.analysis_report_service import AnalysisReportService
+from .services.binance_api import BinanceAPI
 from .models import Token as CryptoToken, Chain, AnalysisReport, TechnicalAnalysis, MarketData, User, VerificationCode, InvitationCode
 from .utils import logger, sanitize_indicators, format_timestamp, parse_timestamp, safe_json_loads
 import numpy as np
-from typing import Dict, Optional
+from typing import Dict, Optional, List
+import pandas as pd
 from datetime import datetime, timezone, timedelta
 import requests
 import json
@@ -38,32 +40,32 @@ class TechnicalIndicatorsAPIView(APIView):
         self.ta_service = TechnicalAnalysisService()
         self.market_service = MarketDataService()
         self.report_service = AnalysisReportService()
-        
+
         # 尝试获取 Coze API 配置
         self.coze_api_key = os.getenv('COZE_API_KEY')
         self.coze_bot_id = os.getenv('COZE_BOT_ID', '7494575252253720584')
         self.coze_api_url = os.getenv('COZE_API_URL', 'https://api.coze.com')
-        
+
         if not self.coze_api_key:
             logger.warning("COZE_API_KEY 环境变量未设置，将使用默认分析报告")
 
     def get(self, request, symbol: str):
         """处理GET请求"""
         force_refresh = request.query_params.get('force_refresh', '').lower() == 'true'
-        
+
         try:
             # 处理 USDT 后缀
             base_symbol = symbol.replace('USDT', '')
-            
+
             if not force_refresh:
                 # 只从本地数据库读取数据
                 try:
                     # 获取代币信息
                     token = CryptoToken.objects.get(symbol=base_symbol)
-                    
+
                     # 获取最新的分析报告
                     latest_report = AnalysisReport.objects.filter(token=token).order_by('-timestamp').first()
-                    
+
                     if not latest_report:
                         return Response({
                             'status': 'error',
@@ -178,27 +180,27 @@ class TechnicalIndicatorsAPIView(APIView):
                         }
                     }
                     return Response(response_data)
-                    
+
                 except CryptoToken.DoesNotExist:
                     return Response({
                         'status': 'error',
-                        'message': f"未找到代币 {symbol} 的记录，请使用 force_refresh=true 参数刷新数据"
+                        'message': f"未找到代币 {symbol} 的信息，请使用 force_refresh=true 参数刷新数据"
                     }, status=status.HTTP_404_NOT_FOUND)
-                except Exception as e:
-                    logger.error(f"从数据库读取数据时发生错误: {str(e)}")
-                    return Response({
-                        'status': 'error',
-                        'message': f"读取数据失败: {str(e)}"
-                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
             else:
                 # 强制刷新数据
                 return self._handle_force_refresh(symbol)
-                
+
         except Exception as e:
-            logger.error(f"处理请求时发生错误: {str(e)}")
+            error_msg = str(e)
+            if not error_msg:  # 处理空错误信息
+                error_msg = "未知错误"
+            logger.error(f"处理请求时发生错误: {error_msg}")
+            logger.error(f"错误类型: {type(e).__name__}")
+            logger.error(f"堆栈跟踪: {traceback.format_exc()}")
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': f"处理请求时发生错误: {error_msg}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _handle_force_refresh(self, symbol: str):
@@ -207,14 +209,16 @@ class TechnicalIndicatorsAPIView(APIView):
             # 获取最新的技术指标数据
             technical_data = self.ta_service.get_all_indicators(symbol)
             if technical_data['status'] == 'error':
+                logger.error(f"获取技术指标数据失败: {technical_data.get('message', '未知错误')}")
                 return Response({
                     'status': 'error',
-                    'message': technical_data['message']
+                    'message': technical_data.get('message', '获取技术指标数据失败')
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             # 获取市场数据
             market_data = self.market_service.get_market_data(symbol)
             if not market_data:
+                logger.error(f"获取市场数据失败: {symbol}")
                 return Response({
                     'status': 'error',
                     'message': f"获取市场数据失败"
@@ -260,10 +264,15 @@ class TechnicalIndicatorsAPIView(APIView):
             return self._handle_local_read(symbol)
 
         except Exception as e:
-            logger.error(f"强制刷新数据时发生错误: {str(e)}")
+            error_msg = str(e)
+            if not error_msg:  # 处理空错误信息
+                error_msg = "未知错误"
+            logger.error(f"强制刷新数据时发生错误: {error_msg}")
+            logger.error(f"错误类型: {type(e).__name__}")
+            logger.error(f"堆栈跟踪: {traceback.format_exc()}")
             return Response({
                 'status': 'error',
-                'message': f"刷新数据失败: {str(e)}"
+                'message': f"刷新数据失败: {error_msg}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _update_analysis_data(self, token: CryptoToken, indicators: Dict, current_price: float) -> None:
@@ -271,7 +280,7 @@ class TechnicalIndicatorsAPIView(APIView):
         try:
             # 处理指标数据
             indicators = sanitize_indicators(indicators)
-            
+
             # 创建或更新技术分析记录
             technical_analysis, _ = TechnicalAnalysis.objects.update_or_create(
                 token=token,
@@ -312,7 +321,7 @@ class TechnicalIndicatorsAPIView(APIView):
             )
 
             logger.info(f"成功更新代币 {token.symbol} 的技术分析数据")
-            
+
             return technical_analysis
 
         except Exception as e:
@@ -325,12 +334,12 @@ class TechnicalIndicatorsAPIView(APIView):
             self.coze_api_key = os.getenv('COZE_API_KEY')
             if not self.coze_api_key:
                 logger.warning("COZE_API_KEY 环境变量未设置")
-        
+
         if not hasattr(self, 'coze_bot_id') or not self.coze_bot_id:
             self.coze_bot_id = os.getenv('COZE_BOT_ID', '7494575252253720584')
             if not self.coze_bot_id:
                 logger.warning("COZE_BOT_ID 环境变量未设置，使用默认值")
-        
+
         if not hasattr(self, 'coze_api_url') or not self.coze_api_url:
             self.coze_api_url = os.getenv('COZE_API_URL', 'https://api.coze.com')
             if not self.coze_api_url:
@@ -427,7 +436,7 @@ class TechnicalIndicatorsAPIView(APIView):
         try:
             # 初始化 Coze API 配置
             self._init_coze_api()
-            
+
             # 获取市场数据
             market_data = await sync_to_async(self.market_service.get_market_data)(symbol)
             if not market_data:
@@ -441,7 +450,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 "Accept": "*/*",
                 "Connection": "keep-alive"
             }
-            
+
             # 构建请求体
             additional_messages = [{
                 "role": "user",
@@ -469,7 +478,7 @@ class TechnicalIndicatorsAPIView(APIView):
 
             # 设置超时
             timeout = aiohttp.ClientTimeout(total=30)
-            
+
             # 发送请求创建对话
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 try:
@@ -482,7 +491,7 @@ class TechnicalIndicatorsAPIView(APIView):
                             error_text = await response.text()
                             logger.error(f"Coze API请求失败: {error_text}")
                             return None
-                        
+
                         response_data = await response.json()
                         if response_data.get('code') != 0:
                             logger.error(f"Coze API响应错误: {response_data}")
@@ -500,7 +509,7 @@ class TechnicalIndicatorsAPIView(APIView):
                         max_retries = 20
                         retry_count = 0
                         retry_interval = 1  # 初始重试间隔（秒）
-                        
+
                         while retry_count < max_retries:
                             try:
                                 # 构建获取对话状态的请求
@@ -510,19 +519,19 @@ class TechnicalIndicatorsAPIView(APIView):
                                     "chat_id": chat_id,
                                     "conversation_id": conversation_id
                                 }
-                                
+
                                 logger.info(f"第 {retry_count + 1} 次尝试获取对话状态")
-                                
+
                                 async with session.get(retrieve_url, headers=headers, params=retrieve_params) as status_response:
                                     status_text = await status_response.text()
                                     logger.info(f"状态响应: {status_text}")
-                                    
+
                                     if status_response.status == 200:
                                         status_data = json.loads(status_text)
                                         if status_data.get('code') == 0:
                                             data = status_data.get('data', {})
                                             status = data.get('status')
-                                            
+
                                             if status == "completed":
                                                 # 获取消息列表
                                                 message_list_url = f"{self.coze_api_url}/v3/chat/message/list"
@@ -531,11 +540,11 @@ class TechnicalIndicatorsAPIView(APIView):
                                                     "chat_id": chat_id,
                                                     "conversation_id": conversation_id
                                                 }
-                                                
+
                                                 async with session.get(message_list_url, headers=headers, params=message_list_params) as messages_response:
                                                     messages_text = await messages_response.text()
                                                     logger.info(f"消息列表响应: {messages_text}")
-                                                    
+
                                                     if messages_response.status == 200:
                                                         messages_data = json.loads(messages_text)
                                                         if messages_data.get('code') == 0:
@@ -557,7 +566,7 @@ class TechnicalIndicatorsAPIView(APIView):
                                                                             if content.startswith('```json'):
                                                                                 content = content[7:-3].strip()
                                                                             analysis_data = json.loads(content)
-                                                                            
+
                                                                             # 转换数据格式
                                                                             formatted_data = {
                                                                                 'trend_up_probability': analysis_data.get('trend_analysis', {}).get('probabilities', {}).get('up', 0),
@@ -574,17 +583,17 @@ class TechnicalIndicatorsAPIView(APIView):
                                                                                 'risk_score': int(analysis_data.get('risk_assessment', {}).get('score', 50)),
                                                                                 'risk_details': analysis_data.get('risk_assessment', {}).get('details', [])
                                                                             }
-                                                                            
+
                                                                             return formatted_data
                                                                         except json.JSONDecodeError as e:
                                                                             logger.error(f"解析JSON失败: {str(e)}")
                                                                             return None
-                                
+
                                 # 如果没有获取到完整结果，继续重试
                                 await asyncio.sleep(retry_interval)
                                 retry_interval = min(retry_interval * 1.5, 5)  # 指数退避，最大5秒
                                 retry_count += 1
-                                
+
                             except asyncio.TimeoutError:
                                 logger.error("获取对话状态超时")
                                 retry_count += 1
@@ -596,7 +605,7 @@ class TechnicalIndicatorsAPIView(APIView):
 
                         logger.error("所有重试失败，无法获取对话结果")
                         return None
-                        
+
                 except asyncio.TimeoutError:
                     logger.error("Coze API 请求超时")
                     return None
@@ -612,7 +621,7 @@ class TechnicalIndicatorsAPIView(APIView):
         """测试Coze API认证"""
         try:
             url = f"{self.coze_api_url}/v3/chat"
-            
+
             # 设置请求头
             headers = {
                 "Authorization": f"Bearer {self.coze_api_key}",
@@ -620,7 +629,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 "Accept": "*/*",
                 "Connection": "keep-alive"
             }
-            
+
             # 构建最简单的请求体
             payload = {
                 "bot_id": self.coze_bot_id,
@@ -635,7 +644,7 @@ class TechnicalIndicatorsAPIView(APIView):
                     }
                 ]
             }
-            
+
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, headers=headers, json=payload) as response:
                     response_text = await response.text()
@@ -643,9 +652,9 @@ class TechnicalIndicatorsAPIView(APIView):
                     logger.info(f"响应状态码: {response.status}")
                     logger.info(f"响应头: {dict(response.headers)}")
                     logger.info(f"响应内容: {response_text}")
-                    
+
                     return response.status == 200
-                    
+
         except Exception as e:
             logger.error(f"测试认证失败: {str(e)}")
             return False
@@ -655,7 +664,7 @@ class TechnicalIndicatorsAPIView(APIView):
         try:
             # 检查是否需要强制刷新
             force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
-            
+
             if force_refresh:
                 # 获取技术指标
                 technical_data = await sync_to_async(self.ta_service.get_all_indicators)(symbol)
@@ -711,13 +720,13 @@ class TechnicalIndicatorsAPIView(APIView):
                 # 保存分析报告
                 try:
                     await sync_to_async(self.report_service.save_analysis_report)(symbol, analysis_data)
-                    
+
                     # 添加时间戳字段，使用当前时间
                     analysis_data['last_update_time'] = format_timestamp(datetime.now(timezone.utc))
-                    
+
                     # 添加当前价格字段
                     analysis_data['current_price'] = float(market_data['price'])
-                    
+
                 except Exception as e:
                     logger.error(f"保存分析报告失败: {str(e)}")
                     return Response({
@@ -730,14 +739,14 @@ class TechnicalIndicatorsAPIView(APIView):
                     'status': 'success',
                     'data': analysis_data
                 })
-            
+
             # 如果不是强制刷新，则尝试从数据库获取最新的分析报告
             try:
                 # 获取或创建默认链
                 chain_filter = sync_to_async(Chain.objects.filter)
                 chain = await chain_filter(chain=symbol.replace('USDT', ''))
                 chain = await sync_to_async(chain.first)()
-                
+
                 if not chain:
                     return Response({
                         'status': 'not_found',
@@ -752,7 +761,7 @@ class TechnicalIndicatorsAPIView(APIView):
                     chain=chain
                 )
                 token = await sync_to_async(token.first)()
-                
+
                 if not token:
                     return Response({
                         'status': 'not_found',
@@ -764,7 +773,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 report_filter = sync_to_async(AnalysisReport.objects.filter)
                 latest_report = await report_filter(token=token)
                 latest_report = await sync_to_async(latest_report.order_by('-timestamp').first)()
-                
+
                 if not latest_report:
                     return Response({
                         'status': 'not_found',
@@ -787,7 +796,7 @@ class TechnicalIndicatorsAPIView(APIView):
                         'message': f"未找到代币 {symbol} 的完整数据",
                         'needs_refresh': True
                     }, status=status.HTTP_404_NOT_FOUND)
-                
+
                 # 构建响应数据
                 response_data = {
                     'status': 'success',
@@ -899,7 +908,7 @@ class TechnicalIndicatorsAPIView(APIView):
                     'message': f"未找到代币 {symbol} 的分析数据",
                     'needs_refresh': True
                 }, status=status.HTTP_404_NOT_FOUND)
-            
+
             return Response({
                 'status': 'error',
                 'message': "未找到数据，请使用 force_refresh=true 参数刷新数据"
@@ -916,6 +925,127 @@ class TechnicalIndicatorsAPIView(APIView):
     def get(self, request, symbol: str):
         """同步入口点，调用异步处理"""
         return asyncio.run(self.async_get(request, symbol))
+
+class PriceHistoryAPIView(APIView):
+    """价格历史数据API视图"""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.binance_api = BinanceAPI()
+
+    def get(self, request, symbol: str):
+        """获取价格历史数据
+
+        Args:
+            request: HTTP请求对象
+            symbol: 交易对符号，例如 'BTCUSDT'
+
+        Returns:
+            Response: 包含价格历史数据的响应
+        """
+        try:
+            # 获取请求参数
+            interval = request.query_params.get('interval', '1h')
+            period = request.query_params.get('period', '24h')
+
+            # 将period转换为小时数
+            period_hours = {
+                '6h': 6,
+                '12h': 12,
+                '24h': 24,
+                '7d': 24 * 7
+            }.get(period, 24)
+
+            # 将interval转换为分钟数和Binance API格式
+            interval_minutes = {
+                '5m': 5,
+                '15m': 15,
+                '30m': 30,
+                '1h': 60,
+                '4h': 240
+            }.get(interval, 60)
+
+            binance_interval = {
+                '5m': '5m',
+                '15m': '15m',
+                '30m': '30m',
+                '1h': '1h',
+                '4h': '4h'
+            }.get(interval, '1h')
+
+            # 计算需要获取的数据点数量
+            limit = min(1000, (period_hours * 60) // interval_minutes)
+
+            # 获取历史K线数据
+            start_time = datetime.now() - timedelta(hours=period_hours)
+            start_str = start_time.strftime('%Y-%m-%d %H:%M:%S')
+
+            # 确保交易对符号格式正确（添加USDT后缀如果没有）
+            if not symbol.endswith('USDT'):
+                symbol = f"{symbol}USDT"
+
+            logger.info(f"获取{symbol}的K线数据，间隔:{binance_interval}，开始时间:{start_str}")
+
+            klines = self.binance_api.get_historical_klines(
+                symbol=symbol,
+                interval=binance_interval,
+                start_str=start_str
+            )
+
+            if not klines:
+                logger.warning(f"无法获取{symbol}的K线数据")
+                return Response({
+                    'status': 'error',
+                    'message': f"无法获取{symbol}的K线数据"
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # 转换为DataFrame
+            df = pd.DataFrame(klines, columns=[
+                'timestamp', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_volume', 'trades', 'buy_base_volume',
+                'buy_quote_volume', 'ignore'
+            ])
+
+            # 转换数据类型
+            for col in ['open', 'high', 'low', 'close', 'volume']:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+
+            # 计算价格变化百分比
+            first_price = float(df['close'].iloc[0])
+            last_price = float(df['close'].iloc[-1])
+            change_percent = ((last_price - first_price) / first_price) * 100 if first_price > 0 else 0
+
+            # 构建响应数据
+            prices = [
+                {
+                    'timestamp': int(row['timestamp']),
+                    'price': float(row['close'])
+                }
+                for _, row in df.iterrows()
+            ]
+
+            response_data = {
+                'status': 'success',
+                'data': {
+                    'symbol': symbol,
+                    'interval': interval,
+                    'period': period,
+                    'prices': prices,
+                    'change_percent': round(change_percent, 2),
+                    'high': float(df['high'].max()),
+                    'low': float(df['low'].min())
+                }
+            }
+
+            return Response(response_data)
+
+        except Exception as e:
+            logger.error(f"获取价格历史数据失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class TokenDataAPIView(APIView):
     """代币数据API视图"""
@@ -964,7 +1094,7 @@ def _sanitize_indicators(self, indicators):
         for key in ['RSI', 'BIAS', 'PSY', 'VWAP', 'ExchangeNetflow', 'FundingRate']:
             if key in indicators:
                 indicators[key] = self._sanitize_float(indicators[key])
-                
+
         # 特殊处理 NUPL
         if 'NUPL' in indicators:
             nupl_value = indicators['NUPL']
@@ -976,7 +1106,7 @@ def _sanitize_indicators(self, indicators):
                     indicators['NUPL'] = max(min(nupl_float, 100.0), -100.0)
             except (ValueError, TypeError):
                 indicators['NUPL'] = 0.0
-                
+
         # 特殊处理 MayerMultiple
         if 'MayerMultiple' in indicators:
             mm_value = indicators['MayerMultiple']
@@ -1034,7 +1164,7 @@ class TechnicalIndicatorsDataAPIView(APIView):
                 return Response(technical_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             indicators = technical_data['data']['indicators']
-            
+
             # 获取市场数据
             market_data = await sync_to_async(self.market_service.get_market_data)(symbol)
             if not market_data:
@@ -1087,7 +1217,7 @@ class TechnicalIndicatorsDataAPIView(APIView):
 class SendVerificationCodeView(APIView):
     """发送验证码视图"""
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         try:
             serializer = SendVerificationCodeSerializer(data=request.data)
@@ -1096,12 +1226,12 @@ class SendVerificationCodeView(APIView):
                     'status': 'error',
                     'message': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             email = serializer.validated_data['email']
-            
+
             # 生成6位数字验证码
             code = ''.join(random.choices(string.digits, k=6))
-            
+
             # 保存验证码
             expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
             VerificationCode.objects.create(
@@ -1109,21 +1239,21 @@ class SendVerificationCodeView(APIView):
                 code=code,
                 expires_at=expires_at
             )
-            
+
             # 发送邮件
             subject = 'K线军师 - 验证码'
             message = settings.EMAIL_TEMPLATE.format(code=code)
             from_email = settings.DEFAULT_FROM_EMAIL
             recipient_list = [email]
-            
+
             try:
                 logger.info(f"尝试发送邮件到 {email}")
                 logger.info(f"使用邮箱: {settings.EMAIL_HOST_USER}")
                 logger.info(f"使用服务器: {settings.EMAIL_HOST}:{settings.EMAIL_PORT}")
-                
+
                 send_mail(subject, message, from_email, recipient_list)
                 logger.info(f"成功发送验证码到 {email}")
-                
+
                 return Response({
                     'status': 'success',
                     'message': '验证码已发送'
@@ -1132,18 +1262,18 @@ class SendVerificationCodeView(APIView):
                 logger.error(f"发送邮件失败: {str(e)}")
                 logger.error(f"错误类型: {type(e)}")
                 logger.error(f"错误详情: {str(e)}")
-                
+
                 error_message = '发送验证码失败，请稍后重试'
                 if 'Authentication Required' in str(e):
                     error_message = '邮件服务器认证失败，请检查配置'
                 elif 'Connection refused' in str(e):
                     error_message = '无法连接到邮件服务器，请检查网络'
-                
+
                 return Response({
                     'status': 'error',
                     'message': error_message
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+
         except Exception as e:
             logger.error(f"发送验证码失败: {str(e)}")
             return Response({
@@ -1154,11 +1284,11 @@ class SendVerificationCodeView(APIView):
 class RegisterView(APIView):
     """注册视图"""
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         try:
             logger.info(f"开始注册流程，请求数据: {request.data}")
-            
+
             serializer = RegisterSerializer(data=request.data)
             if not serializer.is_valid():
                 logger.error(f"序列化器验证失败: {serializer.errors}")
@@ -1166,11 +1296,11 @@ class RegisterView(APIView):
                     'status': 'error',
                     'message': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # 验证验证码
             email = serializer.validated_data['email']
             code = serializer.validated_data['code']
-            
+
             logger.info(f"验证验证码: email={email}, code={code}")
             verification = VerificationCode.objects.filter(
                 email=email,
@@ -1178,14 +1308,14 @@ class RegisterView(APIView):
                 is_used=False,
                 expires_at__gt=datetime.now(timezone.utc)
             ).first()
-            
+
             if not verification:
                 logger.error(f"验证码验证失败: email={email}, code={code}")
                 return Response({
                     'status': 'error',
                     'message': '验证码无效或已过期'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # 验证邀请码
             invitation_code = request.data.get('invitation_code')
             if not invitation_code:
@@ -1194,7 +1324,7 @@ class RegisterView(APIView):
                     'status': 'error',
                     'message': '邀请码不能为空'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             try:
                 logger.info(f"验证邀请码: {invitation_code}")
                 invitation = InvitationCode.objects.get(code=invitation_code, is_used=False)
@@ -1204,11 +1334,11 @@ class RegisterView(APIView):
                     'status': 'error',
                     'message': '无效的邀请码'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # 生成随机用户名
             username = f"user_{''.join(random.choices(string.ascii_lowercase + string.digits, k=8))}"
             logger.info(f"生成随机用户名: {username}")
-            
+
             # 创建用户
             try:
                 logger.info(f"创建用户: email={email}, username={username}")
@@ -1222,7 +1352,7 @@ class RegisterView(APIView):
             except Exception as e:
                 logger.error(f"创建用户失败: {str(e)}")
                 raise
-            
+
             # 更新验证码状态
             try:
                 logger.info("更新验证码状态")
@@ -1231,7 +1361,7 @@ class RegisterView(APIView):
             except Exception as e:
                 logger.error(f"更新验证码状态失败: {str(e)}")
                 raise
-            
+
             # 更新邀请码状态
             try:
                 logger.info("更新邀请码状态")
@@ -1242,7 +1372,7 @@ class RegisterView(APIView):
             except Exception as e:
                 logger.error(f"更新邀请码状态失败: {str(e)}")
                 raise
-            
+
             # 关联邀请码到用户
             try:
                 logger.info("关联邀请码到用户")
@@ -1251,14 +1381,14 @@ class RegisterView(APIView):
             except Exception as e:
                 logger.error(f"关联邀请码到用户失败: {str(e)}")
                 raise
-            
+
             logger.info(f"注册成功: user_id={user.id}")
             return Response({
                 'status': 'success',
                 'message': '注册成功',
                 'data': UserSerializer(user).data
             }, status=status.HTTP_201_CREATED)
-            
+
         except Exception as e:
             logger.error(f"注册失败，发生异常: {str(e)}")
             logger.error(f"异常类型: {type(e)}")
@@ -1271,7 +1401,7 @@ class RegisterView(APIView):
 class LoginView(APIView):
     """登录视图"""
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         try:
             serializer = LoginSerializer(data=request.data)
@@ -1280,10 +1410,10 @@ class LoginView(APIView):
                     'status': 'error',
                     'message': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             email = serializer.validated_data['email']
             password = serializer.validated_data['password']
-            
+
             # 验证用户
             user = User.objects.filter(email=email).first()
             if not user or not user.check_password(password):
@@ -1291,10 +1421,10 @@ class LoginView(APIView):
                     'status': 'error',
                     'message': '邮箱或密码错误'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # 生成token
             token, _ = Token.objects.get_or_create(user=user)
-            
+
             return Response({
                 'status': 'success',
                 'data': {
@@ -1302,7 +1432,7 @@ class LoginView(APIView):
                     'user': UserSerializer(user).data
                 }
             })
-            
+
         except Exception as e:
             logger.error(f"登录失败: {str(e)}")
             return Response({
@@ -1313,21 +1443,21 @@ class LoginView(APIView):
 class UserProfileView(APIView):
     """用户资料视图"""
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         try:
             return Response({
                 'status': 'success',
                 'data': UserSerializer(request.user).data
             })
-            
+
         except Exception as e:
             logger.error(f"获取用户资料失败: {str(e)}")
             return Response({
                 'status': 'error',
                 'message': '获取用户资料失败'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def put(self, request):
         try:
             serializer = UserSerializer(request.user, data=request.data, partial=True)
@@ -1336,15 +1466,15 @@ class UserProfileView(APIView):
                     'status': 'error',
                     'message': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             serializer.save()
-            
+
             return Response({
                 'status': 'success',
                 'message': '更新成功',
                 'data': serializer.data
             })
-            
+
         except Exception as e:
             logger.error(f"更新用户资料失败: {str(e)}")
             return Response({
@@ -1354,17 +1484,17 @@ class UserProfileView(APIView):
 
 class GenerateInvitationCodeView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
         # 生成随机邀请码
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-        
+
         # 创建邀请码
         invitation = InvitationCode.objects.create(
             code=code,
             created_by=request.user
         )
-        
+
         return Response({
             'code': code,
             'created_at': invitation.created_at
@@ -1373,7 +1503,7 @@ class GenerateInvitationCodeView(APIView):
 class TokenRefreshView(APIView):
     """Token刷新视图"""
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
         try:
             serializer = TokenRefreshSerializer(data=request.data, context={'request': request})
