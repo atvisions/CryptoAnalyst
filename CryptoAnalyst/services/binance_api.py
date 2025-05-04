@@ -6,10 +6,6 @@ from typing import List, Optional, Dict, Union
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import requests
-from binance.client import AsyncClient
-from binance.streams import BinanceSocketManager
-import asyncio
-import threading
 import time
 import json
 import traceback
@@ -22,10 +18,6 @@ class BinanceAPI:
     def __init__(self):
         self.client = None
         self._client_initialized = False
-        self.price_cache = {}
-        self.price_cache_lock = threading.Lock()
-        # WebSocket 相关可选，建议也延迟初始化
-        self._websocket_started = False
         logger.info("BinanceAPI 实例创建，尚未初始化 client")
     
     def _init_client(self):
@@ -51,66 +43,6 @@ class BinanceAPI:
             self._init_client()
         return self.client is not None
     
-    def start_websocket(self):
-        """启动WebSocket连接"""
-        def run_websocket():
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            
-            async def handle_socket_message(msg):
-                try:
-                    # 确保消息是字典类型
-                    if isinstance(msg, str):
-                        msg = json.loads(msg)
-                    
-                    # 检查消息格式
-                    if not isinstance(msg, dict):
-                        logger.warning(f"收到非字典类型的消息: {type(msg)}")
-                        return
-                        
-                    if 'e' in msg and msg['e'] == 'error':
-                        logger.error(f"WebSocket错误: {msg['m']}")
-                        return
-                        
-                    # 检查必要的字段
-                    if 's' not in msg or 'c' not in msg:
-                        logger.warning(f"消息缺少必要字段: {msg}")
-                        return
-                        
-                    symbol = msg['s']
-                    price = float(msg['c'])
-                    
-                    with self.price_cache_lock:
-                        self.price_cache[symbol] = {
-                            'price': price,
-                            'timestamp': time.time()
-                        }
-                        
-                except Exception as e:
-                    logger.error(f"处理WebSocket消息时出错: {str(e)}")
-                    logger.error(f"消息内容: {msg}")
-            
-            async def main():
-                client = await AsyncClient.create()
-                bm = BinanceSocketManager(client)
-                
-                # 订阅所有USDT交易对的价格更新
-                async with bm.ticker_socket() as stream:
-                    while True:
-                        try:
-                            msg = await stream.recv()
-                            if isinstance(msg, dict) and msg.get('s', '').endswith('USDT'):
-                                await handle_socket_message(msg)
-                        except Exception as e:
-                            logger.error(f"WebSocket接收消息错误: {str(e)}")
-                            await asyncio.sleep(5)  # 出错后等待5秒重试
-            
-            loop.run_until_complete(main())
-        
-        # 在新线程中运行WebSocket
-        websocket_thread = threading.Thread(target=run_websocket, daemon=True)
-        websocket_thread.start()
-    
     def get_realtime_price(self, symbol: str) -> Optional[float]:
         """
         获取实时价格，优先使用WebSocket缓存
@@ -126,12 +58,11 @@ class BinanceAPI:
             return None
         try:
             # 首先检查缓存
-            with self.price_cache_lock:
-                cached_data = self.price_cache.get(symbol)
-                if cached_data and time.time() - cached_data['timestamp'] < 5:  # 5秒内的缓存有效
-                    logger.info(f"从缓存获取{symbol}价格: {cached_data['price']}")
-                    return cached_data['price']
-            
+            cached_data = self.price_cache.get(symbol)
+            if cached_data and time.time() - cached_data['timestamp'] < 5:  # 5秒内的缓存有效
+                logger.info(f"从缓存获取{symbol}价格: {cached_data['price']}")
+                return cached_data['price']
+        
             # 如果缓存无效，使用REST API（带重试机制）
             max_retries = 3
             retry_delay = 1  # 秒
@@ -222,10 +153,25 @@ class BinanceAPI:
             return None
         try:
             funding_rate = self.client.futures_funding_rate(symbol=symbol)
-            return float(funding_rate[0]['fundingRate'])
-            
+            logger.info(f"futures_funding_rate 原始返回: {funding_rate}")
+            # 兼容 list/dict 两种返回
+            if isinstance(funding_rate, list) and len(funding_rate) > 0:
+                latest_rate = funding_rate[0]
+                rate = float(latest_rate['fundingRate'])
+                logger.info(f"成功获取 {symbol} 的资金费率: {rate}")
+                return rate
+            elif isinstance(funding_rate, dict) and 'fundingRate' in funding_rate:
+                rate = float(funding_rate['fundingRate'])
+                logger.info(f"成功获取 {symbol} 的资金费率: {rate}")
+                return rate
+            else:
+                logger.warning(f"无法获取 {symbol} 的资金费率数据: {funding_rate}")
+                return None
         except BinanceAPIException as e:
             logger.error(f"获取资金费率失败: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"获取资金费率时发生未知错误: {str(e)}")
             return None
             
     def get_historical_klines(self, symbol: str, interval: str, start_str: str) -> Optional[List]:

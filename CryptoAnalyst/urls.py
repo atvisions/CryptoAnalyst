@@ -8,8 +8,7 @@ from .views import (
     LoginView,
     UserProfileView,
     GenerateInvitationCodeView,
-    TokenRefreshView,
-    PriceHistoryAPIView
+    TokenRefreshView
 )
 
 urlpatterns = [
@@ -28,7 +27,4 @@ urlpatterns = [
 
     # 代币数据
     path('crypto/token-data/<str:token_id>/', TokenDataAPIView.as_view(), name='token_data'),
-
-    # 价格历史数据
-    path('crypto/price-history/<str:symbol>/', PriceHistoryAPIView.as_view(), name='price_history'),
 ]

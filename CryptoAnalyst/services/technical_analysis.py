@@ -426,9 +426,11 @@ class TechnicalAnalysisService:
         try:
             funding_rate = self.binance_api.get_funding_rate(symbol)
             if funding_rate is not None:
-                return round(float(funding_rate), 6)
+                rate = float(funding_rate)
+                logger.info(f"获取到 {symbol} 的资金费率: {rate}")
+                return round(rate, 6)
+            logger.warning(f"无法获取 {symbol} 的资金费率")
             return 0.0
-            
         except Exception as e:
             logger.error(f"获取资金费率时发生错误: {str(e)}")
             return 0.0

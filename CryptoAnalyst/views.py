@@ -35,30 +35,25 @@ from .serializers import (
 
 class TechnicalIndicatorsAPIView(APIView):
     """技术指标API视图"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.ta_service = TechnicalAnalysisService()
         self.market_service = MarketDataService()
         self.report_service = AnalysisReportService()
-
-        # 尝试获取 Coze API 配置
-        self.coze_api_key = os.getenv('COZE_API_KEY')
-        self.coze_bot_id = os.getenv('COZE_BOT_ID', '7494575252253720584')
-        self.coze_api_url = os.getenv('COZE_API_URL', 'https://api.coze.com')
-
-        if not self.coze_api_key:
-            logger.warning("COZE_API_KEY 环境变量未设置，将使用默认分析报告")
+        self.binance_api = BinanceAPI()
+        self._init_coze_api()
 
     def get(self, request, symbol: str):
-        """处理GET请求"""
-        force_refresh = request.query_params.get('force_refresh', '').lower() == 'true'
+        """同步入口点，调用异步处理"""
+        # 检查是否需要强制刷新
+        force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
 
         try:
             # 处理 USDT 后缀
             base_symbol = symbol.replace('USDT', '')
 
             if not force_refresh:
-                # 只从本地数据库读取数据
                 try:
                     # 获取代币信息
                     token = CryptoToken.objects.get(symbol=base_symbol)
@@ -68,8 +63,9 @@ class TechnicalIndicatorsAPIView(APIView):
 
                     if not latest_report:
                         return Response({
-                            'status': 'error',
-                            'message': f"未找到代币 {symbol} 的分析数据，请使用 force_refresh=true 参数刷新数据"
+                            'status': 'not_found',
+                            'message': f"未找到代币 {symbol} 的分析数据",
+                            'needs_refresh': True
                         }, status=status.HTTP_404_NOT_FOUND)
 
                     # 获取相关的技术分析数据
@@ -78,9 +74,16 @@ class TechnicalIndicatorsAPIView(APIView):
 
                     if not technical_analysis or not market_data:
                         return Response({
-                            'status': 'error',
-                            'message': f"未找到代币 {symbol} 的完整数据，请使用 force_refresh=true 参数刷新数据"
+                            'status': 'not_found',
+                            'message': f"未找到代币 {symbol} 的完整数据",
+                            'needs_refresh': True
                         }, status=status.HTTP_404_NOT_FOUND)
+
+                    # 获取实时价格
+                    realtime_price = self.binance_api.get_realtime_price(symbol)
+                    if realtime_price:
+                        market_data.price = realtime_price
+                        market_data.save()
 
                     # 构建响应数据
                     response_data = {
@@ -88,9 +91,9 @@ class TechnicalIndicatorsAPIView(APIView):
                         'data': {
                             'trend_analysis': {
                                 'probabilities': {
-                                    'up': int(latest_report.trend_up_probability),
-                                    'sideways': int(latest_report.trend_sideways_probability),
-                                    'down': int(latest_report.trend_down_probability)
+                                    'up': latest_report.trend_up_probability,
+                                    'sideways': latest_report.trend_sideways_probability,
+                                    'down': latest_report.trend_down_probability
                                 },
                                 'summary': latest_report.trend_summary
                             },
@@ -179,28 +182,32 @@ class TechnicalIndicatorsAPIView(APIView):
                             'last_update_time': format_timestamp(latest_report.timestamp)
                         }
                     }
+
                     return Response(response_data)
 
                 except CryptoToken.DoesNotExist:
                     return Response({
-                        'status': 'error',
-                        'message': f"未找到代币 {symbol} 的信息，请使用 force_refresh=true 参数刷新数据"
+                        'status': 'not_found',
+                        'message': f"未找到代币 {symbol} 的分析数据",
+                        'needs_refresh': True
                     }, status=status.HTTP_404_NOT_FOUND)
+                except Exception as e:
+                    logger.error(f"从数据库读取数据时发生错误: {str(e)}")
+                    return Response({
+                        'status': 'error',
+                        'message': f"读取数据失败: {str(e)}",
+                        'needs_refresh': True
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            else:
-                # 强制刷新数据
-                return self._handle_force_refresh(symbol)
+            # 强制刷新数据
+            return self._handle_force_refresh(symbol)
 
         except Exception as e:
-            error_msg = str(e)
-            if not error_msg:  # 处理空错误信息
-                error_msg = "未知错误"
-            logger.error(f"处理请求时发生错误: {error_msg}")
-            logger.error(f"错误类型: {type(e).__name__}")
-            logger.error(f"堆栈跟踪: {traceback.format_exc()}")
+            logger.error(f"处理请求时发生错误: {str(e)}")
             return Response({
                 'status': 'error',
-                'message': f"处理请求时发生错误: {error_msg}"
+                'message': f"处理请求失败: {str(e)}",
+                'needs_refresh': True
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _handle_force_refresh(self, symbol: str):
@@ -926,125 +933,6 @@ class TechnicalIndicatorsAPIView(APIView):
         """同步入口点，调用异步处理"""
         return asyncio.run(self.async_get(request, symbol))
 
-class PriceHistoryAPIView(APIView):
-    """价格历史数据API视图"""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.binance_api = BinanceAPI()
-
-    def get(self, request, symbol: str):
-        """获取价格历史数据
-
-        Args:
-            request: HTTP请求对象
-            symbol: 交易对符号，例如 'BTCUSDT'
-
-        Returns:
-            Response: 包含价格历史数据的响应
-        """
-        try:
-            # 获取请求参数
-            interval = request.query_params.get('interval', '1h')
-            period = request.query_params.get('period', '24h')
-
-            # 将period转换为小时数
-            period_hours = {
-                '6h': 6,
-                '12h': 12,
-                '24h': 24,
-                '7d': 24 * 7
-            }.get(period, 24)
-
-            # 将interval转换为分钟数和Binance API格式
-            interval_minutes = {
-                '5m': 5,
-                '15m': 15,
-                '30m': 30,
-                '1h': 60,
-                '4h': 240
-            }.get(interval, 60)
-
-            binance_interval = {
-                '5m': '5m',
-                '15m': '15m',
-                '30m': '30m',
-                '1h': '1h',
-                '4h': '4h'
-            }.get(interval, '1h')
-
-            # 计算需要获取的数据点数量
-            limit = min(1000, (period_hours * 60) // interval_minutes)
-
-            # 获取历史K线数据
-            start_time = datetime.now() - timedelta(hours=period_hours)
-            start_str = start_time.strftime('%Y-%m-%d %H:%M:%S')
-
-            # 确保交易对符号格式正确（添加USDT后缀如果没有）
-            if not symbol.endswith('USDT'):
-                symbol = f"{symbol}USDT"
-
-            logger.info(f"获取{symbol}的K线数据，间隔:{binance_interval}，开始时间:{start_str}")
-
-            klines = self.binance_api.get_historical_klines(
-                symbol=symbol,
-                interval=binance_interval,
-                start_str=start_str
-            )
-
-            if not klines:
-                logger.warning(f"无法获取{symbol}的K线数据")
-                return Response({
-                    'status': 'error',
-                    'message': f"无法获取{symbol}的K线数据"
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            # 转换为DataFrame
-            df = pd.DataFrame(klines, columns=[
-                'timestamp', 'open', 'high', 'low', 'close', 'volume',
-                'close_time', 'quote_volume', 'trades', 'buy_base_volume',
-                'buy_quote_volume', 'ignore'
-            ])
-
-            # 转换数据类型
-            for col in ['open', 'high', 'low', 'close', 'volume']:
-                df[col] = pd.to_numeric(df[col], errors='coerce')
-
-            # 计算价格变化百分比
-            first_price = float(df['close'].iloc[0])
-            last_price = float(df['close'].iloc[-1])
-            change_percent = ((last_price - first_price) / first_price) * 100 if first_price > 0 else 0
-
-            # 构建响应数据
-            prices = [
-                {
-                    'timestamp': int(row['timestamp']),
-                    'price': float(row['close'])
-                }
-                for _, row in df.iterrows()
-            ]
-
-            response_data = {
-                'status': 'success',
-                'data': {
-                    'symbol': symbol,
-                    'interval': interval,
-                    'period': period,
-                    'prices': prices,
-                    'change_percent': round(change_percent, 2),
-                    'high': float(df['high'].max()),
-                    'low': float(df['low'].min())
-                }
-            }
-
-            return Response(response_data)
-
-        except Exception as e:
-            logger.error(f"获取价格历史数据失败: {str(e)}")
-            return Response({
-                'status': 'error',
-                'message': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class TokenDataAPIView(APIView):

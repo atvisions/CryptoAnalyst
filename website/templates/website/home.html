@@ -1,0 +1,536 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI数据交易助手</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#5B67EA',secondary:'#4B56D9'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <link rel="icon" href="{% static 'website/images/favicon.ico' %}">
+    <style>
+    :where([class^="ri-"])::before { content: "\f3c2"; }
+    body {
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+    }
+    .counter {
+    transition: all 2s ease-out;
+    }
+    .gradient-text {
+    background: linear-gradient(90deg, #5B67EA, #7A85FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    }
+    .hero-bg {
+    background: linear-gradient(135deg, #1A1B1E 0%, #0F1012 100%);
+    position: relative;
+    overflow: hidden;
+    }
+    .hero-bg::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://readdy.ai/api/search-image?query=A%20futuristic%20trading%20interface%20with%20holographic%20displays%20showing%20market%20data%2C%20AI%20analysis%2C%20and%20cryptocurrency%20trends.%20The%20scene%20has%20a%20dark%20elegant%20atmosphere%20with%20blue%20accent%20lighting%20and%20floating%20UI%20elements.%20Professional%203D%20render%20with%20dramatic%20lighting%20and%20depth%20of%20field.&width=1920&height=1080&seq=123&orientation=landscape');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    }
+    .hero-bg::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(91,103,234,0.2) 0%, rgba(15,16,18,0.95) 70%);
+    }
+    .cta-button {
+    transition: all 0.3s ease;
+    }
+    .cta-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(91, 103, 234, 0.5);
+    }
+    .feature-card {
+    transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+    transform: translateY(-8px);
+    }
+    .step-card {
+    position: relative;
+    transition: all 0.5s ease;
+    }
+    .step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(91,103,234,0.1) 0%, rgba(91,103,234,0) 100%);
+    border-radius: inherit;
+    opacity: 0;
+    transition: all 0.5s ease;
+    }
+    .step-card:hover::before {
+    opacity: 1;
+    }
+    .data-source-card {
+    background: linear-gradient(135deg, #1A1B1E 0%, #15161A 100%);
+    border: 1px solid rgba(91,103,234,0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    }
+    .data-source-card:hover {
+    border-color: rgba(91,103,234,0.3);
+    transform: translateY(-4px);
+    }
+    .floating-numbers {
+    position: absolute;
+    font-family: 'Inter', monospace;
+    opacity: 0.1;
+    user-select: none;
+    }
+    input:focus {
+    outline: none;
+    }
+    </style>
+</head>
+<body class="bg-[#0F1012]">
+    <nav class="bg-[#1A1B1E]/80 backdrop-blur-lg py-4 px-6 md:px-12 flex items-center justify-between fixed w-full z-50">
+        <div class="flex items-center">
+            <img src="{% static 'website/images/icon128.png' %}" alt="K线军师" class="h-10 w-10 rounded-full mr-2 inline-block align-middle" />
+            <span class="text-2xl font-['Pacifico'] text-white align-middle">K线军师</span>
+        </div>
+        <div class="hidden md:flex items-center space-x-8">
+            <a href="#features" class="text-gray-300 hover:text-white transition-colors">功能</a>
+            <a href="#how-it-works" class="text-gray-300 hover:text-white transition-colors">使用方法</a>
+            <a href="#stats" class="text-gray-300 hover:text-white transition-colors">数据</a>
+            <a href="#" class="text-gray-300 hover:text-white transition-colors">博客</a>
+        </div>
+        <div>
+            <button class="bg-primary text-white px-4 py-2 !rounded-button hover:bg-opacity-90 transition-all whitespace-nowrap flex items-center">
+                <div class="w-5 h-5 flex items-center justify-center mr-2">
+                    <i class="ri-chrome-fill"></i>
+                </div>
+                添加至 Chrome
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero-bg min-h-screen flex items-center relative">
+        <div class="container mx-auto px-6 md:px-12 py-32 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+                    <span class="gradient-text">AI 数据</span><br>
+                    重新定义交易决策
+                </h1>
+                <p class="text-gray-300 text-xl mb-12 max-w-2xl mx-auto whitespace-nowrap">整合链上数据、交易所数据和舆情分析，让每一次交易都建立在数据洞察之上。</p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
+                    <button class="cta-button bg-primary text-white px-8 py-4 !rounded-button flex items-center whitespace-nowrap group">
+                        <div class="w-6 h-6 flex items-center justify-center mr-2 group-hover:rotate-12 transition-transform">
+                            <i class="ri-chrome-fill text-xl"></i>
+                        </div>
+                        添加至 Chrome
+                    </button>
+                </div>
+                <div class="flex flex-col items-center">
+                    <p class="text-gray-400 text-sm mb-8">已支持主流交易所</p>
+                    <div class="flex items-center justify-center flex-wrap gap-12 mb-16 max-w-3xl">
+                        <div class="flex items-center space-x-12">
+                            <div class="w-32 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                                <img src="{% static 'website/images/binance.ico' %}" alt="Binance" class="h-8 w-8 mr-2"/>
+                                <span class="font-semibold">Binance</span>
+                            </div>
+                            <div class="w-32 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                                <img src="{% static 'website/images/okx.ico' %}" alt="OKX" class="h-8 w-8 mr-2"/>
+                                <span class="font-semibold">OKX</span>
+                            </div>
+                            <div class="w-32 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                                <img src="{% static 'website/images/gate.ico' %}" alt="Gate.io" class="h-8 w-8 mr-2"/>
+                                <span class="font-semibold">Gate.io</span>
+                            </div>
+                            <div class="w-32 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                                <img src="{% static 'website/images/bybit.ico' %}" alt="Bybit" class="h-8 w-8 mr-2"/>
+                                <span class="font-semibold">Bybit</span>
+                            </div>
+                            <div class="w-32 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                                <img src="{% static 'website/images/htx.ico' %}" alt="Htx" class="h-8 w-8 mr-2"/>
+                                <span class="font-semibold">Htx</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="bg-[#15161A] py-32">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">专业级交易分析工具</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">基于深度学习的市场分析系统，为您提供准确的交易信号和风险评估。</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+                <div class="bg-[#1A1B1E] rounded-xl p-8 space-y-6 border border-gray-800/50">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-2xl font-bold">BTCUSDT Market Analysis</h3>
+                        <span class="text-gray-400">USD</span>
+                    </div>
+                    <div class="text-4xl font-bold mb-8">96,588.02</div>
+                    <div class="bg-[#1E1F23] rounded-lg p-6 mb-6">
+                        <h4 class="text-lg font-semibold mb-4">Market Trend Analysis</h4>
+                        <div class="flex space-x-4">
+                            <div class="flex-1 bg-[#1B3B2D] text-[#4CAF50] rounded p-3 text-center">
+                                <span class="block text-lg font-bold">70%</span>
+                                <span class="text-sm">Up</span>
+                            </div>
+                            <div class="flex-1 bg-[#1E1F23] text-gray-400 rounded p-3 text-center">
+                                <span class="block text-lg font-bold">20%</span>
+                                <span class="text-sm">Sideways</span>
+                            </div>
+                            <div class="flex-1 bg-[#3B1E1E] text-[#F44336] rounded p-3 text-center">
+                                <span class="block text-lg font-bold">10%</span>
+                                <span class="text-sm">Down</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-8 min-w-0 overflow-x-auto">
+                    <h3 class="text-2xl font-bold whitespace-nowrap">AI 驱动的市场分析</h3>
+                    <ul class="space-y-6">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 flex items-center justify-center text-primary mt-1 mr-3">
+                                <i class="ri-check-line"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">实时趋势预测</h4>
+                                <p class="text-gray-400">基于深度学习模型，分析市场走势概率，提供清晰的方向指引</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 flex items-center justify-center text-primary mt-1 mr-3">
+                                <i class="ri-check-line"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">技术指标整合</h4>
+                                <p class="text-gray-400">综合多个关键技术指标，提供更全面的市场洞察</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 flex items-center justify-center text-primary mt-1 mr-3">
+                                <i class="ri-check-line"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-2">风险评估系统</h4>
+                                <p class="text-gray-400">智能评估市场风险，为您的交易决策提供保障</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="feature-card bg-[#1A1B1E] p-6 rounded-lg border border-gray-800/50">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                        <div class="w-8 h-8 flex items-center justify-center text-primary">
+                            <i class="ri-ai-generate-line text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">AI 数据分析</h3>
+                    <p class="text-gray-400">利用先进的人工智能算法，分析海量市场数据，识别潜在的交易机会和风险。</p>
+                </div>
+                <div class="feature-card bg-[#1A1B1E] p-6 rounded-lg border border-gray-800/50">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                        <div class="w-8 h-8 flex items-center justify-center text-primary">
+                            <i class="ri-line-chart-line text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">实时市场监控</h3>
+                    <p class="text-gray-400">24/7 不间断监控市场动态，第一时间捕捉价格波动和市场异常情况。</p>
+                </div>
+                <div class="feature-card bg-[#1A1B1E] p-6 rounded-lg border border-gray-800/50">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                        <div class="w-8 h-8 flex items-center justify-center text-primary">
+                            <i class="ri-database-2-line text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">多源数据整合</h3>
+                    <p class="text-gray-400">整合链上数据、交易所数据和社交媒体舆情，提供全方位的市场视角。</p>
+                </div>
+                <div class="feature-card bg-[#1A1B1E] p-6 rounded-lg border border-gray-800/50">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                        <div class="w-8 h-8 flex items-center justify-center text-primary">
+                            <i class="ri-notification-3-line text-2xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">智能交易提醒</h3>
+                    <p class="text-gray-400">根据您设定的条件，自动发送交易机会提醒，不错过任何潜在机会。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="bg-[#0F1012] py-32 relative overflow-hidden">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">三步开启智能交易</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">简单快速的配置过程，让您立即体验 AI 数据分析的优势。</p>
+            </div>
+            <div class="relative">
+                <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 via-primary to-primary/20 transform -translate-y-1/2"></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                    <div class="step-card bg-[#1A1B1E] p-8 rounded-xl border border-gray-800/50">
+                        <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                            <span class="text-3xl font-bold text-primary">1</span>
+                            <div class="absolute -right-2 -top-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                <i class="ri-chrome-fill text-sm"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-center mb-4">安装插件</h3>
+                        <p class="text-gray-400 text-center">从 Chrome 应用商店一键安装，无需复杂配置</p>
+                    </div>
+                    <div class="step-card bg-[#1A1B1E] p-8 rounded-xl border border-gray-800/50">
+                        <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                            <span class="text-3xl font-bold text-primary">2</span>
+                            <div class="absolute -right-2 -top-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                <i class="ri-settings-3-fill text-sm"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-center mb-4">个性化设置</h3>
+                        <p class="text-gray-400 text-center">根据您的交易习惯，定制专属的分析指标</p>
+                    </div>
+                    <div class="step-card bg-[#1A1B1E] p-8 rounded-xl border border-gray-800/50">
+                        <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                            <span class="text-3xl font-bold text-primary">3</span>
+                            <div class="absolute -right-2 -top-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                                <i class="ri-rocket-2-fill text-sm"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-center mb-4">开始交易</h3>
+                        <p class="text-gray-400 text-center">享受 AI 数据分析带来的交易优势</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-[#15161A] py-32 relative overflow-hidden">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-4xl font-bold mb-8">全方位数据整合</h2>
+                    <p class="text-gray-400 text-lg mb-12">我们整合了多个可靠的数据源，确保为您提供最全面、最准确的市场信息。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="data-source-card p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                                <i class="ri-database-2-line text-xl text-primary"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold mb-2">链上数据</h3>
+                            <p class="text-gray-400">实时监控区块链交易流向、地址活跃度等关键指标</p>
+                        </div>
+                        <div class="data-source-card p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                                <i class="ri-exchange-line text-xl text-primary"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold mb-2">交易所数据</h3>
+                            <p class="text-gray-400">整合全球主要交易所的深度数据和交易信息</p>
+                        </div>
+                        <div class="data-source-card p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                                <i class="ri-chat-poll-line text-xl text-primary"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold mb-2">舆情分析</h3>
+                            <p class="text-gray-400">分析社交媒体和新闻媒体的市场情绪指标</p>
+                        </div>
+                        <div class="data-source-card p-6 rounded-xl">
+                            <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                                <i class="ri-funds-line text-xl text-primary"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold mb-2">资金流向</h3>
+                            <p class="text-gray-400">追踪机构投资者的资金动向和持仓变化</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="https://readdy.ai/api/search-image?query=A%20modern%20data%20visualization%20showing%20multiple%20data%20streams%20converging%20into%20a%20central%20AI%20analytics%20hub.%20The%20scene%20features%20holographic%20displays%20with%20flowing%20data%2C%20market%20charts%2C%20and%20network%20connections.%20Professional%203D%20render%20with%20blue%20accent%20lighting%20and%20depth%20of%20field.&width=800&height=600&seq=789&orientation=landscape" alt="数据整合" class="rounded-xl w-full object-cover shadow-2xl">
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#15161A] via-transparent to-transparent"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-[#0F1012] py-32">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">用户怎么说</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">来自真实用户的评价，了解他们如何利用我们的工具提升交易效率。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-[#1A1B1E] p-8 rounded-xl border border-gray-800/50">
+                    <div class="flex items-center mb-4">
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-6">"这款插件彻底改变了我的交易方式。AI 数据分析帮我识别了许多之前会错过的交易机会，大大提高了我的投资回报率。"</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-primary font-semibold">LZ</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">刘志强</h4>
+                            <p class="text-gray-500 text-sm">专业交易员 · 3 年经验</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-[#1A1B1E] p-8 rounded-xl border border-gray-800/50">
+                    <div class="flex items-center mb-4">
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-6">"作为一名兼职交易者，我没有太多时间研究市场。这个插件的实时监控和智能提醒功能让我能够在工作之余也不错过重要的交易机会。"</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-primary font-semibold">WY</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">王颖</h4>
+                            <p class="text-gray-500 text-sm">兼职交易者 · 1.5 年经验</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-[#1A1B1E] p-8 rounded-xl border border-gray-800/50">
+                    <div class="flex items-center mb-4">
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-fill"></i>
+                        </div>
+                        <div class="w-5 h-5 flex items-center justify-center text-yellow-400">
+                            <i class="ri-star-half-fill"></i>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 mb-6">"多源数据整合是这个插件最大的亮点。能够同时看到链上数据、交易所数据和舆情分析，让我对市场有了更全面的理解，交易决策更加理性。"</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-primary font-semibold">ZM</span>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">赵明辉</h4>
+                            <p class="text-gray-500 text-sm">机构投资者 · 5 年经验</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-[#15161A] py-32 relative overflow-hidden">
+        <div class="container mx-auto px-6 md:px-12 text-center relative z-10">
+            <h2 class="text-4xl font-bold mb-6">准备好提升您的交易体验了吗？</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto mb-12 text-lg">立即安装我们的 Chrome 插件，开启数据驱动的智能交易之旅。</p>
+            <button class="cta-button bg-primary text-white px-8 py-4 !rounded-button flex items-center mx-auto whitespace-nowrap group">
+                <div class="w-6 h-6 flex items-center justify-center mr-2 group-hover:rotate-12 transition-transform">
+                    <i class="ri-chrome-fill text-xl"></i>
+                </div>
+                免费安装插件
+            </button>
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent"></div>
+    </section>
+
+    <footer class="bg-[#0F1012] py-16">
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <div>
+                    <span class="text-2xl font-['Pacifico'] text-white mb-6 block">K线军师</span>
+                    <p class="text-gray-400">用 AI 数据分析重新定义交易决策</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-6">产品</h4>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">功能介绍</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">使用教程</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">价格方案</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">更新日志</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-6">资源</h4>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">帮助中心</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">API 文档</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">社区</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">博客</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-6">关于</h4>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">关于我们</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">联系我们</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">加入我们</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">隐私政策</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400">&copy; 2024 AI数据交易助手. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="ri-twitter-fill"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="ri-github-fill"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="ri-discord-fill"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 
