@@ -27,7 +27,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 import random
 import string
-from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token as AuthToken
 from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer,
     SendVerificationCodeSerializer, TokenRefreshSerializer
@@ -50,157 +50,156 @@ class TechnicalIndicatorsAPIView(APIView):
         force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
 
         try:
-            # 处理 USDT 后缀
-            base_symbol = symbol.replace('USDT', '')
+            # 统一 symbol 格式，去除常见后缀
+            clean_symbol = symbol.upper().replace('USDT', '').replace('-PERP', '').replace('_PERP', '').replace('PERP', '')
+            
+            # 在 get 方法中添加日志
+            logger.info(f"查询 symbol: {symbol}, clean_symbol: {clean_symbol}")
+            try:
+                token = CryptoToken.objects.get(symbol=clean_symbol)
+                logger.info(f"找到 token: {token.id}, {token.symbol}")
+                token_exists = True
+            except CryptoToken.DoesNotExist:
+                logger.info(f"未找到 token: {clean_symbol}")
+                token_exists = False
 
-            if not force_refresh:
-                try:
-                    # 获取代币信息
-                    token = CryptoToken.objects.get(symbol=base_symbol)
+            if force_refresh:
+                # 强制刷新数据
+                return self._handle_force_refresh(symbol, token_exists)
 
-                    # 获取最新的分析报告
-                    latest_report = AnalysisReport.objects.filter(token=token).order_by('-timestamp').first()
+            if not token_exists:
+                return Response({
+                    'status': 'not_found',
+                    'message': f"未找到代币 {clean_symbol} 的分析数据",
+                    'needs_refresh': True
+                }, status=status.HTTP_404_NOT_FOUND)
 
-                    if not latest_report:
-                        return Response({
-                            'status': 'not_found',
-                            'message': f"未找到代币 {symbol} 的分析数据",
-                            'needs_refresh': True
-                        }, status=status.HTTP_404_NOT_FOUND)
+            # 获取最新的分析报告
+            latest_report = AnalysisReport.objects.filter(token=token).order_by('-timestamp').first()
 
-                    # 获取相关的技术分析数据
-                    technical_analysis = TechnicalAnalysis.objects.filter(token=token).order_by('-timestamp').first()
-                    market_data = MarketData.objects.filter(token=token).order_by('-timestamp').first()
+            if not latest_report:
+                return Response({
+                    'status': 'not_found',
+                    'message': f"未找到代币 {clean_symbol} 的分析数据",
+                    'needs_refresh': True
+                }, status=status.HTTP_404_NOT_FOUND)
 
-                    if not technical_analysis or not market_data:
-                        return Response({
-                            'status': 'not_found',
-                            'message': f"未找到代币 {symbol} 的完整数据",
-                            'needs_refresh': True
-                        }, status=status.HTTP_404_NOT_FOUND)
+            # 获取相关的技术分析数据
+            technical_analysis = TechnicalAnalysis.objects.filter(token=token).order_by('-timestamp').first()
+            market_data = MarketData.objects.filter(token=token).order_by('-timestamp').first()
 
-                    # 获取实时价格
-                    realtime_price = self.binance_api.get_realtime_price(symbol)
-                    if realtime_price:
-                        market_data.price = realtime_price
-                        market_data.save()
+            if not technical_analysis or not market_data:
+                return Response({
+                    'status': 'not_found',
+                    'message': f"未找到代币 {clean_symbol} 的完整数据",
+                    'needs_refresh': True
+                }, status=status.HTTP_404_NOT_FOUND)
 
-                    # 构建响应数据
-                    response_data = {
-                        'status': 'success',
-                        'data': {
-                            'trend_analysis': {
-                                'probabilities': {
-                                    'up': latest_report.trend_up_probability,
-                                    'sideways': latest_report.trend_sideways_probability,
-                                    'down': latest_report.trend_down_probability
-                                },
-                                'summary': latest_report.trend_summary
+            # 获取实时价格
+            realtime_price = self.binance_api.get_realtime_price(symbol)
+            if realtime_price:
+                market_data.price = realtime_price
+                market_data.save()
+
+            # 构建响应数据
+            response_data = {
+                'status': 'success',
+                'data': {
+                    'trend_analysis': {
+                        'probabilities': {
+                            'up': latest_report.trend_up_probability,
+                            'sideways': latest_report.trend_sideways_probability,
+                            'down': latest_report.trend_down_probability
+                        },
+                        'summary': latest_report.trend_summary
+                    },
+                    'indicators_analysis': {
+                        'RSI': {
+                            'value': float(technical_analysis.rsi) if technical_analysis.rsi is not None else None,
+                            'analysis': latest_report.rsi_analysis,
+                            'support_trend': latest_report.rsi_support_trend
+                        },
+                        'MACD': {
+                            'value': {
+                                'line': float(technical_analysis.macd_line) if technical_analysis.macd_line is not None else None,
+                                'signal': float(technical_analysis.macd_signal) if technical_analysis.macd_signal is not None else None,
+                                'histogram': float(technical_analysis.macd_histogram) if technical_analysis.macd_histogram is not None else None
                             },
-                            'indicators_analysis': {
-                                'RSI': {
-                                    'value': float(technical_analysis.rsi) if technical_analysis.rsi is not None else None,
-                                    'analysis': latest_report.rsi_analysis,
-                                    'support_trend': latest_report.rsi_support_trend
-                                },
-                                'MACD': {
-                                    'value': {
-                                        'line': float(technical_analysis.macd_line) if technical_analysis.macd_line is not None else None,
-                                        'signal': float(technical_analysis.macd_signal) if technical_analysis.macd_signal is not None else None,
-                                        'histogram': float(technical_analysis.macd_histogram) if technical_analysis.macd_histogram is not None else None
-                                    },
-                                    'analysis': latest_report.macd_analysis,
-                                    'support_trend': latest_report.macd_support_trend
-                                },
-                                'BollingerBands': {
-                                    'value': {
-                                        'upper': float(technical_analysis.bollinger_upper) if technical_analysis.bollinger_upper is not None else None,
-                                        'middle': float(technical_analysis.bollinger_middle) if technical_analysis.bollinger_middle is not None else None,
-                                        'lower': float(technical_analysis.bollinger_lower) if technical_analysis.bollinger_lower is not None else None
-                                    },
-                                    'analysis': latest_report.bollinger_analysis,
-                                    'support_trend': latest_report.bollinger_support_trend
-                                },
-                                'BIAS': {
-                                    'value': float(technical_analysis.bias) if technical_analysis.bias is not None else None,
-                                    'analysis': latest_report.bias_analysis,
-                                    'support_trend': latest_report.bias_support_trend
-                                },
-                                'PSY': {
-                                    'value': float(technical_analysis.psy) if technical_analysis.psy is not None else None,
-                                    'analysis': latest_report.psy_analysis,
-                                    'support_trend': latest_report.psy_support_trend
-                                },
-                                'DMI': {
-                                    'value': {
-                                        'plus_di': float(technical_analysis.dmi_plus) if technical_analysis.dmi_plus is not None else None,
-                                        'minus_di': float(technical_analysis.dmi_minus) if technical_analysis.dmi_minus is not None else None,
-                                        'adx': float(technical_analysis.dmi_adx) if technical_analysis.dmi_adx is not None else None
-                                    },
-                                    'analysis': latest_report.dmi_analysis,
-                                    'support_trend': latest_report.dmi_support_trend
-                                },
-                                'VWAP': {
-                                    'value': float(technical_analysis.vwap) if technical_analysis.vwap is not None else None,
-                                    'analysis': latest_report.vwap_analysis,
-                                    'support_trend': latest_report.vwap_support_trend
-                                },
-                                'FundingRate': {
-                                    'value': float(technical_analysis.funding_rate) if technical_analysis.funding_rate is not None else None,
-                                    'analysis': latest_report.funding_rate_analysis,
-                                    'support_trend': latest_report.funding_rate_support_trend
-                                },
-                                'ExchangeNetflow': {
-                                    'value': float(technical_analysis.exchange_netflow) if technical_analysis.exchange_netflow is not None else None,
-                                    'analysis': latest_report.exchange_netflow_analysis,
-                                    'support_trend': latest_report.exchange_netflow_support_trend
-                                },
-                                'NUPL': {
-                                    'value': float(technical_analysis.nupl) if technical_analysis.nupl is not None else None,
-                                    'analysis': latest_report.nupl_analysis,
-                                    'support_trend': latest_report.nupl_support_trend
-                                },
-                                'MayerMultiple': {
-                                    'value': float(technical_analysis.mayer_multiple) if technical_analysis.mayer_multiple is not None else None,
-                                    'analysis': latest_report.mayer_multiple_analysis,
-                                    'support_trend': latest_report.mayer_multiple_support_trend
-                                }
+                            'analysis': latest_report.macd_analysis,
+                            'support_trend': latest_report.macd_support_trend
+                        },
+                        'BollingerBands': {
+                            'value': {
+                                'upper': float(technical_analysis.bollinger_upper) if technical_analysis.bollinger_upper is not None else None,
+                                'middle': float(technical_analysis.bollinger_middle) if technical_analysis.bollinger_middle is not None else None,
+                                'lower': float(technical_analysis.bollinger_lower) if technical_analysis.bollinger_lower is not None else None
                             },
-                            'trading_advice': {
-                                'action': latest_report.trading_action,
-                                'reason': latest_report.trading_reason,
-                                'entry_price': float(latest_report.entry_price),
-                                'stop_loss': float(latest_report.stop_loss),
-                                'take_profit': float(latest_report.take_profit)
+                            'analysis': latest_report.bollinger_analysis,
+                            'support_trend': latest_report.bollinger_support_trend
+                        },
+                        'BIAS': {
+                            'value': float(technical_analysis.bias) if technical_analysis.bias is not None else None,
+                            'analysis': latest_report.bias_analysis,
+                            'support_trend': latest_report.bias_support_trend
+                        },
+                        'PSY': {
+                            'value': float(technical_analysis.psy) if technical_analysis.psy is not None else None,
+                            'analysis': latest_report.psy_analysis,
+                            'support_trend': latest_report.psy_support_trend
+                        },
+                        'DMI': {
+                            'value': {
+                                'plus_di': float(technical_analysis.dmi_plus) if technical_analysis.dmi_plus is not None else None,
+                                'minus_di': float(technical_analysis.dmi_minus) if technical_analysis.dmi_minus is not None else None,
+                                'adx': float(technical_analysis.dmi_adx) if technical_analysis.dmi_adx is not None else None
                             },
-                            'risk_assessment': {
-                                'level': latest_report.risk_level,
-                                'score': int(latest_report.risk_score),
-                                'details': latest_report.risk_details
-                            },
-                            'current_price': float(market_data.price),
-                            'last_update_time': format_timestamp(latest_report.timestamp)
+                            'analysis': latest_report.dmi_analysis,
+                            'support_trend': latest_report.dmi_support_trend
+                        },
+                        'VWAP': {
+                            'value': float(technical_analysis.vwap) if technical_analysis.vwap is not None else None,
+                            'analysis': latest_report.vwap_analysis,
+                            'support_trend': latest_report.vwap_support_trend
+                        },
+                        'FundingRate': {
+                            'value': float(technical_analysis.funding_rate) if technical_analysis.funding_rate is not None else None,
+                            'analysis': latest_report.funding_rate_analysis,
+                            'support_trend': latest_report.funding_rate_support_trend
+                        },
+                        'ExchangeNetflow': {
+                            'value': float(technical_analysis.exchange_netflow) if technical_analysis.exchange_netflow is not None else None,
+                            'analysis': latest_report.exchange_netflow_analysis,
+                            'support_trend': latest_report.exchange_netflow_support_trend
+                        },
+                        'NUPL': {
+                            'value': float(technical_analysis.nupl) if technical_analysis.nupl is not None else None,
+                            'analysis': latest_report.nupl_analysis,
+                            'support_trend': latest_report.nupl_support_trend
+                        },
+                        'MayerMultiple': {
+                            'value': float(technical_analysis.mayer_multiple) if technical_analysis.mayer_multiple is not None else None,
+                            'analysis': latest_report.mayer_multiple_analysis,
+                            'support_trend': latest_report.mayer_multiple_support_trend
                         }
-                    }
+                    },
+                    'trading_advice': {
+                        'action': latest_report.trading_action,
+                        'reason': latest_report.trading_reason,
+                        'entry_price': float(latest_report.entry_price),
+                        'stop_loss': float(latest_report.stop_loss),
+                        'take_profit': float(latest_report.take_profit)
+                    },
+                    'risk_assessment': {
+                        'level': latest_report.risk_level,
+                        'score': int(latest_report.risk_score),
+                        'details': latest_report.risk_details
+                    },
+                    'current_price': float(market_data.price),
+                    'last_update_time': format_timestamp(latest_report.timestamp)
+                }
+            }
 
-                    return Response(response_data)
-
-                except CryptoToken.DoesNotExist:
-                    return Response({
-                        'status': 'not_found',
-                        'message': f"未找到代币 {symbol} 的分析数据",
-                        'needs_refresh': True
-                    }, status=status.HTTP_404_NOT_FOUND)
-                except Exception as e:
-                    logger.error(f"从数据库读取数据时发生错误: {str(e)}")
-                    return Response({
-                        'status': 'error',
-                        'message': f"读取数据失败: {str(e)}",
-                        'needs_refresh': True
-                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            # 强制刷新数据
-            return self._handle_force_refresh(symbol)
+            return Response(response_data)
 
         except Exception as e:
             logger.error(f"处理请求时发生错误: {str(e)}")
@@ -210,7 +209,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 'needs_refresh': True
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def _handle_force_refresh(self, symbol: str):
+    def _handle_force_refresh(self, symbol: str, token_exists: bool = False):
         """强制刷新数据"""
         try:
             # 获取最新的技术指标数据
@@ -231,28 +230,32 @@ class TechnicalIndicatorsAPIView(APIView):
                     'message': f"获取市场数据失败"
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # 处理 USDT 后缀
-            base_symbol = symbol.replace('USDT', '')
+            # 获取 Chain 记录
+            try:
+                chain = Chain.objects.get(chain='CRYPTO')
+            except Chain.DoesNotExist:
+                # 如果不存在，创建新记录
+                chain = Chain.objects.create(
+                    chain='CRYPTO',
+                    is_active=True,
+                    is_testnet=False
+                )
 
-            # 获取或创建 Chain 记录
-            chain, _ = Chain.objects.get_or_create(
-                chain=base_symbol,
-                defaults={
-                    'is_active': True,
-                    'is_testnet': False
-                }
-            )
+            # 统一 symbol 格式，去除常见后缀
+            clean_symbol = symbol.upper().replace('USDT', '').replace('-PERP', '').replace('_PERP', '').replace('PERP', '')
 
-            # 获取或创建 Token 记录
-            token, _ = CryptoToken.objects.get_or_create(
-                symbol=base_symbol,
-                chain=chain,
-                defaults={
-                    'name': base_symbol,
-                    'address': '0x0000000000000000000000000000000000000000',
-                    'decimals': 18
-                }
-            )
+            # 获取 Token 记录
+            try:
+                token = CryptoToken.objects.get(symbol=clean_symbol)
+            except CryptoToken.DoesNotExist:
+                # 如果不存在，创建新记录
+                token = CryptoToken.objects.create(
+                    symbol=clean_symbol,
+                    chain=chain,
+                    name=clean_symbol,
+                    address='0x0000000000000000000000000000000000000000',
+                    decimals=18
+                )
 
             # 更新技术分析数据
             indicators = technical_data['data']['indicators']
@@ -268,7 +271,150 @@ class TechnicalIndicatorsAPIView(APIView):
             )
 
             # 返回最新数据
-            return self._handle_local_read(symbol)
+            try:
+                # 获取代币信息，使用清理后的符号
+                token = CryptoToken.objects.get(symbol=clean_symbol)
+                
+                # 获取最新的分析报告
+                latest_report = AnalysisReport.objects.filter(token=token).order_by('-timestamp').first()
+
+                if not latest_report:
+                    return Response({
+                        'status': 'not_found',
+                        'message': f"未找到代币 {clean_symbol} 的分析数据",
+                        'needs_refresh': True
+                    }, status=status.HTTP_404_NOT_FOUND)
+
+                # 获取相关的技术分析数据
+                technical_analysis = TechnicalAnalysis.objects.filter(token=token).order_by('-timestamp').first()
+                market_data = MarketData.objects.filter(token=token).order_by('-timestamp').first()
+
+                if not technical_analysis or not market_data:
+                    return Response({
+                        'status': 'not_found',
+                        'message': f"未找到代币 {clean_symbol} 的完整数据",
+                        'needs_refresh': True
+                    }, status=status.HTTP_404_NOT_FOUND)
+
+                # 获取实时价格
+                realtime_price = self.binance_api.get_realtime_price(symbol)
+                if realtime_price:
+                    market_data.price = realtime_price
+                    market_data.save()
+
+                # 构建响应数据
+                response_data = {
+                    'status': 'success',
+                    'data': {
+                        'trend_analysis': {
+                            'probabilities': {
+                                'up': latest_report.trend_up_probability,
+                                'sideways': latest_report.trend_sideways_probability,
+                                'down': latest_report.trend_down_probability
+                            },
+                            'summary': latest_report.trend_summary
+                        },
+                        'indicators_analysis': {
+                            'RSI': {
+                                'value': float(technical_analysis.rsi) if technical_analysis.rsi is not None else None,
+                                'analysis': latest_report.rsi_analysis,
+                                'support_trend': latest_report.rsi_support_trend
+                            },
+                            'MACD': {
+                                'value': {
+                                    'line': float(technical_analysis.macd_line) if technical_analysis.macd_line is not None else None,
+                                    'signal': float(technical_analysis.macd_signal) if technical_analysis.macd_signal is not None else None,
+                                    'histogram': float(technical_analysis.macd_histogram) if technical_analysis.macd_histogram is not None else None
+                                },
+                                'analysis': latest_report.macd_analysis,
+                                'support_trend': latest_report.macd_support_trend
+                            },
+                            'BollingerBands': {
+                                'value': {
+                                    'upper': float(technical_analysis.bollinger_upper) if technical_analysis.bollinger_upper is not None else None,
+                                    'middle': float(technical_analysis.bollinger_middle) if technical_analysis.bollinger_middle is not None else None,
+                                    'lower': float(technical_analysis.bollinger_lower) if technical_analysis.bollinger_lower is not None else None
+                                },
+                                'analysis': latest_report.bollinger_analysis,
+                                'support_trend': latest_report.bollinger_support_trend
+                            },
+                            'BIAS': {
+                                'value': float(technical_analysis.bias) if technical_analysis.bias is not None else None,
+                                'analysis': latest_report.bias_analysis,
+                                'support_trend': latest_report.bias_support_trend
+                            },
+                            'PSY': {
+                                'value': float(technical_analysis.psy) if technical_analysis.psy is not None else None,
+                                'analysis': latest_report.psy_analysis,
+                                'support_trend': latest_report.psy_support_trend
+                            },
+                            'DMI': {
+                                'value': {
+                                    'plus_di': float(technical_analysis.dmi_plus) if technical_analysis.dmi_plus is not None else None,
+                                    'minus_di': float(technical_analysis.dmi_minus) if technical_analysis.dmi_minus is not None else None,
+                                    'adx': float(technical_analysis.dmi_adx) if technical_analysis.dmi_adx is not None else None
+                                },
+                                'analysis': latest_report.dmi_analysis,
+                                'support_trend': latest_report.dmi_support_trend
+                            },
+                            'VWAP': {
+                                'value': float(technical_analysis.vwap) if technical_analysis.vwap is not None else None,
+                                'analysis': latest_report.vwap_analysis,
+                                'support_trend': latest_report.vwap_support_trend
+                            },
+                            'FundingRate': {
+                                'value': float(technical_analysis.funding_rate) if technical_analysis.funding_rate is not None else None,
+                                'analysis': latest_report.funding_rate_analysis,
+                                'support_trend': latest_report.funding_rate_support_trend
+                            },
+                            'ExchangeNetflow': {
+                                'value': float(technical_analysis.exchange_netflow) if technical_analysis.exchange_netflow is not None else None,
+                                'analysis': latest_report.exchange_netflow_analysis,
+                                'support_trend': latest_report.exchange_netflow_support_trend
+                            },
+                            'NUPL': {
+                                'value': float(technical_analysis.nupl) if technical_analysis.nupl is not None else None,
+                                'analysis': latest_report.nupl_analysis,
+                                'support_trend': latest_report.nupl_support_trend
+                            },
+                            'MayerMultiple': {
+                                'value': float(technical_analysis.mayer_multiple) if technical_analysis.mayer_multiple is not None else None,
+                                'analysis': latest_report.mayer_multiple_analysis,
+                                'support_trend': latest_report.mayer_multiple_support_trend
+                            }
+                        },
+                        'trading_advice': {
+                            'action': latest_report.trading_action,
+                            'reason': latest_report.trading_reason,
+                            'entry_price': float(latest_report.entry_price),
+                            'stop_loss': float(latest_report.stop_loss),
+                            'take_profit': float(latest_report.take_profit)
+                        },
+                        'risk_assessment': {
+                            'level': latest_report.risk_level,
+                            'score': int(latest_report.risk_score),
+                            'details': latest_report.risk_details
+                        },
+                        'current_price': float(market_data.price),
+                        'last_update_time': format_timestamp(latest_report.timestamp)
+                    }
+                }
+
+                return Response(response_data)
+
+            except CryptoToken.DoesNotExist:
+                return Response({
+                    'status': 'not_found',
+                    'message': f"未找到代币 {clean_symbol} 的分析数据",
+                    'needs_refresh': True
+                }, status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                logger.error(f"从数据库读取数据时发生错误: {str(e)}")
+                return Response({
+                    'status': 'error',
+                    'message': f"读取数据失败: {str(e)}",
+                    'needs_refresh': True
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
             error_msg = str(e)
@@ -671,6 +817,10 @@ class TechnicalIndicatorsAPIView(APIView):
         try:
             # 检查是否需要强制刷新
             force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
+            
+            # 统一 symbol 格式，去除常见后缀 (移到最前面，确保所有分支都能使用)
+            clean_symbol = symbol.upper().replace('USDT', '').replace('-PERP', '').replace('_PERP', '').replace('PERP', '')
+            logger.info(f"异步处理请求: symbol={symbol}, clean_symbol={clean_symbol}, force_refresh={force_refresh}")
 
             if force_refresh:
                 # 获取技术指标
@@ -690,7 +840,7 @@ class TechnicalIndicatorsAPIView(APIView):
 
                 # 获取或创建 Chain 记录
                 chain, _ = await sync_to_async(Chain.objects.get_or_create)(
-                    chain=symbol.replace('USDT', ''),
+                    chain='CRYPTO',  # 使用通用的链名称
                     defaults={
                         'is_active': True,
                         'is_testnet': False
@@ -698,15 +848,16 @@ class TechnicalIndicatorsAPIView(APIView):
                 )
 
                 # 获取或创建 Token 记录
-                token, created = await sync_to_async(CryptoToken.objects.get_or_create)(
-                    symbol=symbol.replace('USDT', '').upper(),
-                    chain=chain,
-                    defaults={
-                        'name': symbol.replace('USDT', '').upper(),
-                        'address': '0x0000000000000000000000000000000000000000',
-                        'decimals': 18
-                    }
-                )
+                token_qs = await sync_to_async(CryptoToken.objects.filter)(symbol=clean_symbol)
+                token = await sync_to_async(token_qs.first)()
+                if not token:
+                    token = await sync_to_async(CryptoToken.objects.create)(
+                        symbol=clean_symbol,
+                        chain=chain,
+                        name=clean_symbol,
+                        address='0x0000000000000000000000000000000000000000',
+                        decimals=18
+                    )
 
                 # 更新分析数据
                 technical_analysis = await sync_to_async(self._update_analysis_data)(token, indicators, market_data['price'])
@@ -726,14 +877,15 @@ class TechnicalIndicatorsAPIView(APIView):
 
                 # 保存分析报告
                 try:
-                    await sync_to_async(self.report_service.save_analysis_report)(symbol, analysis_data)
-
+                    # 统一使用 clean_symbol
+                    await sync_to_async(self.report_service.save_analysis_report)(clean_symbol, analysis_data)
+                    
                     # 添加时间戳字段，使用当前时间
                     analysis_data['last_update_time'] = format_timestamp(datetime.now(timezone.utc))
-
+                    
                     # 添加当前价格字段
                     analysis_data['current_price'] = float(market_data['price'])
-
+                    
                 except Exception as e:
                     logger.error(f"保存分析报告失败: {str(e)}")
                     return Response({
@@ -751,28 +903,25 @@ class TechnicalIndicatorsAPIView(APIView):
             try:
                 # 获取或创建默认链
                 chain_filter = sync_to_async(Chain.objects.filter)
-                chain = await chain_filter(chain=symbol.replace('USDT', ''))
+                chain = await chain_filter(chain='CRYPTO')  # 使用通用的链名称
                 chain = await sync_to_async(chain.first)()
 
                 if not chain:
                     return Response({
                         'status': 'not_found',
-                        'message': f"未找到代币 {symbol} 的分析数据",
+                        'message': f"未找到代币 {clean_symbol} 的分析数据",
                         'needs_refresh': True
                     }, status=status.HTTP_404_NOT_FOUND)
 
                 # 获取代币
                 token_filter = sync_to_async(CryptoToken.objects.filter)
-                token = await token_filter(
-                    symbol=symbol.replace('USDT', '').upper(),
-                    chain=chain
-                )
+                token = await token_filter(symbol=clean_symbol, chain=chain)
                 token = await sync_to_async(token.first)()
 
                 if not token:
                     return Response({
                         'status': 'not_found',
-                        'message': f"未找到代币 {symbol} 的分析数据",
+                        'message': f"未找到代币 {clean_symbol} 的分析数据",
                         'needs_refresh': True
                     }, status=status.HTTP_404_NOT_FOUND)
 
@@ -784,7 +933,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 if not latest_report:
                     return Response({
                         'status': 'not_found',
-                        'message': f"未找到代币 {symbol} 的分析数据",
+                        'message': f"未找到代币 {clean_symbol} 的分析数据",
                         'needs_refresh': True
                     }, status=status.HTTP_404_NOT_FOUND)
 
@@ -800,7 +949,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 if not technical_analysis or not market_data:
                     return Response({
                         'status': 'not_found',
-                        'message': f"未找到代币 {symbol} 的完整数据",
+                        'message': f"未找到代币 {clean_symbol} 的完整数据",
                         'needs_refresh': True
                     }, status=status.HTTP_404_NOT_FOUND)
 
@@ -903,16 +1052,16 @@ class TechnicalIndicatorsAPIView(APIView):
                 }
                 return Response(response_data)
             except CryptoToken.DoesNotExist:
-                logger.info(f"未找到代币 {symbol} 的记录")
+                logger.info(f"未找到代币 {clean_symbol} 的记录")
                 return Response({
                     'status': 'error',
-                    'message': f"未找到代币 {symbol} 的记录，请先使用 force_refresh=true 参数刷新数据"
+                    'message': f"未找到代币 {clean_symbol} 的记录，请先使用 force_refresh=true 参数刷新数据"
                 }, status=status.HTTP_404_NOT_FOUND)
             except Exception as e:
                 logger.error(f"从数据库读取数据时发生错误: {str(e)}")
                 return Response({
                     'status': 'not_found',
-                    'message': f"未找到代币 {symbol} 的分析数据",
+                    'message': f"未找到代币 {clean_symbol} 的分析数据",
                     'needs_refresh': True
                 }, status=status.HTTP_404_NOT_FOUND)
 
@@ -1311,7 +1460,7 @@ class LoginView(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             # 生成token
-            token, _ = Token.objects.get_or_create(user=user)
+            token, _ = AuthToken.objects.get_or_create(user=user)
 
             return Response({
                 'status': 'success',

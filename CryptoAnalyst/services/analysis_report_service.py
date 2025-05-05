@@ -6,17 +6,15 @@ from CryptoAnalyst.utils import logger
 class AnalysisReportService:
     """分析报告服务类"""
     
-    def save_analysis_report(self, symbol: str, data: Dict) -> AnalysisReport:
-        """保存分析报告
-        
-        Args:
-            symbol: 代币符号
-            data: 分析报告数据
-            
-        Returns:
-            AnalysisReport: 保存的分析报告对象
-        """
+    def save_analysis_report(self, symbol: str, analysis_data: Dict):
+        """保存分析报告"""
         try:
+            # 统一 symbol 格式
+            clean_symbol = symbol.upper().replace('USDT', '').replace('-PERP', '').replace('_PERP', '').replace('PERP', '')
+            
+            # 查找代币
+            token = Token.objects.get(symbol=clean_symbol)
+            
             # 检查必要的键是否存在
             required_keys = [
                 'trend_up_probability', 'trend_sideways_probability', 'trend_down_probability',
@@ -24,36 +22,25 @@ class AnalysisReportService:
                 'entry_price', 'stop_loss', 'take_profit', 'risk_level', 'risk_score', 'risk_details'
             ]
             for key in required_keys:
-                if key not in data:
+                if key not in analysis_data:
                     raise ValueError(f"缺少必要的键: {key}")
             
             # 获取或创建默认链
             chain, _ = Chain.objects.get_or_create(
-                chain=symbol.replace('USDT', ''),
+                chain=clean_symbol,
                 defaults={
                     'is_active': True,
                     'is_testnet': False
                 }
             )
             
-            # 获取或创建代币
-            token, _ = Token.objects.get_or_create(
-                symbol=symbol.replace('USDT', '').upper(),
-                chain=chain,
-                defaults={
-                    'name': symbol.replace('USDT', '').upper(),
-                    'address': '0x0000000000000000000000000000000000000000',
-                    'decimals': 18
-                }
-            )
-            
             # 获取最新的技术分析数据
             technical_analysis = TechnicalAnalysis.objects.filter(token=token).order_by('-timestamp').first()
             if not technical_analysis:
-                raise ValueError(f"未找到代币 {symbol} 的技术分析数据")
+                raise ValueError(f"未找到代币 {clean_symbol} 的技术分析数据")
             
             # 从 indicators_analysis 中提取各个指标的分析结果
-            indicators = data['indicators_analysis']
+            indicators = analysis_data['indicators_analysis']
             
             # 保存分析报告
             report = AnalysisReport.objects.create(
@@ -62,10 +49,10 @@ class AnalysisReportService:
                 technical_analysis=technical_analysis,
                 
                 # 趋势分析
-                trend_up_probability=int(data['trend_up_probability']),
-                trend_sideways_probability=int(data['trend_sideways_probability']),
-                trend_down_probability=int(data['trend_down_probability']),
-                trend_summary=data['trend_summary'],
+                trend_up_probability=int(analysis_data['trend_up_probability']),
+                trend_sideways_probability=int(analysis_data['trend_sideways_probability']),
+                trend_down_probability=int(analysis_data['trend_down_probability']),
+                trend_summary=analysis_data['trend_summary'],
                 
                 # 指标分析
                 # RSI
@@ -113,21 +100,21 @@ class AnalysisReportService:
                 mayer_multiple_support_trend=indicators.get('MayerMultiple', {}).get('support_trend', ''),
                 
                 # 交易建议
-                trading_action=data['trading_action'],
-                trading_reason=data['trading_reason'],
-                entry_price=float(data['entry_price']),
-                stop_loss=float(data['stop_loss']),
-                take_profit=float(data['take_profit']),
+                trading_action=analysis_data['trading_action'],
+                trading_reason=analysis_data['trading_reason'],
+                entry_price=float(analysis_data['entry_price']),
+                stop_loss=float(analysis_data['stop_loss']),
+                take_profit=float(analysis_data['take_profit']),
                 
                 # 风险评估
-                risk_level=data['risk_level'],
-                risk_score=int(data['risk_score']),
-                risk_details=data['risk_details']
+                risk_level=analysis_data['risk_level'],
+                risk_score=int(analysis_data['risk_score']),
+                risk_details=analysis_data['risk_details']
             )
             
-            logger.info(f"成功保存{symbol}的分析报告")
+            logger.info(f"成功保存{clean_symbol}的分析报告")
             return report
             
         except Exception as e:
-            logger.error(f"保存{symbol}的分析报告失败: {str(e)}")
+            logger.error(f"保存{clean_symbol}的分析报告失败: {str(e)}")
             raise 
