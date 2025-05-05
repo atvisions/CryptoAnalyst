@@ -6301,3 +6301,821 @@ INFO 2025-05-05 03:23:20,464 autoreload 3855 8462421120 /Users/liuzhao/Documents
 INFO 2025-05-05 03:23:20,885 autoreload 3867 8462421120 Watching for file changes with StatReloader
 INFO 2025-05-05 03:33:36,244 autoreload 3867 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
 INFO 2025-05-05 03:33:37,377 autoreload 4611 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 06:57:50,774 autoreload 26349 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 06:58:12,988 autoreload 26406 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 06:58:17,978 basehttp 26406 6193721344 "POST /api/auth/login/ HTTP/1.1" 200 235
+WARNING 2025-05-05 06:58:34,226 log 26406 6193721344 Method Not Allowed: /api/auth/change-password/
+WARNING 2025-05-05 06:58:34,227 basehttp 26406 6193721344 "GET /api/auth/change-password/ HTTP/1.1" 405 45
+WARNING 2025-05-05 06:58:38,635 log 26406 6193721344 Bad Request: /api/auth/change-password/
+WARNING 2025-05-05 06:58:38,636 basehttp 26406 6193721344 "POST /api/auth/change-password/ HTTP/1.1" 400 122
+INFO 2025-05-05 06:59:02,178 basehttp 26406 6193721344 "POST /api/auth/change-password/ HTTP/1.1" 200 111
+WARNING 2025-05-05 06:59:07,916 log 26406 6193721344 Bad Request: /api/auth/login/
+WARNING 2025-05-05 06:59:07,917 basehttp 26406 6193721344 "POST /api/auth/login/ HTTP/1.1" 400 52
+INFO 2025-05-05 06:59:17,704 basehttp 26406 6193721344 "POST /api/auth/login/ HTTP/1.1" 200 235
+WARNING 2025-05-05 07:01:15,598 log 26406 6210547712 Unauthorized: /api/auth/request-password-reset/
+WARNING 2025-05-05 07:01:15,600 basehttp 26406 6210547712 "POST /api/auth/request-password-reset/ HTTP/1.1" 401 34
+ERROR 2025-05-05 07:01:27,171 views 26406 6210547712 发送重置密码邮件失败: 'Settings' object has no attribute 'FRONTEND_URL'
+ERROR 2025-05-05 07:01:27,172 log 26406 6210547712 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 07:01:27,172 basehttp 26406 6210547712 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 79
+WARNING 2025-05-05 07:02:55,265 log 26406 6227374080 Bad Request: /api/auth/send-code/
+WARNING 2025-05-05 07:02:55,266 basehttp 26406 6227374080 "POST /api/auth/send-code/ HTTP/1.1" 400 64
+INFO 2025-05-05 07:04:06,889 autoreload 26406 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/config/settings.py changed, reloading.
+INFO 2025-05-05 07:04:07,630 autoreload 26852 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:04:17,253 autoreload 26852 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/config/settings.py changed, reloading.
+INFO 2025-05-05 07:04:17,774 autoreload 26885 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:04:29,262 autoreload 26885 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:04:30,656 autoreload 26913 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:04:39,061 autoreload 26913 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/config/settings.py changed, reloading.
+INFO 2025-05-05 07:04:39,542 autoreload 26939 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:05:13,301 basehttp 26939 6129922048 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 75
+INFO 2025-05-05 07:08:44,685 autoreload 26939 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/serializers.py changed, reloading.
+INFO 2025-05-05 07:08:45,483 autoreload 27234 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:09:05,654 autoreload 27234 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:09:06,652 autoreload 27267 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:09:32,483 autoreload 27267 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/serializers.py changed, reloading.
+INFO 2025-05-05 07:09:33,035 autoreload 27306 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:10:01,355 basehttp 27306 6160379904 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 75
+INFO 2025-05-05 07:16:35,727 autoreload 30353 8462421120 Watching for file changes with StatReloader
+ERROR 2025-05-05 07:17:17,470 views 30353 6174420992 发送重置密码验证码失败: type object 'datetime.timezone' has no attribute 'now'
+ERROR 2025-05-05 07:17:17,472 log 30353 6174420992 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 07:17:17,472 basehttp 30353 6174420992 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+ERROR 2025-05-05 07:18:03,189 views 30353 6174420992 发送重置密码验证码失败: type object 'datetime.timezone' has no attribute 'now'
+ERROR 2025-05-05 07:18:03,190 log 30353 6174420992 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 07:18:03,191 basehttp 30353 6174420992 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+WARNING 2025-05-05 07:18:25,742 log 30353 6174420992 Bad Request: /api/auth/reset-password-with-code/
+WARNING 2025-05-05 07:18:25,743 basehttp 30353 6174420992 "POST /api/auth/reset-password-with-code/ HTTP/1.1" 400 114
+INFO 2025-05-05 07:19:51,272 autoreload 30353 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:19:51,992 autoreload 30646 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:20:06,527 autoreload 30646 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:20:07,049 autoreload 30672 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:20:20,555 autoreload 30672 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:20:21,019 autoreload 30699 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:20:32,475 autoreload 30699 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:20:33,203 autoreload 30733 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:20:58,982 autoreload 30733 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:20:59,579 autoreload 30779 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:21:11,104 autoreload 30779 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:21:11,589 autoreload 30810 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:21:22,075 autoreload 30810 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/serializers.py changed, reloading.
+INFO 2025-05-05 07:21:22,736 autoreload 30825 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:21:31,998 autoreload 30825 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/serializers.py changed, reloading.
+INFO 2025-05-05 07:21:32,624 autoreload 30852 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:21:36,784 autoreload 30852 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/serializers.py changed, reloading.
+INFO 2025-05-05 07:21:37,184 autoreload 30859 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:21:51,113 basehttp 30859 6138998784 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 78
+INFO 2025-05-05 07:22:55,827 autoreload 30859 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/config/settings.py changed, reloading.
+INFO 2025-05-05 07:22:56,517 autoreload 31543 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:22:58,897 autoreload 31543 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/config/settings.py changed, reloading.
+INFO 2025-05-05 07:22:59,293 autoreload 31553 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:23:15,789 autoreload 31553 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/serializers.py changed, reloading.
+INFO 2025-05-05 07:23:16,326 autoreload 31575 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:23:20,371 autoreload 31575 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/serializers.py changed, reloading.
+INFO 2025-05-05 07:23:20,751 autoreload 31583 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:23:24,710 autoreload 31583 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:23:25,072 autoreload 31604 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:23:38,157 autoreload 31604 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:23:38,819 autoreload 31617 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:23:45,059 autoreload 31617 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:23:45,637 autoreload 31644 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:23:56,278 autoreload 31644 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:23:56,858 autoreload 31669 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:24:08,146 autoreload 31669 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-05 07:24:08,872 autoreload 31678 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:24:23,437 autoreload 31678 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-05-05 07:24:23,920 autoreload 31705 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:24:36,461 autoreload 31705 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/models.py changed, reloading.
+INFO 2025-05-05 07:24:36,992 autoreload 31729 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:24:48,331 autoreload 31729 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/models.py changed, reloading.
+INFO 2025-05-05 07:24:48,901 autoreload 31763 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:25:05,424 autoreload 31763 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/admin.py changed, reloading.
+INFO 2025-05-05 07:25:05,951 autoreload 31792 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:25:39,074 autoreload 31847 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-05 07:25:47,439 basehttp 31847 6202503168 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 78
+INFO 2025-05-05 07:26:05,920 basehttp 31847 6202503168 "POST /api/auth/reset-password-with-code/ HTTP/1.1" 200 266
+WARNING 2025-05-05 07:26:10,601 log 31847 6202503168 Bad Request: /api/auth/login/
+WARNING 2025-05-05 07:26:10,601 basehttp 31847 6202503168 "POST /api/auth/login/ HTTP/1.1" 400 52
+INFO 2025-05-05 07:26:18,636 basehttp 31847 6202503168 "POST /api/auth/login/ HTTP/1.1" 200 235
+INFO 2025-05-05 07:26:30,526 basehttp 31847 6202503168 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 78
+WARNING 2025-05-05 07:33:41,071 log 31847 6219329536 Method Not Allowed: /api/auth/request-password-reset/
+WARNING 2025-05-05 07:33:41,072 basehttp 31847 6219329536 "GET /api/auth/request-password-reset/ HTTP/1.1" 405 45
+WARNING 2025-05-05 07:33:47,705 log 31847 6219329536 Bad Request: /api/auth/request-password-reset/
+WARNING 2025-05-05 07:33:47,705 basehttp 31847 6219329536 "POST /api/auth/request-password-reset/ HTTP/1.1" 400 85
+INFO 2025-05-05 07:38:15,093 basehttp 31847 6219329536 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 78
+INFO 2025-05-05 07:50:18,044 basehttp 31847 6236155904 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 78
+ERROR 2025-05-05 07:56:16,842 views 31847 6252982272 发送重置密码验证码失败: Connection unexpectedly closed: timed out
+ERROR 2025-05-05 07:56:16,847 log 31847 6252982272 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 07:56:16,848 basehttp 31847 6252982272 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+INFO 2025-05-05 08:10:57,545 autoreload 42730 8462421120 Watching for file changes with StatReloader
+ERROR 2025-05-05 08:19:51,104 views 42730 6162198528 发送重置密码验证码失败: timed out
+ERROR 2025-05-05 08:19:51,115 log 42730 6162198528 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 08:19:51,116 basehttp 42730 6162198528 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+INFO 2025-05-05 08:21:20,323 basehttp 42730 6162198528 "OPTIONS /api/auth/request-password-reset/ HTTP/1.1" 200 0
+INFO 2025-05-05 08:25:26,155 basehttp 42730 6162198528 "OPTIONS /api/auth/request-password-reset/ HTTP/1.1" 200 0
+WARNING 2025-05-05 08:26:08,173 log 42730 6162198528 Bad Request: /api/auth/request-password-reset/
+WARNING 2025-05-05 08:26:08,173 basehttp 42730 6162198528 "POST /api/auth/request-password-reset/ HTTP/1.1" 400 85
+INFO 2025-05-05 08:29:32,777 basehttp 42730 6162198528 "OPTIONS /api/auth/request-password-reset/ HTTP/1.1" 200 0
+ERROR 2025-05-05 08:31:12,636 views 42730 6162198528 发送重置密码验证码失败: timed out
+ERROR 2025-05-05 08:31:12,640 log 42730 6162198528 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 08:31:12,641 basehttp 42730 6162198528 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+ERROR 2025-05-05 08:32:32,457 views 42730 6162198528 发送重置密码验证码失败: timed out
+ERROR 2025-05-05 08:32:32,462 log 42730 6162198528 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 08:32:32,463 basehttp 42730 6162198528 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+ERROR 2025-05-05 08:33:32,699 views 42730 6162198528 发送重置密码验证码失败: timed out
+ERROR 2025-05-05 08:33:32,701 log 42730 6162198528 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 08:33:32,702 basehttp 42730 6162198528 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+ERROR 2025-05-05 08:35:04,076 views 42730 6162198528 发送重置密码验证码失败: timed out
+ERROR 2025-05-05 08:35:04,079 log 42730 6162198528 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 08:35:04,080 basehttp 42730 6162198528 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+INFO 2025-05-05 08:35:57,169 autoreload 45871 8462421120 Watching for file changes with StatReloader
+ERROR 2025-05-05 08:36:32,437 views 45871 6136852480 发送重置密码验证码失败: timed out
+ERROR 2025-05-05 08:36:32,443 log 45871 6136852480 Internal Server Error: /api/auth/request-password-reset/
+ERROR 2025-05-05 08:36:32,444 basehttp 45871 6136852480 "POST /api/auth/request-password-reset/ HTTP/1.1" 500 82
+INFO 2025-05-05 10:31:20,572 basehttp 45871 6153678848 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 78
+INFO 2025-05-05 10:37:22,969 basehttp 45871 6170505216 "POST /api/auth/request-password-reset/ HTTP/1.1" 200 78
+INFO 2025-05-05 10:37:53,039 basehttp 45871 6170505216 "POST /api/auth/reset-password-with-code/ HTTP/1.1" 200 266
+INFO 2025-05-05 10:38:06,209 basehttp 45871 6170505216 "OPTIONS /api/auth/login/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:38:21,552 basehttp 45871 6170505216 "OPTIONS /api/auth/login/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:38:44,777 basehttp 45871 6170505216 "OPTIONS /api/auth/login/ HTTP/1.1" 200 0
+WARNING 2025-05-05 10:42:46,389 log 45871 6170505216 Bad Request: /api/auth/login/
+WARNING 2025-05-05 10:42:46,391 basehttp 45871 6170505216 "POST /api/auth/login/ HTTP/1.1" 400 52
+INFO 2025-05-05 10:42:54,195 basehttp 45871 6170505216 "POST /api/auth/login/ HTTP/1.1" 200 235
+WARNING 2025-05-05 10:43:17,184 log 45871 6187331584 Method Not Allowed: /api/auth/login/
+WARNING 2025-05-05 10:43:17,185 basehttp 45871 6187331584 "GET /api/auth/login/ HTTP/1.1" 405 5600
+INFO 2025-05-05 10:43:18,682 basehttp 45871 6187331584 "GET /static/rest_framework/css/bootstrap-tweaks.css HTTP/1.1" 200 3385
+INFO 2025-05-05 10:43:18,689 basehttp 45871 6204157952 "GET /static/rest_framework/css/prettify.css HTTP/1.1" 200 817
+INFO 2025-05-05 10:43:18,694 basehttp 45871 6187331584 "GET /static/rest_framework/js/ajax-form.js HTTP/1.1" 200 3597
+INFO 2025-05-05 10:43:18,695 basehttp 45871 6254637056 "GET /static/rest_framework/css/default.css HTTP/1.1" 200 1152
+INFO 2025-05-05 10:43:18,696 basehttp 45871 6271463424 "GET /static/rest_framework/js/prettify-min.js HTTP/1.1" 200 13632
+INFO 2025-05-05 10:43:18,699 basehttp 45871 6187331584 "GET /static/rest_framework/js/default.js HTTP/1.1" 200 1268
+INFO 2025-05-05 10:43:18,700 basehttp 45871 6204157952 "GET /static/rest_framework/js/bootstrap.min.js HTTP/1.1" 200 39680
+INFO 2025-05-05 10:43:18,701 basehttp 45871 6220984320 "GET /static/rest_framework/css/bootstrap.min.css HTTP/1.1" 200 121457
+INFO 2025-05-05 10:43:18,701 basehttp 45871 6254637056 "GET /static/rest_framework/js/csrf.js HTTP/1.1" 200 1719
+INFO 2025-05-05 10:43:18,711 basehttp 45871 6237810688 "GET /static/rest_framework/js/jquery-3.5.1.min.js HTTP/1.1" 200 89476
+INFO 2025-05-05 10:44:10,987 basehttp 45871 6187331584 "OPTIONS /api/auth/login/ HTTP/1.1" 200 0
+WARNING 2025-05-05 10:47:52,089 log 45871 6187331584 Bad Request: /api/auth/login/
+WARNING 2025-05-05 10:47:52,092 basehttp 45871 6187331584 "POST /api/auth/login/ HTTP/1.1" 400 52
+INFO 2025-05-05 10:48:00,094 basehttp 45871 6187331584 "POST /api/auth/login/ HTTP/1.1" 200 235
+INFO 2025-05-05 10:48:00,947 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:02,949 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:02,949 basehttp 45871 6204157952 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:02,958 basehttp 45871 6204157952 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:04,953 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:06,957 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:08,960 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:10,964 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:16,967 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:18,969 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:32,311 basehttp 45871 6187331584 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:48:34,311 basehttp 45871 6187331584 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+WARNING 2025-05-05 10:50:04,926 log 45871 6187331584 Bad Request: /api/auth/login/
+WARNING 2025-05-05 10:50:04,927 basehttp 45871 6187331584 "POST /api/auth/login/ HTTP/1.1" 400 52
+INFO 2025-05-05 10:50:12,918 basehttp 45871 6187331584 "POST /api/auth/login/ HTTP/1.1" 200 235
+INFO 2025-05-05 10:50:13,553 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:15,551 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:15,551 basehttp 45871 6204157952 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:15,560 basehttp 45871 6204157952 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:17,558 basehttp 45871 6204157952 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:19,559 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:21,594 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:23,568 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:29,619 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:31,620 basehttp 45871 6187331584 "OPTIONS /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:50:45,803 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:50:45,804 technical_analysis 45871 6187331584 技术分析服务初始化完成
+INFO 2025-05-05 10:50:45,804 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:50:46,655 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+WARNING 2025-05-05 10:50:46,667 log 45871 6187331584 Unauthorized: /api/crypto/technical-indicators/SOLUSDT/
+WARNING 2025-05-05 10:50:46,668 basehttp 45871 6187331584 "GET /api/crypto/technical-indicators/SOLUSDT/ HTTP/1.1" 401 34
+INFO 2025-05-05 10:50:58,203 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:50:58,203 technical_analysis 45871 6187331584 技术分析服务初始化完成
+INFO 2025-05-05 10:50:58,203 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:50:58,749 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:50:58,756 views 45871 6187331584 异步处理请求: symbol=SOLUSDT, clean_symbol=SOL, force_refresh=False
+WARNING 2025-05-05 10:50:58,768 log 45871 6187331584 Not Found: /api/crypto/technical-indicators/SOLUSDT/
+WARNING 2025-05-05 10:50:58,768 basehttp 45871 6187331584 "GET /api/crypto/technical-indicators/SOLUSDT/ HTTP/1.1" 404 91
+INFO 2025-05-05 10:51:29,622 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:51:29,623 technical_analysis 45871 6187331584 技术分析服务初始化完成
+INFO 2025-05-05 10:51:29,623 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:51:30,157 binance_api 45871 6187331584 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:51:30,166 views 45871 6187331584 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:51:30,218 basehttp 45871 6187331584 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:52:42,766 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:52:42,769 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:52:42,770 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:52:43,379 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:52:43,395 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:52:43,425 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:52:43,436 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:52:43,437 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:52:43,437 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:52:44,115 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:52:44,124 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:52:44,136 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:53:00,930 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:00,931 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:53:00,931 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:01,534 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:01,544 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:53:01,562 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:53:01,566 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:01,566 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:53:01,566 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:02,345 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:02,357 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:53:02,366 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:53:54,063 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:54,064 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:53:54,064 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:54,731 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:54,769 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:53:54,788 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:53:54,817 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:54,820 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:53:54,820 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:55,519 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:53:55,526 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:53:55,549 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:54:04,966 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:54:04,967 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:54:04,967 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:54:05,522 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:54:05,544 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:54:05,556 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:54:05,570 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:54:05,571 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:54:05,571 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:54:06,112 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:54:06,122 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:54:06,137 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2424
+INFO 2025-05-05 10:55:15,356 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:55:15,359 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:55:15,361 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:55:15,971 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:55:15,987 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=True
+INFO 2025-05-05 10:55:16,525 binance_api 45871 6204731392 BinanceAPI 客户端初始化完成
+INFO 2025-05-05 10:55:18,792 binance_api 45871 6204731392 futures_funding_rate 原始返回: [{'symbol': 'BTCUSDT', 'fundingTime': 1743580800000, 'fundingRate': '0.00003036', 'markPrice': '84393.10059259'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743609600000, 'fundingRate': '0.00000733', 'markPrice': '86716.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743638400000, 'fundingRate': '0.00005862', 'markPrice': '82485.00000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743667200000, 'fundingRate': '0.00005038', 'markPrice': '83423.97282759'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743696000000, 'fundingRate': '0.00006484', 'markPrice': '82009.80792337'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743724800000, 'fundingRate': '0.00004283', 'markPrice': '83168.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743753600000, 'fundingRate': '0.00004736', 'markPrice': '83968.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743782400000, 'fundingRate': '0.00008038', 'markPrice': '82822.00000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743811200000, 'fundingRate': '0.00008559', 'markPrice': '83861.30000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743840000000, 'fundingRate': '0.00007437', 'markPrice': '83490.00000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743868800000, 'fundingRate': '0.00000408', 'markPrice': '82582.45056296'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743897600000, 'fundingRate': '0.00000221', 'markPrice': '83501.91631852'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743926400000, 'fundingRate': '0.00005363', 'markPrice': '82990.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743955200002, 'fundingRate': '-0.00000603', 'markPrice': '82503.61944061'}, {'symbol': 'BTCUSDT', 'fundingTime': 1743984000000, 'fundingRate': '0.00004946', 'markPrice': '78392.35042912'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744012800000, 'fundingRate': '0.00006857', 'markPrice': '75088.25410370'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744041600000, 'fundingRate': '0.00004998', 'markPrice': '78465.57328148'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744070400000, 'fundingRate': '0.00004074', 'markPrice': '79140.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744099200000, 'fundingRate': '0.00003575', 'markPrice': '79455.76043704'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744128000000, 'fundingRate': '0.00003134', 'markPrice': '78462.82929630'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744156800000, 'fundingRate': '0.00009568', 'markPrice': '76297.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744185600001, 'fundingRate': '-0.00002252', 'markPrice': '77645.50000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744214400000, 'fundingRate': '0.00006856', 'markPrice': '77224.48104444'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744243200000, 'fundingRate': '0.00007705', 'markPrice': '82588.00000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744272000000, 'fundingRate': '0.00000114', 'markPrice': '81561.50000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744300800000, 'fundingRate': '0.00006775', 'markPrice': '78726.30000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744329600001, 'fundingRate': '0.00002065', 'markPrice': '79576.11047407'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744358400000, 'fundingRate': '-0.00004294', 'markPrice': '81213.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744387200000, 'fundingRate': '0.00003290', 'markPrice': '82486.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744416000000, 'fundingRate': '0.00003654', 'markPrice': '83385.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744444800001, 'fundingRate': '0.00005640', 'markPrice': '83685.40000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744473600000, 'fundingRate': '0.00005388', 'markPrice': '84974.20000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744502400000, 'fundingRate': '0.00005057', 'markPrice': '85240.01637778'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744531200000, 'fundingRate': '0.00008429', 'markPrice': '84383.61757037'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744560000000, 'fundingRate': '0.00009642', 'markPrice': '83820.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744588800000, 'fundingRate': '0.00008113', 'markPrice': '83715.61378519'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744617600000, 'fundingRate': '0.00007127', 'markPrice': '84545.16948148'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744646400000, 'fundingRate': '0.00002428', 'markPrice': '84063.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744675200000, 'fundingRate': '-0.00002073', 'markPrice': '84553.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744704000000, 'fundingRate': '0.00006606', 'markPrice': '85691.30000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744732800001, 'fundingRate': '0.00001883', 'markPrice': '84874.59705926'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744761600000, 'fundingRate': '0.00002428', 'markPrice': '83608.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744790400000, 'fundingRate': '0.00006917', 'markPrice': '83336.36678161'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744819200000, 'fundingRate': '0.00001978', 'markPrice': '84801.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744848000001, 'fundingRate': '0.00001404', 'markPrice': '83994.18360000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744876800000, 'fundingRate': '0.00005679', 'markPrice': '84630.32499202'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744905600001, 'fundingRate': '0.00003425', 'markPrice': '84495.50000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744934400000, 'fundingRate': '0.00001788', 'markPrice': '84916.10982222'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744963200000, 'fundingRate': '0.00007071', 'markPrice': '84622.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1744992000000, 'fundingRate': '0.00002995', 'markPrice': '84337.39696296'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745020800000, 'fundingRate': '0.00002930', 'markPrice': '84429.71837548'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745049600000, 'fundingRate': '0.00006024', 'markPrice': '85174.50000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745078400000, 'fundingRate': '-0.00001953', 'markPrice': '85146.20000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745107200000, 'fundingRate': '-0.00000298', 'markPrice': '85046.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745136000000, 'fundingRate': '-0.00001078', 'markPrice': '84739.09365128'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745164800000, 'fundingRate': '-0.00002258', 'markPrice': '84305.11534074'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745193600000, 'fundingRate': '0.00005232', 'markPrice': '85142.30088148'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745222400005, 'fundingRate': '0.00005403', 'markPrice': '87400.60000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745251200003, 'fundingRate': '0.00001553', 'markPrice': '87998.12642222'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745280000008, 'fundingRate': '0.00007749', 'markPrice': '87467.82270370'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745308800000, 'fundingRate': '-0.00000744', 'markPrice': '88436.16399259'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745337600000, 'fundingRate': '-0.00007045', 'markPrice': '90881.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745366400000, 'fundingRate': '-0.00001389', 'markPrice': '93404.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745395200002, 'fundingRate': '0.00001374', 'markPrice': '94110.36297318'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745424000000, 'fundingRate': '0.00004587', 'markPrice': '93149.55929437'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745452800000, 'fundingRate': '-0.00002671', 'markPrice': '93641.27053973'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745481600001, 'fundingRate': '0.00005210', 'markPrice': '92167.24875325'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745510400001, 'fundingRate': '-0.00002165', 'markPrice': '93148.88519481'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745539200007, 'fundingRate': '-0.00001764', 'markPrice': '93931.60000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745568000002, 'fundingRate': '0.00000170', 'markPrice': '93734.00000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745596800003, 'fundingRate': '0.00000120', 'markPrice': '95000.28830833'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745625600002, 'fundingRate': '-0.00010085', 'markPrice': '94591.80000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745654400000, 'fundingRate': '-0.00002774', 'markPrice': '94523.02069167'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745683200002, 'fundingRate': '0.00002855', 'markPrice': '94326.89167892'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745712000001, 'fundingRate': '-0.00001500', 'markPrice': '94575.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745740800000, 'fundingRate': '-0.00000660', 'markPrice': '94027.70000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745769600000, 'fundingRate': '-0.00000421', 'markPrice': '93857.80000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745798400001, 'fundingRate': '0.00000373', 'markPrice': '93697.00000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745827200003, 'fundingRate': '0.00000246', 'markPrice': '94641.50000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745856000005, 'fundingRate': '-0.00005821', 'markPrice': '93782.50000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745884800000, 'fundingRate': '-0.00000773', 'markPrice': '94969.00000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745913600000, 'fundingRate': '0.00000413', 'markPrice': '94877.90000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745942400010, 'fundingRate': '0.00001305', 'markPrice': '94800.87365217'}, {'symbol': 'BTCUSDT', 'fundingTime': 1745971200001, 'fundingRate': '-0.00005181', 'markPrice': '94211.74500725'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746000000000, 'fundingRate': '0.00002939', 'markPrice': '94577.60000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746028800003, 'fundingRate': '-0.00003797', 'markPrice': '93961.60732609'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746057600000, 'fundingRate': '0.00003519', 'markPrice': '94130.75027536'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746086400000, 'fundingRate': '0.00005755', 'markPrice': '94983.01632609'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746115200001, 'fundingRate': '-0.00008028', 'markPrice': '96794.89389805'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746144000000, 'fundingRate': '-0.00012232', 'markPrice': '96433.84531159'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746172800000, 'fundingRate': '-0.00009382', 'markPrice': '96302.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746201600003, 'fundingRate': '-0.00008689', 'markPrice': '97277.00616667'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746230400000, 'fundingRate': '-0.00005953', 'markPrice': '96831.65852586'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746259200000, 'fundingRate': '0.00003198', 'markPrice': '96290.80000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746288000000, 'fundingRate': '-0.00001483', 'markPrice': '96360.13496232'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746316800001, 'fundingRate': '0.00000370', 'markPrice': '95819.52819239'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746345600001, 'fundingRate': '0.00003229', 'markPrice': '95842.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746374400002, 'fundingRate': '0.00003745', 'markPrice': '95421.10000000'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746403200000, 'fundingRate': '-0.00002404', 'markPrice': '94240.51430435'}, {'symbol': 'BTCUSDT', 'fundingTime': 1746432000000, 'fundingRate': '0.00003636', 'markPrice': '94697.80169565'}]
+INFO 2025-05-05 10:55:18,794 binance_api 45871 6204731392 成功获取 BTCUSDT 的资金费率: 3.036e-05
+INFO 2025-05-05 10:55:18,794 technical_analysis 45871 6204731392 获取到 BTCUSDT 的资金费率: 3.036e-05
+INFO 2025-05-05 10:55:18,797 technical_analysis 45871 6204731392 计算梅耶倍数的原始数据:
+INFO 2025-05-05 10:55:18,797 technical_analysis 45871 6204731392 数据长度: 1000
+INFO 2025-05-05 10:55:18,797 technical_analysis 45871 6204731392 最新价格: 94130.42
+INFO 2025-05-05 10:55:18,797 technical_analysis 45871 6204731392 MA200值: 90416.11590000002
+INFO 2025-05-05 10:55:18,798 technical_analysis 45871 6204731392 梅耶倍数计算结果: 1.041080111250388
+INFO 2025-05-05 10:55:19,382 binance_api 45871 6204731392 BinanceAPI 客户端初始化完成
+INFO 2025-05-05 10:55:23,359 signals 45871 6204731392 更新代币 BTC 的技术分析数据
+INFO 2025-05-05 10:55:23,366 signals 45871 6204731392 更新代币 BTC 的市场数据
+INFO 2025-05-05 10:55:23,367 views 45871 6204731392 成功更新代币 BTC 的技术分析数据
+INFO 2025-05-05 10:55:25,123 views 45871 6221557760 === 测试认证响应详情 ===
+INFO 2025-05-05 10:55:25,123 views 45871 6221557760 响应状态码: 200
+INFO 2025-05-05 10:55:25,124 views 45871 6221557760 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '20250505105523576FFA79FE281334A3E0', 'Server-Timing': 'inner; dur=144', 'x-tt-trace-host': '01c0eedc5a4fb55ea2996e34c730980f1352ee675a64e33dd40cf67fb87428660dd32535de0689526c8eed49a5a6583450bc3aa09efb7c2a9210e0883ba679c72216d84cd3cada564548246881eb355657b6d0ce6d8f3e4f57ec3b86e6cc002815a3972e3755f483f71284f70065f821a0', 'x-tt-trace-id': '00-250505105523576FFA79FE281334A3E0-3A3178D5738BE75D-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Expires': 'Mon, 05 May 2025 10:55:25 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Mon, 05 May 2025 10:55:25 GMT', 'Content-Length': '162', 'X-Cache': 'TCP_MISS from a23-206-199-15.deploy.akamaitechnologies.com (AkamaiGHost/22.1.1.1-d05c6443fdf0ef1ad227a2aacc363f6e) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'X-Origin-Response-Time': '413,23.206.199.15', 'X-Akamai-Request-ID': '7766ea98'}
+INFO 2025-05-05 10:55:25,124 views 45871 6221557760 响应内容: {"data":{"id":"7500913404970958855","conversation_id":"7500913404970942471","bot_id":"7494575252253720584","created_at":1746442524,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+INFO 2025-05-05 10:55:29,936 views 45871 6221557760 第 1 次尝试获取对话状态
+INFO 2025-05-05 10:55:30,302 views 45871 6221557760 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7500913445001478152","created_at":1746442530,"id":"7500913445001510920","status":"in_progress"},"detail":{"logid":"20250505105529590AFFCC1E2728DED837"},"msg":""}
+INFO 2025-05-05 10:55:31,304 views 45871 6221557760 第 2 次尝试获取对话状态
+INFO 2025-05-05 10:55:31,644 views 45871 6221557760 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7500913445001478152","created_at":1746442530,"id":"7500913445001510920","status":"in_progress"},"detail":{"logid":"20250505105530590AFFCC1E2728DED9F1"},"msg":""}
+INFO 2025-05-05 10:55:33,145 views 45871 6221557760 第 3 次尝试获取对话状态
+INFO 2025-05-05 10:55:33,497 views 45871 6221557760 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7500913445001478152","created_at":1746442530,"id":"7500913445001510920","status":"in_progress"},"detail":{"logid":"20250505105532590AFFCC1E2728DEDC2D"},"msg":""}
+INFO 2025-05-05 10:55:35,751 views 45871 6221557760 第 4 次尝试获取对话状态
+INFO 2025-05-05 10:55:36,091 views 45871 6221557760 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7500913445001478152","created_at":1746442530,"id":"7500913445001510920","status":"in_progress"},"detail":{"logid":"20250505105534590AFFCC1E2728DEDF13"},"msg":""}
+INFO 2025-05-05 10:55:39,468 views 45871 6221557760 第 5 次尝试获取对话状态
+INFO 2025-05-05 10:55:40,046 views 45871 6221557760 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7500913445001478152","created_at":1746442530,"id":"7500913445001510920","status":"in_progress"},"detail":{"logid":"202505051055389A2D84911DB58B270967"},"msg":""}
+INFO 2025-05-05 10:55:45,047 views 45871 6221557760 第 6 次尝试获取对话状态
+INFO 2025-05-05 10:55:45,402 views 45871 6221557760 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","completed_at":1746442542,"conversation_id":"7500913445001478152","created_at":1746442530,"id":"7500913445001510920","status":"completed","usage":{"input_count":676,"output_count":871,"token_count":1547}},"detail":{"logid":"202505051055449A2D84911DB58B270F14"},"msg":""}
+INFO 2025-05-05 10:55:45,790 views 45871 6221557760 消息列表响应: {"code":0,"data":[{"bot_id":"7494575252253720584","chat_id":"7500913445001510920","content":"```json\n{\n    \"trend_analysis\": {\n        \"probabilities\": {\n            \"up\": 45,\n            \"sideways\": 30,\n            \"down\": 25\n        },\n        \"summary\": \"市场趋势显示出一定的上涨潜力，但存在横盘和下跌的风险。\"\n    },\n    \"indicators_analysis\": {\n        \"RSI\": {\n            \"value\": 71.22,\n            \"analysis\": \"RSI处于超买区域，可能存在回调风险。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MACD\": {\n            \"value\": {\n                \"line\": 2730.18,\n                \"signal\": 2730.27,\n                \"histogram\": -0.09\n            },\n            \"analysis\": \"MACD线和信号线几乎持平，表明市场可能处于转折点。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"BollingerBands\": {\n            \"value\": {\n                \"upper\": 100965.3,\n                \"middle\": 91821.87,\n                \"lower\": 82678.45\n            },\n            \"analysis\": \"价格接近布林带上轨，可能会出现回调。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"BIAS\": {\n            \"value\": -1.23,\n            \"analysis\": \"BIAS为负，表明价格偏离均线，有回调的可能。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"PSY\": {\n            \"value\": 41.7,\n            \"analysis\": \"PSY值低于50，市场情绪偏向看空。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"DMI\": {\n            \"value\": {\n                \"plus_di\": 31.1,\n                \"minus_di\": 14.6,\n                \"adx\": 71.2\n            },\n            \"analysis\": \"正DI高于负DI，且ADX较高，表明市场趋势强劲。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"VWAP\": {\n            \"value\": 31031.86,\n            \"analysis\": \"VWAP显示当前价格高于平均成交价格，市场可能处于高位。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"FundingRate\": {\n            \"value\": 3e-05,\n            \"analysis\": \"资金费率正值，表明多头情绪较强。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"ExchangeNetflow\": {\n            \"value\": -62.9,\n            \"analysis\": \"交易所净流出，表明投资者倾向于持有。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"NUPL\": {\n            \"value\": 100.0,\n            \"analysis\": \"NUPL数值极高，表明市场可能过热。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MayerMultiple\": {\n            \"value\": 1.04,\n            \"analysis\": \"Mayer Multiple接近1，市场处于相对合理估值区间。\",\n            \"support_trend\": \"支持当前趋势\"\n        }\n    },\n    \"trading_advice\": {\n        \"action\": \"持有\",\n        \"reason\": \"尽管市场指标显示存在回调风险，但整体趋势仍然较强，建议持有。\",\n        \"entry_price\": 94118.3,\n        \"stop_loss\": 90000.0,\n        \"take_profit\": 100000.0\n    },\n    \"risk_assessment\": {\n        \"level\": \"中\",\n        \"score\": 60,\n        \"details\": [\n            \"RSI超买\",\n            \"MACD线和信号线持平\",\n            \"价格接近布林带上轨\",\n            \"市场情绪偏向看空\"\n        ]\n    }\n}\n```","content_type":"text","conversation_id":"7500913445001478152","created_at":1746442530,"id":"7500913487481143303","reasoning_content":"","role":"assistant","type":"answer","updated_at":1746442539},{"bot_id":"7494575252253720584","chat_id":"7500913445001510920","content":"{\"msg_type\":\"generate_answer_finish\",\"data\":\"{\\\"finish_reason\\\":0,\\\"FinData\\\":\\\"\\\"}\",\"from_module\":null,\"from_unit\":null}","content_type":"text","conversation_id":"7500913445001478152","created_at":1746442542,"id":"7500913487481307143","role":"assistant","type":"verbose","updated_at":1746442541},{"bot_id":"7494575252253720584","chat_id":"7500913445001510920","content":"Can you provide more details on the market trend probabilities mentioned in the analysis?","content_type":"text","conversation_id":"7500913445001478152","created_at":1746442542,"id":"7500913487481323527","role":"assistant","type":"follow_up","updated_at":1746442541},{"bot_id":"7494575252253720584","chat_id":"7500913445001510920","content":"What does the RSI value being in the overbought zone indicate for potential market movements?","content_type":"text","conversation_id":"7500913445001478152","created_at":1746442542,"id":"7500913487481339911","role":"assistant","type":"follow_up","updated_at":1746442541},{"bot_id":"7494575252253720584","chat_id":"7500913445001510920","content":"How does the similarity between the MACD line and signal line influence market analysis?","content_type":"text","conversation_id":"7500913445001478152","created_at":1746442542,"id":"7500913487481356295","role":"assistant","type":"follow_up","updated_at":1746442541}],"detail":{"logid":"202505051055449A2D84911DB58B270F7A"},"msg":""}
+INFO 2025-05-05 10:55:45,805 analysis_report_service 45871 6204731392 成功保存BTC的分析报告
+INFO 2025-05-05 10:55:45,808 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 200 2277
+INFO 2025-05-05 10:55:46,826 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:55:46,826 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:55:46,826 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:55:47,390 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:55:47,400 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:55:47,417 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:08,077 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:08,078 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:57:08,078 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:08,731 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:08,754 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:08,776 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:08,787 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:08,787 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:57:08,787 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:09,419 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:09,442 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:09,448 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:14,682 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:16,666 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:17,684 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:17,685 technical_analysis 45871 6238384128 技术分析服务初始化完成
+INFO 2025-05-05 10:57:17,685 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:18,282 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:18,293 views 45871 6238384128 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:18,308 basehttp 45871 6238384128 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:18,318 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:18,319 technical_analysis 45871 6238384128 技术分析服务初始化完成
+INFO 2025-05-05 10:57:18,320 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:18,672 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:18,975 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:18,985 views 45871 6238384128 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:19,004 basehttp 45871 6238384128 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:22,679 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:29,363 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:29,364 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:57:29,364 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:30,202 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:30,227 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:30,256 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:30,299 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:30,301 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:57:30,301 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:30,684 basehttp 45871 6238384128 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:30,932 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:30,937 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:30,949 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:44,983 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:46,965 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:48,352 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:48,353 technical_analysis 45871 6238384128 技术分析服务初始化完成
+INFO 2025-05-05 10:57:48,354 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:48,974 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:49,103 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:49,133 views 45871 6238384128 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:49,143 basehttp 45871 6238384128 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:49,147 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:49,147 technical_analysis 45871 6238384128 技术分析服务初始化完成
+INFO 2025-05-05 10:57:49,147 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:49,724 binance_api 45871 6238384128 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:57:49,734 views 45871 6238384128 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:57:49,749 basehttp 45871 6238384128 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:57:52,982 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:56,222 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:57:58,221 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:58:00,228 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:58:02,229 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:58:04,234 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:58:12,242 basehttp 45871 6221557760 "OPTIONS /api/auth/profile/ HTTP/1.1" 200 0
+INFO 2025-05-05 10:58:25,483 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 10:59:04,065 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:04,067 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:04,067 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:04,624 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:04,635 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:04,645 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:04,650 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:04,650 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:04,651 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:05,472 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:05,478 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:05,494 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:05,746 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 10:59:15,775 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:15,776 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:15,777 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:16,382 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:16,393 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:16,405 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:16,412 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:16,413 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:16,413 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:16,645 basehttp 45871 6238384128 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 10:59:17,213 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:17,221 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:17,237 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:21,355 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:21,356 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:21,357 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:21,919 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:21,926 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:21,937 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:21,945 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:21,945 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:21,945 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:22,487 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:22,496 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:22,507 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:27,155 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 10:59:30,467 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:30,468 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:30,468 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:31,083 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:31,091 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:31,104 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:31,110 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:31,112 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:31,113 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:34,713 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:34,722 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:34,742 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:35,222 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 10:59:37,556 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:37,556 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:37,556 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:38,403 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:38,415 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:38,428 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:38,438 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:38,439 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:38,439 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:39,773 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:39,778 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:39,794 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:49,227 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:49,228 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:49,228 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:52,095 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:52,102 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:52,115 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 10:59:52,129 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:52,129 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 10:59:52,129 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:52,702 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 10:59:52,709 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 10:59:52,725 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:00:31,580 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:00:31,581 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:00:31,581 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:00:32,186 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:00:32,201 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:00:32,227 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:00:32,245 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:00:32,245 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:00:32,245 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:00:32,839 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:00:32,902 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:00:32,910 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:04,662 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:04,663 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:04,663 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:05,352 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:05,375 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:05,412 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:05,487 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:05,488 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:05,488 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:06,034 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:06,039 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:06,053 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:16,104 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:16,105 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:16,105 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:16,654 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:16,660 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:16,671 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:16,675 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:16,676 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:16,676 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:17,374 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:17,468 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:17,582 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:27,167 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:27,168 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:27,168 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:27,725 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:27,735 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:27,749 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:27,758 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:27,759 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:27,759 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:28,498 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:28,507 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:28,514 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:36,827 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:36,828 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:36,828 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:37,432 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:37,438 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:37,476 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:37,479 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:37,479 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:37,484 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:38,075 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:38,084 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:38,095 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:48,038 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:48,038 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:48,038 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:48,626 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:48,642 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:48,665 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:48,697 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:48,698 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:48,699 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:49,241 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:49,249 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:49,265 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:57,618 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:57,619 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:57,619 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:58,203 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:58,213 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:58,225 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:01:58,236 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:58,237 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:01:58,237 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:58,804 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:01:58,813 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:01:58,833 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:06,419 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:06,422 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:06,422 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:07,002 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:07,008 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:07,026 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:07,045 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:07,045 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:07,045 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:07,638 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:07,647 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:07,660 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:17,057 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:17,058 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:17,058 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:17,687 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:17,696 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:17,708 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:17,717 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:17,717 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:17,718 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:18,266 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:18,273 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:18,279 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:29,154 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:29,155 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:29,155 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:29,827 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:29,837 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:29,858 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:29,877 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:29,878 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:29,878 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:30,458 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:30,479 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:30,494 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:46,225 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:46,226 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:46,226 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:46,788 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:46,805 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:46,820 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:46,829 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:46,829 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:46,830 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:47,405 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:47,409 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:47,418 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:56,556 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:56,628 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:56,628 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:57,287 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:57,299 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:57,328 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:02:57,397 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:57,397 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:02:57,397 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:57,963 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:02:57,977 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:02:57,994 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:03:06,635 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:06,636 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:03:06,636 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:07,338 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:07,354 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:03:07,408 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:03:07,415 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:07,416 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:03:07,416 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:07,957 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:07,963 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:03:07,972 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:03:31,963 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:31,964 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:03:31,965 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:32,520 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:32,537 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:03:32,556 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:03:32,607 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:32,608 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:03:32,608 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:33,253 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:33,266 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:03:33,286 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:03:49,304 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:49,305 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:03:49,306 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:49,875 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:49,890 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:03:49,908 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:03:49,917 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:49,917 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:03:49,917 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:50,476 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:03:50,481 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:03:50,492 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:03,847 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:03,848 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:03,848 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:04,413 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:04,434 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:04,456 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:04,460 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:04,462 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:04,462 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:05,068 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:05,077 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:05,086 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:11,298 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:11,299 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:11,299 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:12,014 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:12,033 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:12,055 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:12,064 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:12,065 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:12,065 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:12,623 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:12,631 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:12,648 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:34,220 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 11:04:37,013 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:37,014 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:37,014 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:37,707 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:37,716 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:37,734 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:37,747 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:37,748 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:37,748 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:38,304 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:38,315 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:38,330 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:42,733 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 11:04:43,264 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 11:04:44,527 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:44,528 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:44,528 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:45,078 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:45,086 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:45,095 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:45,100 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:45,100 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:45,100 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:45,917 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:45,927 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:45,947 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:56,386 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:56,388 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:56,388 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:56,936 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:56,950 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:56,964 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:04:56,968 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:56,968 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:04:56,969 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:57,505 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:04:57,510 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:04:57,521 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:05:07,860 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:05:07,865 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:05:07,865 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:05:08,507 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:05:08,519 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:05:08,571 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:05:08,585 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:05:08,585 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:05:08,585 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:05:09,204 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:05:09,280 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:05:09,293 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:06:00,364 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:00,366 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:06:00,366 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:00,921 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:00,938 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:06:00,958 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:06:00,966 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:00,966 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:06:00,966 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:01,537 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:01,546 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:06:01,566 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:06:18,503 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:18,504 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:06:18,504 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:19,050 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:19,084 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:06:19,096 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:06:19,099 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:19,099 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:06:19,099 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:19,654 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:19,660 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:06:19,670 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:06:55,028 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:55,028 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:06:55,028 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:55,586 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:55,597 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:06:55,616 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:06:55,619 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:55,619 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:06:55,620 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:56,361 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:06:56,368 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:06:56,377 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:07:07,687 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:07,688 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:07:07,688 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:08,264 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:08,271 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:07:08,283 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:07:08,287 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:08,287 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:07:08,287 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:08,924 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:08,934 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:07:08,948 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:07:20,015 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:20,016 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:07:20,016 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:20,575 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:20,584 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:07:20,595 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:07:20,598 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:20,599 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:07:20,599 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:21,244 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:21,250 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:07:21,268 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:07:59,921 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:07:59,924 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:07:59,925 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:00,486 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:00,498 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:08:00,516 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:08:00,519 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:00,519 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:08:00,519 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:01,123 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:01,133 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:08:01,149 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:08:11,100 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:11,101 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:08:11,101 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:11,899 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:11,911 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:08:11,934 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:08:11,938 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:11,938 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:08:11,938 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:12,503 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:12,562 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:08:12,574 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:08:27,141 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:27,141 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:08:27,141 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:27,695 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:27,701 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:08:27,714 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:08:27,718 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:27,718 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:08:27,718 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:28,287 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:08:28,295 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:08:28,305 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:09:14,290 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:14,294 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:09:14,294 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:14,855 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:14,876 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:09:14,897 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:09:14,902 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:14,902 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:09:14,903 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:15,460 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:15,467 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:09:15,478 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:09:17,329 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 11:09:27,486 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:27,487 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:09:27,487 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:28,036 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:28,046 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:09:28,056 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:09:28,062 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:28,062 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:09:28,063 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:28,731 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:28,741 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:09:28,755 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:09:35,680 basehttp 45871 6221557760 "GET /api/auth/profile/ HTTP/1.1" 200 175
+INFO 2025-05-05 11:09:37,656 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:37,656 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:09:37,656 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:38,286 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:38,297 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:09:38,311 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261
+INFO 2025-05-05 11:09:38,316 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:38,316 technical_analysis 45871 6221557760 技术分析服务初始化完成
+INFO 2025-05-05 11:09:38,316 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:39,077 binance_api 45871 6221557760 BinanceAPI 实例创建，尚未初始化 client
+INFO 2025-05-05 11:09:39,087 views 45871 6221557760 异步处理请求: symbol=BTCUSDT, clean_symbol=BTC, force_refresh=False
+INFO 2025-05-05 11:09:39,103 basehttp 45871 6221557760 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2261

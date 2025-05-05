@@ -12,7 +12,9 @@ from .utils import logger, sanitize_indicators, format_timestamp, parse_timestam
 import numpy as np
 from typing import Dict, Optional, List
 import pandas as pd
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
+import pytz
+from django.utils import timezone
 import requests
 import json
 import asyncio
@@ -23,14 +25,15 @@ import base64
 import traceback
 import os
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.core.mail import send_mail
 import random
 import string
 from rest_framework.authtoken.models import Token as AuthToken
 from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer,
-    SendVerificationCodeSerializer, TokenRefreshSerializer
+    SendVerificationCodeSerializer, TokenRefreshSerializer,
+    ChangePasswordSerializer, ResetPasswordWithCodeSerializer, ResetPasswordCodeSerializer
 )
 
 class TechnicalIndicatorsAPIView(APIView):
@@ -437,7 +440,7 @@ class TechnicalIndicatorsAPIView(APIView):
             # 创建或更新技术分析记录
             technical_analysis, _ = TechnicalAnalysis.objects.update_or_create(
                 token=token,
-                timestamp=datetime.now(timezone.utc),
+                timestamp=timezone.now(),
                 defaults={
                     'rsi': indicators.get('RSI'),
                     'macd_line': indicators.get('MACD', {}).get('line'),
@@ -462,7 +465,7 @@ class TechnicalIndicatorsAPIView(APIView):
             # 创建或更新市场数据记录
             MarketData.objects.update_or_create(
                 token=token,
-                timestamp=datetime.now(timezone.utc),
+                timestamp=timezone.now(),
                 defaults={
                     'price': current_price,
                     'volume': 0.0,
@@ -611,7 +614,7 @@ class TechnicalIndicatorsAPIView(APIView):
                     "technical_indicators": {
                         "symbol": symbol,
                         "interval": "1d",
-                        "timestamp": format_timestamp(datetime.now(timezone.utc)),
+                        "timestamp": format_timestamp(timezone.now()),
                         "indicators": indicators
                     },
                     "market_data": {
@@ -881,7 +884,7 @@ class TechnicalIndicatorsAPIView(APIView):
                     await sync_to_async(self.report_service.save_analysis_report)(clean_symbol, analysis_data)
                     
                     # 添加时间戳字段，使用当前时间
-                    analysis_data['last_update_time'] = format_timestamp(datetime.now(timezone.utc))
+                    analysis_data['last_update_time'] = format_timestamp(timezone.now())
                     
                     # 添加当前价格字段
                     analysis_data['current_price'] = float(market_data['price'])
@@ -1270,7 +1273,7 @@ class SendVerificationCodeView(APIView):
             code = ''.join(random.choices(string.digits, k=6))
 
             # 保存验证码
-            expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+            expires_at = timezone.now() + timedelta(minutes=10)
             VerificationCode.objects.create(
                 email=email,
                 code=code,
@@ -1343,7 +1346,7 @@ class RegisterView(APIView):
                 email=email,
                 code=code,
                 is_used=False,
-                expires_at__gt=datetime.now(timezone.utc)
+                expires_at__gt=timezone.now()
             ).first()
 
             if not verification:
@@ -1404,7 +1407,7 @@ class RegisterView(APIView):
                 logger.info("更新邀请码状态")
                 invitation.is_used = True
                 invitation.used_by = user
-                invitation.used_at = datetime.now(timezone.utc)
+                invitation.used_at = timezone.now()
                 invitation.save()
             except Exception as e:
                 logger.error(f"更新邀请码状态失败: {str(e)}")
@@ -1559,4 +1562,189 @@ class TokenRefreshView(APIView):
             return Response({
                 'status': 'error',
                 'message': '刷新token失败'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ChangePasswordView(APIView):
+    """修改密码视图"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        serializer = ChangePasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'status': 'error',
+                'message': '验证失败',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 获取当前用户
+        user = request.user
+        current_password = serializer.validated_data['current_password']
+        new_password = serializer.validated_data['new_password']
+        
+        # 验证当前密码
+        if not user.check_password(current_password):
+            return Response({
+                'status': 'error',
+                'message': '当前密码不正确'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 设置新密码
+        user.set_password(new_password)
+        user.save()
+        
+        # 删除并重新生成认证令牌
+        AuthToken.objects.filter(user=user).delete()
+        token = AuthToken.objects.create(user=user)
+        
+        return Response({
+            'status': 'success',
+            'message': '密码修改成功',
+            'data': {
+                'token': token.key
+            }
+        })
+
+class RequestPasswordResetView(APIView):
+    """请求重置密码视图"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = ResetPasswordCodeSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'status': 'error',
+                'message': '验证失败',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data['email']
+        
+        try:
+            # 获取用户
+            user = User.objects.get(email=email)
+            
+            # 生成6位数字验证码
+            code = ''.join(random.choices(string.digits, k=6))
+            
+            # 删除该邮箱之前的所有未使用验证码
+            VerificationCode.objects.filter(
+                email=email,
+                is_used=False
+            ).delete()
+            
+            # 保存验证码
+            expires_at = timezone.now() + timedelta(minutes=10)
+            VerificationCode.objects.create(
+                email=email,
+                code=code,
+                expires_at=expires_at
+            )
+            
+            # 发送邮件
+            subject = '重置您的密码 - K线军师'
+            message = f"""
+尊敬的用户：
+
+您的验证码是：{code}
+
+验证码有效期为10分钟，请尽快使用验证码重置您的密码。
+
+如果这不是您的操作，请忽略此邮件。
+
+K线军师团队
+"""
+            
+            # 发送邮件
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+            
+            return Response({
+                'status': 'success',
+                'message': '重置密码验证码已发送到您的邮箱'
+            })
+            
+        except User.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': '该邮箱未注册'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"发送重置密码验证码失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': '发送重置密码验证码失败，请稍后重试'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ResetPasswordWithCodeView(APIView):
+    """使用验证码重置密码视图"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = ResetPasswordWithCodeSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'status': 'error',
+                'message': '验证失败',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data['email']
+        code = serializer.validated_data['code']
+        new_password = serializer.validated_data['new_password']
+        
+        try:
+            # 获取用户
+            user = User.objects.get(email=email)
+            
+            # 验证验证码
+            verification = VerificationCode.objects.filter(
+                email=email,
+                code=code,
+                is_used=False,
+                expires_at__gt=timezone.now()
+            ).first()
+            
+            if not verification:
+                return Response({
+                    'status': 'error',
+                    'message': '验证码无效或已过期'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # 设置新密码
+            user.set_password(new_password)
+            user.save()
+            
+            # 标记验证码为已使用
+            verification.is_used = True
+            verification.save()
+            
+            # 生成新的认证令牌
+            AuthToken.objects.filter(user=user).delete()
+            token = AuthToken.objects.create(user=user)
+            
+            return Response({
+                'status': 'success',
+                'message': '密码重置成功',
+                'data': {
+                    'token': token.key,
+                    'user': UserSerializer(user).data
+                }
+            })
+            
+        except User.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': '该邮箱未注册'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"重置密码失败: {str(e)}")
+            return Response({
+                'status': 'error',
+                'message': '重置密码失败，请稍后重试'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

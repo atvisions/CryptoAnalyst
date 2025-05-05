@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 import random
 import string
+from datetime import timedelta
 
 class Chain(models.Model):
     """链模型"""
