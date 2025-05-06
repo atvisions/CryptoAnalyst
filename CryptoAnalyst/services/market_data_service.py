@@ -1,18 +1,12 @@
 import logging
-from .binance_api import BinanceAPI
-from .coingecko_api import CoinGeckoAPI
-from .coinmarketcap_api import CoinMarketCapAPI
+from .okx_api import OKXAPI
 import requests
 import pandas as pd
-from binance.client import Client
 
 class MarketDataService:
     def __init__(self):
-        self.binance_api = BinanceAPI()
-        self.coingecko_api = CoinGeckoAPI()
-        self.coinmarketcap_api = CoinMarketCapAPI()
+        self.okx_api = OKXAPI()
         self.logger = logging.getLogger(__name__)
-        self.binance_client = Client()
 
     def calculate_nupl(self, symbol: str) -> float:
         """计算未实现盈亏比率
@@ -25,10 +19,10 @@ class MarketDataService:
         """
         try:
             # 获取最近200天的K线数据
-            klines = self.binance_client.get_historical_klines(
+            klines = self.okx_api.get_historical_klines(
                 symbol=symbol,
-                interval=Client.KLINE_INTERVAL_1DAY,
-                limit=200
+                interval="1d",
+                start_str="200 days ago UTC"
             )
             
             if not klines or len(klines) < 200:
@@ -83,7 +77,7 @@ class MarketDataService:
             symbol = self._format_symbol(symbol)
             
             # 获取24小时交易数据
-            ticker = self.binance_api.get_ticker(symbol)
+            ticker = self.okx_api.get_ticker(symbol)
             if not ticker:
                 self.logger.warning(f"无法获取{symbol}的24小时交易数据")
                 return None
@@ -94,7 +88,7 @@ class MarketDataService:
             netflow = buy_volume - sell_volume
             
             # 转换为BTC单位
-            current_price = self.binance_api.get_current_price(symbol)
+            current_price = self.okx_api.get_current_price(symbol)
             if current_price:
                 netflow_btc = netflow / current_price
                 return round(netflow_btc, 4)
@@ -118,7 +112,7 @@ class MarketDataService:
             symbol = self._format_symbol(symbol)
             
             # 获取200天历史K线数据
-            klines = self.binance_api.get_historical_klines(symbol, "1d", "200 days ago UTC")
+            klines = self.okx_api.get_historical_klines(symbol, "1d", "200 days ago UTC")
             if not klines or len(klines) < 200:
                 self.logger.warning(f"无法获取{symbol}的足够历史K线数据来计算梅耶倍数")
                 return None
@@ -126,7 +120,7 @@ class MarketDataService:
             # 计算200日移动平均线
             ma200 = sum(float(k[4]) for k in klines) / len(klines)
             # 获取当前价格
-            current_price = self.binance_api.get_current_price(symbol)
+            current_price = self.okx_api.get_current_price(symbol)
             if not current_price:
                 self.logger.warning(f"无法获取{symbol}的当前价格")
                 return None
@@ -174,47 +168,118 @@ class MarketDataService:
             symbol = self._format_symbol(symbol)
             
             # 获取24小时市场数据
-            ticker = self.binance_api.get_ticker(symbol)
+            ticker = self.okx_api.get_ticker(symbol)
             if not ticker:
-                self.logger.warning(f"无法获取{symbol}的24小时市场数据")
-                return None
+                self.logger.warning(f"无法获取{symbol}的24小时市场数据，尝试使用备选方法")
+                # 使用备选方法
+                return self.get_market_data_for_symbol(symbol)
 
             # 计算其他市场指标
             nupl = self.calculate_nupl(symbol)
             exchange_netflow = self.calculate_exchange_netflow(symbol)
             mayer_multiple = self.calculate_mayer_multiple(symbol)
             fear_greed_index = self.get_fear_greed_index()
-                
-            return {
-                'price': float(ticker['lastPrice']),
-                'volume': float(ticker['volume']),
-                'price_change_24h': float(ticker['priceChange']),
-                'price_change_percent_24h': float(ticker['priceChangePercent']),
-                'high_24h': float(ticker['highPrice']),
-                'low_24h': float(ticker['lowPrice']),
-                'nupl': nupl if nupl is not None else 0.0,
-                'exchange_netflow': exchange_netflow if exchange_netflow is not None else 0.0,
-                'mayer_multiple': mayer_multiple if mayer_multiple is not None else 0.0,
-                'fear_greed_index': fear_greed_index if fear_greed_index is not None else 50.0,
-                'buy_volume': float(ticker.get('buyVolume', 0)),
-                'sell_volume': float(ticker.get('sellVolume', 0))
-            }
             
+            try:    
+                return {
+                    'price': float(ticker.get('lastPrice', 0)),
+                    'volume': float(ticker.get('volume', 0)),
+                    'price_change_24h': float(ticker.get('priceChange', 0)),
+                    'price_change_percent_24h': float(ticker.get('priceChangePercent', 0)),
+                    'high_24h': float(ticker.get('highPrice', 0)),
+                    'low_24h': float(ticker.get('lowPrice', 0)),
+                    'nupl': nupl if nupl is not None else 0.0,
+                    'exchange_netflow': exchange_netflow if exchange_netflow is not None else 0.0,
+                    'mayer_multiple': mayer_multiple if mayer_multiple is not None else 0.0,
+                    'fear_greed_index': fear_greed_index if fear_greed_index is not None else 50.0,
+                    'buy_volume': float(ticker.get('buyVolume', 0)),
+                    'sell_volume': float(ticker.get('sellVolume', 0))
+                }
+            except KeyError as e:
+                self.logger.error(f"获取{symbol}的市场数据键错误: {e}，尝试使用备选方法")
+                return self.get_market_data_for_symbol(symbol)
+                
         except Exception as e:
             self.logger.error(f"获取{symbol}的市场数据失败: {str(e)}")
-            return None
-
+            # 使用备选方法
+            return self.get_market_data_for_symbol(symbol)
+            
     def _format_symbol(self, symbol):
         """格式化交易对符号
         
         Args:
-            symbol: 原始符号，如'BTC'或'BTCUSDT'
+            symbol: 原始符号
             
         Returns:
-            str: 格式化后的符号，如'BTCUSDT'
+            str: 格式化后的符号
         """
-        # 如果符号已经包含USDT，直接返回
-        if symbol.endswith('USDT'):
-            return symbol
-        # 否则添加USDT后缀
-        return f"{symbol}USDT" 
+        # 统一大写
+        symbol = symbol.upper()
+        
+        # 如果不含USDT，添加USDT后缀
+        if 'USDT' not in symbol:
+            symbol = symbol + 'USDT'
+            
+        return symbol 
+
+    def get_market_data_for_symbol(self, symbol: str) -> dict:
+        """获取单个交易对的市场数据"""
+        
+        try:
+            result = {}
+            
+            # 获取当前价格
+            current_price = self.okx_api.get_current_price(symbol)
+            if current_price:
+                result['price'] = current_price
+            else:
+                result['price'] = 0.0
+
+            # 获取24小时交易量
+            try:
+                volume_24h = self.okx_api.get_24h_volume(symbol)
+                if volume_24h:
+                    result['volume_24h'] = volume_24h
+                else:
+                    result['volume_24h'] = 0.0
+            except Exception as e:
+                self.logger.error(f"获取{symbol}的24小时交易量失败: {e}")
+                result['volume_24h'] = 0.0
+
+            # 获取24小时价格变化
+            try:
+                price_change_24h = self.okx_api.get_24h_price_change(symbol)
+                if price_change_24h is not None:
+                    result['price_change_24h'] = price_change_24h
+                else:
+                    # 如果无法获取价格变化，则计算一个估计值
+                    ticker = self.okx_api.get_ticker(symbol)
+                    if ticker and 'lastPrice' in ticker and 'priceChangePercent' in ticker:
+                        # 使用价格变化百分比和当前价格估算价格变化
+                        price_change_percent = float(ticker['priceChangePercent'])
+                        last_price = float(ticker['lastPrice'])
+                        estimated_price_change = (price_change_percent / 100) * last_price
+                        result['price_change_24h'] = estimated_price_change
+                    else:
+                        result['price_change_24h'] = 0.0
+            except Exception as e:
+                self.logger.error(f"获取{symbol}的价格变化失败: {e}")
+                result['price_change_24h'] = 0.0
+
+            # 获取其他市场数据...
+            try:
+                # 其他可能的市场数据
+                # ...
+                pass
+            except Exception as e:
+                self.logger.error(f"获取{symbol}的其他市场数据失败: {e}")
+            
+            return result
+        except Exception as e:
+            self.logger.error(f"获取{symbol}的市场数据失败: {str(e)}")
+            # 返回基本的空数据结构
+            return {
+                'price': 0.0,
+                'volume_24h': 0.0,
+                'price_change_24h': 0.0
+            } 

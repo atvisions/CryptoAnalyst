@@ -3,9 +3,10 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Optional, Union
 from datetime import datetime, timedelta
-from CryptoAnalyst.services.binance_api import BinanceAPI
+from CryptoAnalyst.services.okx_api import OKXAPI
 import requests
 import os
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ class TechnicalAnalysisService:
     
     def __init__(self):
         """初始化技术分析服务"""
-        self.binance_api = BinanceAPI()  # 使用新的初始化方式
+        self.okx_api = OKXAPI()  # 使用新的初始化方式
         logger.info("技术分析服务初始化完成")
     
     def get_all_indicators(self, symbol: str, interval: str = '1d', limit: int = 1000) -> Dict:
@@ -29,22 +30,44 @@ class TechnicalAnalysisService:
             Dict: 包含所有技术指标的字典
         """
         try:
-            # 确保 binance_api 客户端已初始化
-            if not self.binance_api._ensure_client():
-                logger.error("无法初始化 Binance API 客户端")
+            # 确保 okx_api 客户端已初始化
+            if not self.okx_api._ensure_client():
+                logger.error("无法初始化 OKX API 客户端")
                 return {
                     'status': 'error',
-                    'message': "无法连接到 Binance API"
+                    'message': "无法连接到 OKX API"
                 }
+            
+            # 首先检查是否能获取实时价格，这可以验证交易对是否存在
+            price = self.okx_api.get_realtime_price(symbol)
+            if not price:
+                logger.error(f"无法获取{symbol}的实时价格，交易对可能不存在")
+                return {
+                    'status': 'error',
+                    'message': f"无法获取{symbol}的实时价格，请检查交易对是否存在"
+                }
+            
+            logger.info(f"成功获取{symbol}实时价格: {price}，开始计算技术指标")
                 
-            # 获取历史K线数据
-            klines = self.binance_api.get_historical_klines(symbol, interval, '1000 days ago UTC')
-            if not klines:
-                logger.warning(f"无法获取{symbol}的K线数据")
-                return {
-                    'status': 'error',
-                    'message': f"无法获取{symbol}的K线数据"
-                }
+            # 获取历史K线数据，减少请求数据量
+            # 从之前的1000天减少到100天，对于新上线的代币更友好
+            klines = self.okx_api.get_historical_klines(symbol, interval, '100 days ago UTC')
+            
+            # 如果无法获取足够的历史数据，尝试获取更少的数据
+            if not klines or len(klines) < 20:  # 至少需要20条数据来计算基本指标
+                logger.warning(f"历史数据不足，尝试获取更少的历史数据: {symbol}")
+                klines = self.okx_api.get_klines(symbol, interval, 50)  # 尝试只获取50条数据
+                
+                if not klines or len(klines) < 14:  # RSI至少需要14条数据
+                    logger.warning(f"无法获取足够的K线数据进行分析: {symbol}")
+                    return {
+                        'status': 'error',
+                        'message': f"无法获取{symbol}的K线数据"
+                    }
+            
+            # 记录获取到的K线数量
+            kline_count = len(klines)
+            logger.info(f"获取到{kline_count}条K线数据，开始计算指标")
                 
             # 转换为DataFrame
             df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_volume', 'trades', 'taker_buy_base', 'taker_buy_quote', 'ignore'])
@@ -57,38 +80,81 @@ class TechnicalAnalysisService:
             # 按时间排序
             df = df.sort_values('timestamp')
             
-            # 检查数据长度
+            # 告警如果数据量不足
             if len(df) < 200:
-                logger.warning(f"数据长度不足200天，可能影响某些指标的计算准确性")
+                logger.warning(f"数据长度不足200天({len(df)}天)，某些高级指标可能不准确")
             
-            # 计算技术指标
-            indicators = {
-                'RSI': self._calculate_rsi(df),
-                'MACD': self._calculate_macd(df),
-                'BollingerBands': self._calculate_bollinger_bands(df),
-                'BIAS': self._calculate_bias(df),
-                'PSY': self._calculate_psy(df),
-                'DMI': self._calculate_dmi(df),
-                'VWAP': self._calculate_vwap(df),
-                'FundingRate': self._get_funding_rate(symbol),
-                'ExchangeNetflow': self._calculate_exchange_netflow(df),
-                'NUPL': self._calculate_nupl(df) if len(df) >= 200 else 0.0,
-                'MayerMultiple': self._calculate_mayer_multiple(df) if len(df) >= 200 else 1.0
-            }
+            # 计算技术指标，基于可用数据量灵活调整
+            indicators = {}
+            
+            # 基本指标，至少需要14天数据
+            if len(df) >= 14:
+                indicators['RSI'] = self._calculate_rsi(df)
+                indicators['MACD'] = self._calculate_macd(df)
+                indicators['BollingerBands'] = self._calculate_bollinger_bands(df)
+                indicators['BIAS'] = self._calculate_bias(df)
+            else:
+                logger.warning(f"数据不足，无法计算基本技术指标")
+                # 提供默认值
+                indicators['RSI'] = 50.0
+                indicators['MACD'] = {'line': 0.0, 'signal': 0.0, 'histogram': 0.0}
+                indicators['BollingerBands'] = {'upper': price * 1.02, 'middle': price, 'lower': price * 0.98}
+                indicators['BIAS'] = 0.0
+            
+            # 其他指标
+            if len(df) >= 12:
+                indicators['PSY'] = self._calculate_psy(df)
+            else:
+                indicators['PSY'] = 50.0
+                
+            if len(df) >= 14:
+                indicators['DMI'] = self._calculate_dmi(df)
+            else:
+                indicators['DMI'] = {'plus_di': 25.0, 'minus_di': 25.0, 'adx': 20.0}
+                
+            if len(df) >= 20:
+                indicators['VWAP'] = self._calculate_vwap(df)
+            else:
+                indicators['VWAP'] = price
+            
+            # 资金费率和交易所净流入可能不依赖于历史K线长度
+            indicators['FundingRate'] = self._get_funding_rate(symbol)
+            indicators['ExchangeNetflow'] = self._calculate_exchange_netflow(df)
+            
+            # 高级指标需要更多数据
+            if len(df) >= 200:
+                indicators['NUPL'] = self._calculate_nupl(df, window=200)
+                indicators['MayerMultiple'] = self._calculate_mayer_multiple(df, window=200)
+            elif len(df) >= 100:
+                # 使用100天数据计算，可能不太准确但比默认值更有意义
+                logger.info(f"数据量不足200天，使用{len(df)}天数据计算高级指标")
+                indicators['NUPL'] = self._calculate_nupl(df, window=100)
+                indicators['MayerMultiple'] = self._calculate_mayer_multiple(df, window=100)
+            elif len(df) >= 50:
+                # 使用50天数据计算，作为近似值
+                logger.info(f"数据量较少，仅{len(df)}天，使用近似方法计算高级指标")
+                indicators['NUPL'] = self._calculate_nupl(df, window=50)
+                indicators['MayerMultiple'] = self._calculate_mayer_multiple(df, window=50)
+            else:
+                # 数据太少，使用默认值
+                logger.warning(f"数据量过少({len(df)}天)，无法计算高级指标，使用默认值")
+                indicators['NUPL'] = 0.0
+                indicators['MayerMultiple'] = 1.0
             
             # 检查所有指标是否有效
             for key, value in indicators.items():
                 if isinstance(value, (int, float)):
-                    if not np.isfinite(value):
-                        logger.warning(f"指标 {key} 的值无效: {value}")
+                    if np.isnan(value) or np.isinf(value):
+                        logger.warning(f"指标 {key} 的值无效: {value}，使用默认值")
                         indicators[key] = 0.0
                 elif isinstance(value, dict):
                     for sub_key, sub_value in value.items():
                         if isinstance(sub_value, (int, float)):
-                            if not np.isfinite(sub_value):
-                                logger.warning(f"指标 {key}.{sub_key} 的值无效: {sub_value}")
+                            if np.isnan(sub_value) or np.isinf(sub_value):
+                                logger.warning(f"指标 {key}.{sub_key} 的值无效: {sub_value}，使用默认值")
                                 value[sub_key] = 0.0
             
+            logger.info(f"成功计算{symbol}的所有技术指标")
             return {
                 'status': 'success',
                 'data': {
@@ -100,19 +166,20 @@ class TechnicalAnalysisService:
             }
             
         except requests.exceptions.Timeout:
-            logger.error(f"请求Binance API超时")
+            logger.error(f"请求OKX API超时")
             return {
                 'status': 'error',
-                'message': "连接Binance API超时，请稍后重试"
+                'message': "连接OKX API超时，请稍后重试"
             }
         except requests.exceptions.RequestException as e:
-            logger.error(f"请求Binance API失败: {str(e)}")
+            logger.error(f"请求OKX API失败: {str(e)}")
             return {
                 'status': 'error',
-                'message': f"连接Binance API失败: {str(e)}"
+                'message': f"连接OKX API失败: {str(e)}"
             }
         except Exception as e:
             logger.error(f"计算技术指标时发生错误: {str(e)}")
+            logger.error(traceback.format_exc())
             return {
                 'status': 'error',
                 'message': str(e)
@@ -424,7 +491,7 @@ class TechnicalAnalysisService:
             float: 资金费率
         """
         try:
-            funding_rate = self.binance_api.get_funding_rate(symbol)
+            funding_rate = self.okx_api.get_funding_rate(symbol)
             if funding_rate is not None:
                 rate = float(funding_rate)
                 logger.info(f"获取到 {symbol} 的资金费率: {rate}")
@@ -470,20 +537,25 @@ class TechnicalAnalysisService:
             logger.error(f"计算交易所净流入流出时发生错误: {str(e)}")
             return 0.0
     
-    def _calculate_nupl(self, df: pd.DataFrame) -> float:
+    def _calculate_nupl(self, df: pd.DataFrame, window: int = 200) -> float:
         """计算未实现盈亏比率
         
         Args:
             df: 包含价格数据的DataFrame
+            window: 计算窗口，默认为200天
             
         Returns:
             float: 未实现盈亏比率
         """
         try:
             # 检查数据长度
-            if len(df) < 200:
-                logger.warning(f"数据长度不足200天，无法计算NUPL")
+            if len(df) < window:
+                logger.warning(f"数据长度不足{window}天，无法计算NUPL")
                 return 0.0
+            
+            # 根据数据可用性动态调整计算窗口
+            actual_window = min(window, len(df) - 1)
+            logger.info(f"使用{actual_window}天数据计算NUPL")
             
             # 确保数据类型正确
             df['close'] = pd.to_numeric(df['close'], errors='coerce')
@@ -496,21 +568,25 @@ class TechnicalAnalysisService:
                 logger.warning("数据中包含无效值")
                 return 0.0
             
-            # 计算已实现价格（使用过去200天的成交量加权平均价格）
-            df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
-            df['volume_price'] = df['typical_price'] * df['volume']
+            # 使用实际可用窗口计算已实现价格
+            # 这里使用过去actual_window天的成交量加权平均价格
+            df_window = df.iloc[-actual_window:]
+            
+            # 计算已实现价格
+            df_window['typical_price'] = (df_window['high'] + df_window['low'] + df_window['close']) / 3
+            df_window['volume_price'] = df_window['typical_price'] * df_window['volume']
             
             # 检查计算结果
-            if df['volume_price'].isna().any() or df['volume'].isna().any():
+            if df_window['volume_price'].isna().any() or df_window['volume'].isna().any():
                 logger.warning("计算过程中出现无效值")
                 return 0.0
             
-            total_volume = df['volume'].sum()
+            total_volume = df_window['volume'].sum()
             if total_volume == 0 or np.isnan(total_volume) or np.isinf(total_volume):
                 logger.warning("总成交量无效")
                 return 0.0
             
-            realized_price = df['volume_price'].sum() / total_volume
+            realized_price = df_window['volume_price'].sum() / total_volume
             
             # 检查已实现价格
             if realized_price == 0 or np.isnan(realized_price) or np.isinf(realized_price):
@@ -534,53 +610,59 @@ class TechnicalAnalysisService:
             # 限制数值范围在 -100% 到 100% 之间
             nupl = max(min(nupl, 100.0), -100.0)
             
+            logger.info(f"NUPL计算结果: {nupl}")
             return round(float(nupl), 2)
             
         except Exception as e:
             logger.error(f"计算未实现盈亏比率时发生错误: {str(e)}")
             return 0.0
     
-    def _calculate_mayer_multiple(self, df: pd.DataFrame) -> float:
+    def _calculate_mayer_multiple(self, df: pd.DataFrame, window: int = 200) -> float:
         """计算梅耶倍数
         
         Args:
             df: 包含价格数据的DataFrame
+            window: 计算窗口，默认为200天
             
         Returns:
             float: 梅耶倍数
         """
         try:
             # 检查数据长度
-            if len(df) < 200:
-                logger.warning(f"数据长度不足200天，无法计算梅耶倍数")
-                return 1.0
+            if len(df) < window:
+                logger.warning(f"数据长度不足{window}天，使用可用的{len(df)}天数据计算梅耶倍数")
             
-            # 打印原始数据
-            logger.info(f"计算梅耶倍数的原始数据:")
-            logger.info(f"数据长度: {len(df)}")
-            logger.info(f"最新价格: {df['close'].iloc[-1]}")
-            
-            # 计算200日移动平均线
-            ma200 = df['close'].rolling(window=200).mean()
-            
-            # 打印MA200数据
-            logger.info(f"MA200值: {ma200.iloc[-1]}")
-            
-            # 计算当前价格与200日均线的比率
-            current_price = float(df['close'].iloc[-1])
-            ma200_value = float(ma200.iloc[-1])
-            
-            if ma200_value == 0:
-                logger.warning("MA200值为0，无法计算梅耶倍数")
+            # 动态调整窗口大小，确保至少有20天数据
+            actual_window = min(window, len(df) - 1)
+            if actual_window < 20:
+                logger.warning(f"数据不足20天，无法可靠计算梅耶倍数")
                 return 1.0
                 
-            mayer_multiple = current_price / ma200_value
+            logger.info(f"使用{actual_window}天数据计算梅耶倍数")
+            
+            # 获取当前价格
+            current_price = float(df['close'].iloc[-1])
+            
+            # 计算适应窗口大小的移动平均线
+            moving_avg = df['close'].rolling(window=actual_window).mean()
+            
+            # 打印MA数据
+            ma_value = float(moving_avg.iloc[-1])
+            logger.info(f"使用{actual_window}日移动平均线: {ma_value}")
+            
+            # 检查移动平均线值是否有效
+            if ma_value == 0 or np.isnan(ma_value) or np.isinf(ma_value):
+                logger.warning(f"{actual_window}日均线值无效，无法计算梅耶倍数")
+                return 1.0
+                
+            # 计算当前价格与移动均线的比率
+            mayer_multiple = current_price / ma_value
             
             # 打印计算结果
             logger.info(f"梅耶倍数计算结果: {mayer_multiple}")
             
             # 限制数值范围
-            mayer_multiple = max(min(mayer_multiple, 100.0), 0.01)
+            mayer_multiple = max(min(mayer_multiple, 10.0), 0.1)
             
             return round(float(mayer_multiple), 2)
             
