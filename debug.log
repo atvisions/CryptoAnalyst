@@ -8737,3 +8737,63 @@ ERROR 2025-05-06 05:30:25,252 okx_api 45527 6155661312 获取GTUSDT价格失败
 ERROR 2025-05-06 05:30:25,252 technical_analysis 45527 6155661312 无法获取GTUSDT的实时价格，交易对可能不存在
 ERROR 2025-05-06 05:30:25,254 log 45527 6392147968 Internal Server Error: /api/crypto/technical-indicators-data/GTUSDT/
 ERROR 2025-05-06 05:30:25,255 basehttp 45527 6392147968 "GET /api/crypto/technical-indicators-data/GTUSDT/ HTTP/1.1" 500 97
+INFO 2025-05-06 10:23:53,817 autoreload 79353 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-06 10:24:06,984 autoreload 79417 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:54:50,582 autoreload 79353 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:54:51,341 autoreload 79417 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:54:51,890 autoreload 2885 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:54:51,985 autoreload 2888 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:55:01,185 autoreload 2885 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-05-07 12:55:01,256 autoreload 2888 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-05-07 12:55:02,075 autoreload 2929 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:55:02,075 autoreload 2930 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:55:48,194 autoreload 2930 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:55:48,461 autoreload 2929 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:55:48,972 autoreload 3000 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:55:48,972 autoreload 2999 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:55:50,916 autoreload 2999 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-05-07 12:55:50,918 autoreload 3000 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-05-07 12:55:51,488 autoreload 3009 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:55:51,497 autoreload 3010 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:56:56,312 autoreload 3009 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:56:56,314 autoreload 3010 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:56:57,132 autoreload 3122 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:56:57,132 autoreload 3123 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:56:59,090 autoreload 3123 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:56:59,091 autoreload 3122 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:56:59,477 autoreload 3135 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:56:59,477 autoreload 3134 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:57:18,599 basehttp 3134 6133166080 "GET / HTTP/1.1" 200 32279
+INFO 2025-05-07 12:57:18,684 basehttp 3134 6133166080 "GET /static/website/images/icon128.png HTTP/1.1" 200 26177
+INFO 2025-05-07 12:57:18,684 basehttp 3134 6149992448 "GET /static/website/images/binance.ico HTTP/1.1" 200 4286
+INFO 2025-05-07 12:57:18,704 basehttp 3134 6149992448 "GET /static/website/images/okx.ico HTTP/1.1" 200 2462
+INFO 2025-05-07 12:57:18,711 basehttp 3134 6133166080 "GET /static/website/images/gate.ico HTTP/1.1" 200 619
+INFO 2025-05-07 12:57:18,713 basehttp 3134 6166818816 "GET /static/website/images/bybit.ico HTTP/1.1" 200 15086
+INFO 2025-05-07 12:57:18,713 basehttp 3134 6183645184 "GET /static/website/images/htx.ico HTTP/1.1" 200 1536
+INFO 2025-05-07 12:57:20,300 basehttp 3134 6133166080 "GET /static/website/images/favicon.ico HTTP/1.1" 200 4286
+WARNING 2025-05-07 12:57:32,050 log 3134 6133166080 Not Found: /privacy-policy
+WARNING 2025-05-07 12:57:32,051 basehttp 3134 6133166080 "GET /privacy-policy HTTP/1.1" 404 2639
+WARNING 2025-05-07 12:57:32,128 log 3134 6133166080 Not Found: /favicon.ico
+WARNING 2025-05-07 12:57:32,129 basehttp 3134 6133166080 "GET /favicon.ico HTTP/1.1" 404 2630
+INFO 2025-05-07 12:58:21,879 autoreload 3134 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/website/urls.py changed, reloading.
+INFO 2025-05-07 12:58:21,887 autoreload 3135 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/website/urls.py changed, reloading.
+INFO 2025-05-07 12:58:22,522 autoreload 3265 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:22,523 autoreload 3266 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:28,510 autoreload 3266 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/website/views.py changed, reloading.
+INFO 2025-05-07 12:58:28,526 autoreload 3265 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/website/views.py changed, reloading.
+INFO 2025-05-07 12:58:29,089 autoreload 3313 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:29,090 autoreload 3312 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:31,132 autoreload 3313 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/website/urls.py changed, reloading.
+INFO 2025-05-07 12:58:31,151 autoreload 3312 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/website/urls.py changed, reloading.
+INFO 2025-05-07 12:58:31,656 autoreload 3324 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:31,680 autoreload 3325 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:40,907 autoreload 3325 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-05-07 12:58:40,926 autoreload 3324 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/urls.py changed, reloading.
+INFO 2025-05-07 12:58:41,484 autoreload 3354 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:41,484 autoreload 3353 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:52,729 autoreload 3353 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:58:52,746 autoreload 3354 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-07 12:58:53,918 autoreload 3383 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:58:53,919 autoreload 3382 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-07 12:59:39,602 basehttp 3382 6207303680 "GET /privacy-policy HTTP/1.1" 301 0
+INFO 2025-05-07 12:59:39,609 basehttp 3382 6224130048 "GET /privacy-policy/ HTTP/1.1" 200 2462

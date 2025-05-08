@@ -35,6 +35,7 @@ from .serializers import (
     SendVerificationCodeSerializer, TokenRefreshSerializer,
     ChangePasswordSerializer, ResetPasswordWithCodeSerializer, ResetPasswordCodeSerializer
 )
+from django.shortcuts import render
 
 class TechnicalIndicatorsAPIView(APIView):
     """技术指标API视图"""
