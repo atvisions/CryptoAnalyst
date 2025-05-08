@@ -39,6 +39,11 @@ class AnalysisReportService:
             if not technical_analysis:
                 raise ValueError(f"未找到代币 {clean_symbol} 的技术分析数据")
             
+            # 获取最新的市场数据
+            market_data = MarketData.objects.filter(token=token).order_by('-timestamp').first()
+            if not market_data:
+                raise ValueError(f"未找到代币 {clean_symbol} 的市场数据")
+            
             # 从 indicators_analysis 中提取各个指标的分析结果
             indicators = analysis_data['indicators_analysis']
             
@@ -47,6 +52,7 @@ class AnalysisReportService:
                 token=token,
                 timestamp=datetime.now(timezone.utc),
                 technical_analysis=technical_analysis,
+                snapshot_price=float(market_data.price),  # 添加报告生成时的价格
                 
                 # 趋势分析
                 trend_up_probability=int(analysis_data['trend_up_probability']),

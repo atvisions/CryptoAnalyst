@@ -222,6 +222,7 @@ class TechnicalIndicatorsAPIView(APIView):
                         'details': latest_report.risk_details
                     },
                     'current_price': float(market_data.price),
+                    'snapshot_price': float(latest_report.snapshot_price),
                     'last_update_time': format_timestamp(latest_report.timestamp)
                 }
             }
@@ -478,6 +479,7 @@ class TechnicalIndicatorsAPIView(APIView):
                                 'details': latest_report.risk_details
                             },
                             'current_price': float(market_data.price),
+                            'snapshot_price': float(latest_report.snapshot_price),
                             'last_update_time': format_timestamp(latest_report.timestamp)
                         }
                     }
@@ -1138,6 +1140,7 @@ class TechnicalIndicatorsAPIView(APIView):
                                     'details': latest_report.risk_details
                                 },
                                 'current_price': float(market_data.price),
+                                'snapshot_price': float(latest_report.snapshot_price),
                                 'last_update_time': format_timestamp(latest_report.timestamp)
                             }
                         }

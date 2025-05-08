@@ -8797,3 +8797,424 @@ INFO 2025-05-07 12:58:53,918 autoreload 3383 8462421120 Watching for file change
 INFO 2025-05-07 12:58:53,919 autoreload 3382 8462421120 Watching for file changes with StatReloader
 INFO 2025-05-07 12:59:39,602 basehttp 3382 6207303680 "GET /privacy-policy HTTP/1.1" 301 0
 INFO 2025-05-07 12:59:39,609 basehttp 3382 6224130048 "GET /privacy-policy/ HTTP/1.1" 200 2462
+INFO 2025-05-08 11:41:04,891 autoreload 3382 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/models.py changed, reloading.
+INFO 2025-05-08 11:41:05,806 autoreload 9486 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 11:41:56,010 autoreload 9486 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-08 11:41:57,308 autoreload 9554 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 11:42:03,511 autoreload 9554 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-08 11:42:04,017 autoreload 9580 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 11:59:01,341 autoreload 9580 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/analysis_report_service.py changed, reloading.
+INFO 2025-05-08 11:59:02,084 autoreload 11394 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 11:59:37,806 autoreload 11394 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/analysis_report_service.py changed, reloading.
+INFO 2025-05-08 11:59:39,085 autoreload 11459 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 12:00:15,140 autoreload 11459 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/services/analysis_report_service.py changed, reloading.
+INFO 2025-05-08 12:00:15,635 autoreload 11525 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 12:03:14,213 views 11525 6174355456 查询 symbol: BTCUSDT, clean_symbol: BTC
+INFO 2025-05-08 12:03:14,220 views 11525 6174355456 找到 token: 8, BTC
+INFO 2025-05-08 12:03:14,220 okx_api 11525 6174355456 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:03:14,220 technical_analysis 11525 6174355456 技术分析服务初始化完成
+INFO 2025-05-08 12:03:14,220 views 11525 6174355456 延迟初始化: 技术分析服务
+INFO 2025-05-08 12:03:14,220 okx_api 11525 6174355456 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:03:14,220 views 11525 6174355456 延迟初始化: 市场数据服务
+INFO 2025-05-08 12:03:14,220 views 11525 6174355456 延迟初始化: 分析报告服务
+INFO 2025-05-08 12:03:14,220 okx_api 11525 6174355456 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:03:14,220 views 11525 6174355456 延迟初始化: OKX API服务
+INFO 2025-05-08 12:03:14,225 okx_api 11525 6174355456 正在检查环境变量...
+INFO 2025-05-08 12:03:14,225 okx_api 11525 6174355456 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:03:14,225 okx_api 11525 6174355456 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:03:14,225 okx_api 11525 6174355456 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:03:14,226 okx_api 11525 6174355456 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:03:14,226 okx_api 11525 6174355456 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:03:14,226 okx_api 11525 6174355456 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:03:14,226 okx_api 11525 6174355456 成功加载 OKX API 密钥
+INFO 2025-05-08 12:03:14,226 okx_api 11525 6174355456 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:03:14,226 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:03:14,547 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.32秒, 数据大小: 358
+INFO 2025-05-08 12:03:14,549 okx_api 11525 6174355456 成功获取BTCUSDT价格: 99479.1
+INFO 2025-05-08 12:03:14,549 technical_analysis 11525 6174355456 成功获取BTCUSDT实时价格: 99479.1，开始计算技术指标
+INFO 2025-05-08 12:03:14,549 okx_api 11525 6174355456 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=100 days ago UTC
+INFO 2025-05-08 12:03:14,549 okx_api 11525 6174355456 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:03:14,549 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:03:14,870 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.32秒, 数据大小: 12057
+INFO 2025-05-08 12:03:14,874 okx_api 11525 6174355456 使用常规K线接口获取了 100 条K线数据
+INFO 2025-05-08 12:03:14,874 technical_analysis 11525 6174355456 获取到100条K线数据，开始计算指标
+WARNING 2025-05-08 12:03:14,889 technical_analysis 11525 6174355456 数据长度不足200天(100天)，某些高级指标可能不准确
+DEBUG 2025-05-08 12:03:14,952 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/public/funding-rate | 参数: {'instId': 'BTC-USDT-SWAP'} | 数据: None
+DEBUG 2025-05-08 12:03:15,423 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.44秒, 数据大小: 490
+INFO 2025-05-08 12:03:15,427 okx_api 11525 6174355456 成功获取 BTCUSDT 的资金费率: 7.24078070642e-05
+INFO 2025-05-08 12:03:15,427 technical_analysis 11525 6174355456 获取到 BTCUSDT 的资金费率: 7.24078070642e-05
+INFO 2025-05-08 12:03:15,429 technical_analysis 11525 6174355456 数据量不足200天，使用100天数据计算高级指标
+INFO 2025-05-08 12:03:15,429 technical_analysis 11525 6174355456 使用99天数据计算NUPL
+INFO 2025-05-08 12:03:15,458 technical_analysis 11525 6174355456 NUPL计算结果: 12.519009450913913
+INFO 2025-05-08 12:03:15,458 technical_analysis 11525 6174355456 使用99天数据计算梅耶倍数
+INFO 2025-05-08 12:03:15,459 technical_analysis 11525 6174355456 使用99日移动平均线: 89664.09090909091
+INFO 2025-05-08 12:03:15,459 technical_analysis 11525 6174355456 梅耶倍数计算结果: 1.1094642123886627
+INFO 2025-05-08 12:03:15,459 technical_analysis 11525 6174355456 成功计算BTCUSDT的所有技术指标
+INFO 2025-05-08 12:03:15,467 okx_api 11525 6174355456 正在检查环境变量...
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 成功加载 OKX API 密钥
+INFO 2025-05-08 12:03:15,468 okx_api 11525 6174355456 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:03:15,468 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:03:15,779 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.31秒, 数据大小: 360
+DEBUG 2025-05-08 12:03:15,781 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:03:16,077 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.30秒, 数据大小: 148
+INFO 2025-05-08 12:03:16,080 okx_api 11525 6174355456 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:03:16,080 okx_api 11525 6174355456 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:03:16,080 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:03:16,397 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.32秒, 数据大小: 12059
+INFO 2025-05-08 12:03:16,400 okx_api 11525 6174355456 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:03:16,400 market_data_service 11525 6174355456 获取BTCUSDT的K线数据失败或数据不足
+DEBUG 2025-05-08 12:03:16,400 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:03:16,705 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.30秒, 数据大小: 360
+DEBUG 2025-05-08 12:03:16,708 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:03:17,005 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.30秒, 数据大小: 148
+DEBUG 2025-05-08 12:03:17,008 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:03:17,356 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.35秒, 数据大小: 359
+INFO 2025-05-08 12:03:17,359 okx_api 11525 6174355456 成功获取BTCUSDT价格: 99479.1
+INFO 2025-05-08 12:03:17,360 okx_api 11525 6174355456 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:03:17,360 okx_api 11525 6174355456 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:03:17,360 okx_api 11525 6174355456 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:03:17,687 okx_api 11525 6174355456 OKX API响应成功: 耗时: 0.33秒, 数据大小: 12059
+INFO 2025-05-08 12:03:17,690 okx_api 11525 6174355456 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:03:17,690 market_data_service 11525 6174355456 无法获取BTCUSDT的足够历史K线数据来计算梅耶倍数
+INFO 2025-05-08 12:03:19,242 signals 11525 6174355456 更新代币 BTC 的技术分析数据
+INFO 2025-05-08 12:03:19,252 signals 11525 6174355456 更新代币 BTC 的市场数据
+INFO 2025-05-08 12:03:19,253 views 11525 6174355456 成功更新代币 BTC 的技术分析数据
+INFO 2025-05-08 12:03:19,253 views 11525 6174355456 准备获取Coze分析: BTCUSDT
+INFO 2025-05-08 12:03:20,155 views 11525 6174355456 === 测试认证响应详情 ===
+INFO 2025-05-08 12:03:20,156 views 11525 6174355456 响应状态码: 200
+INFO 2025-05-08 12:03:20,156 views 11525 6174355456 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '20250508120319B3437B7528B1462D4348', 'Server-Timing': 'inner; dur=108', 'x-tt-trace-host': '01d062bfccdbf70c161d191ffd72f7f97d97fb5cbfdfc06bd41bd13acfa4781e00c67cd47c539238928ae4e61e8aa2b12f13db57da30d2ed14c17120ad759bf7b56d875d9c1aeb8f479b1b9627363ffd2da67d174df25db0e63d440477eea5c176', 'x-tt-trace-id': '00-250508120319B3437B7528B1462D4348-7276B2112AE498DC-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Expires': 'Thu, 08 May 2025 12:03:20 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Thu, 08 May 2025 12:03:20 GMT', 'Content-Length': '162', 'X-Cache': 'TCP_MISS from a23-52-131-102.deploy.akamaitechnologies.com (AkamaiGHost/22.1.1.1-d05c6443fdf0ef1ad227a2aacc363f6e) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'X-Origin-Response-Time': '115,23.52.131.102', 'X-Akamai-Request-ID': '49d8ce2d'}
+INFO 2025-05-08 12:03:20,156 views 11525 6174355456 响应内容: {"data":{"id":"7502044195415146503","conversation_id":"7502044195415130119","bot_id":"7494575252253720584","created_at":1746705800,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+INFO 2025-05-08 12:03:20,156 views 11525 6174355456 Coze API认证成功，获取分析报告
+DEBUG 2025-05-08 12:03:20,157 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:03:20,457 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.30秒, 数据大小: 360
+DEBUG 2025-05-08 12:03:20,459 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:03:20,776 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.32秒, 数据大小: 148
+INFO 2025-05-08 12:03:20,779 okx_api 11525 6209155072 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:03:20,779 okx_api 11525 6209155072 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:03:20,779 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:03:21,109 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.33秒, 数据大小: 12059
+INFO 2025-05-08 12:03:21,112 okx_api 11525 6209155072 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:03:21,112 market_data_service 11525 6209155072 获取BTCUSDT的K线数据失败或数据不足
+DEBUG 2025-05-08 12:03:21,112 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:03:21,417 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.30秒, 数据大小: 360
+DEBUG 2025-05-08 12:03:21,420 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:03:21,716 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.30秒, 数据大小: 148
+DEBUG 2025-05-08 12:03:21,717 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:03:22,016 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.30秒, 数据大小: 360
+INFO 2025-05-08 12:03:22,018 okx_api 11525 6209155072 成功获取BTCUSDT价格: 99479.2
+INFO 2025-05-08 12:03:22,019 okx_api 11525 6209155072 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:03:22,019 okx_api 11525 6209155072 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:03:22,019 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:03:22,319 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.30秒, 数据大小: 12059
+INFO 2025-05-08 12:03:22,322 okx_api 11525 6209155072 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:03:22,322 market_data_service 11525 6209155072 无法获取BTCUSDT的足够历史K线数据来计算梅耶倍数
+INFO 2025-05-08 12:03:23,630 views 11525 6174355456 第 1 次尝试获取对话状态
+INFO 2025-05-08 12:03:23,817 views 11525 6174355456 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044239170240520","created_at":1746705804,"id":"7502044239170256904","status":"in_progress"},"detail":{"logid":"20250508120323E4AEC502B9C0082D0099"},"msg":""}
+INFO 2025-05-08 12:03:24,819 views 11525 6174355456 第 2 次尝试获取对话状态
+INFO 2025-05-08 12:03:24,996 views 11525 6174355456 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044239170240520","created_at":1746705804,"id":"7502044239170256904","status":"in_progress"},"detail":{"logid":"20250508120324B16DE88A808FE52CC67C"},"msg":""}
+INFO 2025-05-08 12:03:26,498 views 11525 6174355456 第 3 次尝试获取对话状态
+INFO 2025-05-08 12:03:26,666 views 11525 6174355456 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044239170240520","created_at":1746705804,"id":"7502044239170256904","status":"in_progress"},"detail":{"logid":"20250508120325B16DE88A808FE52CC84B"},"msg":""}
+INFO 2025-05-08 12:03:28,917 views 11525 6174355456 第 4 次尝试获取对话状态
+INFO 2025-05-08 12:03:29,071 views 11525 6174355456 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044239170240520","created_at":1746705804,"id":"7502044239170256904","status":"in_progress"},"detail":{"logid":"20250508120328B16DE88A808FE52CCB08"},"msg":""}
+INFO 2025-05-08 12:03:32,448 views 11525 6174355456 第 5 次尝试获取对话状态
+INFO 2025-05-08 12:03:32,617 views 11525 6174355456 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044239170240520","created_at":1746705804,"id":"7502044239170256904","status":"in_progress"},"detail":{"logid":"20250508120331B16DE88A808FE52CCEBA"},"msg":""}
+INFO 2025-05-08 12:03:37,618 views 11525 6174355456 第 6 次尝试获取对话状态
+INFO 2025-05-08 12:03:37,875 views 11525 6174355456 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","completed_at":1746705814,"conversation_id":"7502044239170240520","created_at":1746705804,"id":"7502044239170256904","status":"completed","usage":{"input_count":678,"output_count":882,"token_count":1560}},"detail":{"logid":"20250508120337B16DE88A808FE52CD38B"},"msg":""}
+INFO 2025-05-08 12:03:38,067 views 11525 6174355456 消息列表响应: {"code":0,"data":[{"bot_id":"7494575252253720584","chat_id":"7502044239170256904","content":"{\n    \"trend_analysis\": {\n        \"probabilities\": {\n            \"up\": 70,\n            \"sideways\": 20,\n            \"down\": 10\n        },\n        \"summary\": \"当前市场趋势显示比特币价格有较高的上涨概率。技术指标总体上支持价格继续上涨。\"\n    },\n    \"indicators_analysis\": {\n        \"RSI\": {\n            \"value\": 67.94,\n            \"analysis\": \"RSI处于超买区间，表明市场可能存在一定的回调压力，但整体仍然看涨。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"MACD\": {\n            \"value\": {\n                \"line\": 2914.21,\n                \"signal\": 2791.63,\n                \"histogram\": 122.58\n            },\n            \"analysis\": \"MACD线高于信号线，且柱状图为正，显示出强烈的看涨信号。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"BollingerBands\": {\n            \"value\": {\n                \"upper\": 101468.68,\n                \"middle\": 93588.34,\n                \"lower\": 85883.69\n            },\n            \"analysis\": \"价格接近布林带上轨，表明市场可能已经进入超买状态，但仍有上涨空间。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"BIAS\": {\n            \"value\": 3.51,\n            \"analysis\": \"BIAS值显示市场情绪偏向乐观，支持价格进一步上涨。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"PSY\": {\n            \"value\": 50.0,\n            \"analysis\": \"PSY处于中性区间，表明市场情绪稳定。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"DMI\": {\n            \"value\": {\n                \"plus_di\": 25.2,\n                \"minus_di\": 12.9,\n                \"adx\": 60.2\n            },\n            \"analysis\": \"DMI显示出强烈的趋势信号，ADX值表明当前趋势非常强劲。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"VWAP\": {\n            \"value\": 88497.31,\n            \"analysis\": \"价格高于VWAP，表明当前市场处于强势状态。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"FundingRate\": {\n            \"value\": 7.2e-05,\n            \"analysis\": \"资金费率为正，表明市场对未来价格走势持乐观态度。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"ExchangeNetflow\": {\n            \"value\": 10.62,\n            \"analysis\": \"净流入显示资金进入市场，支持价格上涨。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"NUPL\": {\n            \"value\": 12.52,\n            \"analysis\": \"NUPL值显示投资者处于盈利状态，市场情绪乐观。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"MayerMultiple\": {\n            \"value\": 1.11,\n            \"analysis\": \"Mayer Multiple显示价格高于长期平均水平，支持看涨趋势。\",\n            \"support_trend\": \"支持当前趋势\"\n        }\n    },\n    \"trading_advice\": {\n        \"action\": \"买入\",\n        \"reason\": \"技术指标显示市场有较高的上涨概率，当前趋势强劲，适合买入。\",\n        \"entry_price\": 99479.2,\n        \"stop_loss\": 93588.34,\n        \"take_profit\": 101468.68\n    },\n    \"risk_assessment\": {\n        \"level\": \"中\",\n        \"score\": 60,\n        \"details\": [\"RSI处于超买区间，可能存在回调风险\", \"价格接近布林带上轨，需关注超买状态\"]\n    }\n}","content_type":"text","conversation_id":"7502044239170240520","created_at":1746705804,"id":"7502044239170289672","reasoning_content":"","role":"assistant","type":"answer","updated_at":1746705812},{"bot_id":"7494575252253720584","chat_id":"7502044239170256904","content":"{\"msg_type\":\"generate_answer_finish\",\"data\":\"{\\\"finish_reason\\\":0,\\\"FinData\\\":\\\"\\\"}\",\"from_module\":null,\"from_unit\":null}","content_type":"text","conversation_id":"7502044239170240520","created_at":1746705814,"id":"7502044239170404360","role":"assistant","type":"verbose","updated_at":1746705814},{"bot_id":"7494575252253720584","chat_id":"7502044239170256904","content":"Can you provide more details about the Bollinger Bands for BTCUSDT?","content_type":"text","conversation_id":"7502044239170240520","created_at":1746705814,"id":"7502044239170420744","role":"assistant","type":"follow_up","updated_at":1746705814},{"bot_id":"7494575252253720584","chat_id":"7502044239170256904","content":"What is the significance of the DMI indicators' values in the current market analysis?","content_type":"text","conversation_id":"7502044239170240520","created_at":1746705814,"id":"7502044281348030471","role":"assistant","type":"follow_up","updated_at":1746705814},{"bot_id":"7494575252253720584","chat_id":"7502044239170256904","content":"How does the trend analysis suggest potential price movements for Bitcoin based on the probabilities given?","content_type":"text","conversation_id":"7502044239170240520","created_at":1746705814,"id":"7502044281348046855","role":"assistant","type":"follow_up","updated_at":1746705814}],"detail":{"logid":"20250508120337B16DE88A808FE52CD3C9"},"msg":""}
+ERROR 2025-05-08 12:03:38,103 analysis_report_service 11525 6174355456 保存BTC的分析报告失败: (1054, "Unknown column 'snapshot_price' in 'field list'")
+ERROR 2025-05-08 12:03:38,103 views 11525 6174355456 保存分析报告失败: (1054, "Unknown column 'snapshot_price' in 'field list'")
+ERROR 2025-05-08 12:03:38,107 log 11525 6174355456 Internal Server Error: /api/crypto/technical-indicators/BTCUSDT/
+ERROR 2025-05-08 12:03:38,108 basehttp 11525 6174355456 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 500 116
+INFO 2025-05-08 12:04:14,690 views 11525 6191755264 查询 symbol: BTCUSDT, clean_symbol: BTC
+INFO 2025-05-08 12:04:14,692 views 11525 6191755264 找到 token: 8, BTC
+INFO 2025-05-08 12:04:14,692 okx_api 11525 6191755264 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:04:14,692 technical_analysis 11525 6191755264 技术分析服务初始化完成
+INFO 2025-05-08 12:04:14,692 views 11525 6191755264 延迟初始化: 技术分析服务
+INFO 2025-05-08 12:04:14,692 okx_api 11525 6191755264 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:04:14,692 views 11525 6191755264 延迟初始化: 市场数据服务
+INFO 2025-05-08 12:04:14,692 views 11525 6191755264 延迟初始化: 分析报告服务
+INFO 2025-05-08 12:04:14,692 okx_api 11525 6191755264 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:04:14,692 views 11525 6191755264 延迟初始化: OKX API服务
+INFO 2025-05-08 12:04:14,702 okx_api 11525 6191755264 正在检查环境变量...
+INFO 2025-05-08 12:04:14,707 okx_api 11525 6191755264 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:04:14,707 okx_api 11525 6191755264 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:04:14,708 okx_api 11525 6191755264 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:04:14,708 okx_api 11525 6191755264 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:04:14,708 okx_api 11525 6191755264 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:04:14,708 okx_api 11525 6191755264 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:04:14,708 okx_api 11525 6191755264 成功加载 OKX API 密钥
+INFO 2025-05-08 12:04:14,708 okx_api 11525 6191755264 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:04:14,708 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:15,038 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.33秒, 数据大小: 359
+INFO 2025-05-08 12:04:15,041 okx_api 11525 6191755264 成功获取BTCUSDT价格: 99470.3
+INFO 2025-05-08 12:04:15,041 technical_analysis 11525 6191755264 成功获取BTCUSDT实时价格: 99470.3，开始计算技术指标
+INFO 2025-05-08 12:04:15,042 okx_api 11525 6191755264 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=100 days ago UTC
+INFO 2025-05-08 12:04:15,042 okx_api 11525 6191755264 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:04:15,042 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:04:15,453 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.41秒, 数据大小: 12057
+INFO 2025-05-08 12:04:15,458 okx_api 11525 6191755264 使用常规K线接口获取了 100 条K线数据
+INFO 2025-05-08 12:04:15,459 technical_analysis 11525 6191755264 获取到100条K线数据，开始计算指标
+WARNING 2025-05-08 12:04:15,482 technical_analysis 11525 6191755264 数据长度不足200天(100天)，某些高级指标可能不准确
+DEBUG 2025-05-08 12:04:15,499 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/public/funding-rate | 参数: {'instId': 'BTC-USDT-SWAP'} | 数据: None
+DEBUG 2025-05-08 12:04:15,795 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.30秒, 数据大小: 490
+INFO 2025-05-08 12:04:15,797 okx_api 11525 6191755264 成功获取 BTCUSDT 的资金费率: 7.24078070642e-05
+INFO 2025-05-08 12:04:15,797 technical_analysis 11525 6191755264 获取到 BTCUSDT 的资金费率: 7.24078070642e-05
+INFO 2025-05-08 12:04:15,797 technical_analysis 11525 6191755264 数据量不足200天，使用100天数据计算高级指标
+INFO 2025-05-08 12:04:15,797 technical_analysis 11525 6191755264 使用99天数据计算NUPL
+INFO 2025-05-08 12:04:15,799 technical_analysis 11525 6191755264 NUPL计算结果: 12.509063094897208
+INFO 2025-05-08 12:04:15,799 technical_analysis 11525 6191755264 使用99天数据计算梅耶倍数
+INFO 2025-05-08 12:04:15,799 technical_analysis 11525 6191755264 使用99日移动平均线: 89664.00202020201
+INFO 2025-05-08 12:04:15,799 technical_analysis 11525 6191755264 梅耶倍数计算结果: 1.1093671680814399
+INFO 2025-05-08 12:04:15,799 technical_analysis 11525 6191755264 成功计算BTCUSDT的所有技术指标
+INFO 2025-05-08 12:04:15,801 okx_api 11525 6191755264 正在检查环境变量...
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 成功加载 OKX API 密钥
+INFO 2025-05-08 12:04:15,802 okx_api 11525 6191755264 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:04:15,802 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:16,114 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.31秒, 数据大小: 359
+DEBUG 2025-05-08 12:04:16,116 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:04:16,422 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.31秒, 数据大小: 146
+INFO 2025-05-08 12:04:16,427 okx_api 11525 6191755264 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:04:16,427 okx_api 11525 6191755264 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:04:16,427 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:04:16,730 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.30秒, 数据大小: 12057
+INFO 2025-05-08 12:04:16,735 okx_api 11525 6191755264 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:04:16,735 market_data_service 11525 6191755264 获取BTCUSDT的K线数据失败或数据不足
+DEBUG 2025-05-08 12:04:16,736 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:17,045 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.31秒, 数据大小: 359
+DEBUG 2025-05-08 12:04:17,048 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:04:17,362 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.31秒, 数据大小: 148
+DEBUG 2025-05-08 12:04:17,366 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:17,658 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.29秒, 数据大小: 359
+INFO 2025-05-08 12:04:17,660 okx_api 11525 6191755264 成功获取BTCUSDT价格: 99470.4
+INFO 2025-05-08 12:04:17,660 okx_api 11525 6191755264 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:04:17,660 okx_api 11525 6191755264 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:04:17,660 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:04:18,010 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.35秒, 数据大小: 12057
+INFO 2025-05-08 12:04:18,016 okx_api 11525 6191755264 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:04:18,016 market_data_service 11525 6191755264 无法获取BTCUSDT的足够历史K线数据来计算梅耶倍数
+INFO 2025-05-08 12:04:19,015 signals 11525 6191755264 更新代币 BTC 的技术分析数据
+INFO 2025-05-08 12:04:19,019 signals 11525 6191755264 更新代币 BTC 的市场数据
+INFO 2025-05-08 12:04:19,022 views 11525 6191755264 成功更新代币 BTC 的技术分析数据
+INFO 2025-05-08 12:04:19,022 views 11525 6191755264 准备获取Coze分析: BTCUSDT
+INFO 2025-05-08 12:04:19,647 views 11525 6191755264 === 测试认证响应详情 ===
+INFO 2025-05-08 12:04:19,648 views 11525 6191755264 响应状态码: 200
+INFO 2025-05-08 12:04:19,648 views 11525 6191755264 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '20250508120418CEF0CCF71A37E02D7057', 'Server-Timing': 'inner; dur=55', 'x-tt-trace-host': '0174bd1facd9f3f37af7dfa41b9aed81577490092e2b5a9834664550de85503409038f2cd338d2260b9647a8fdf9bedfaf5fa64e2791de87d1d93efc83f3f47b77de4ef2b335274ef229bc387cd6bab5a1966a8dc4644edfeb7f413d943b6e6022f684028678e9fd9251443ece32da755a', 'x-tt-trace-id': '00-250508120418CEF0CCF71A37E02D7057-5BABA920660D6409-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Expires': 'Thu, 08 May 2025 12:04:20 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Thu, 08 May 2025 12:04:20 GMT', 'Content-Length': '162', 'X-Cache': 'TCP_MISS from a23-52-131-120.deploy.akamaitechnologies.com (AkamaiGHost/22.1.1.1-d05c6443fdf0ef1ad227a2aacc363f6e) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'X-Origin-Response-Time': '190,23.52.131.120', 'X-Akamai-Request-ID': '378d1dea'}
+INFO 2025-05-08 12:04:19,648 views 11525 6191755264 响应内容: {"data":{"id":"7502044435455459346","conversation_id":"7502044435455442962","bot_id":"7494575252253720584","created_at":1746705859,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+INFO 2025-05-08 12:04:19,649 views 11525 6191755264 Coze API认证成功，获取分析报告
+DEBUG 2025-05-08 12:04:19,649 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:19,956 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.31秒, 数据大小: 360
+DEBUG 2025-05-08 12:04:19,959 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:04:20,269 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.31秒, 数据大小: 148
+INFO 2025-05-08 12:04:20,276 okx_api 11525 6209155072 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:04:20,277 okx_api 11525 6209155072 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:04:20,277 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:04:20,610 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.33秒, 数据大小: 12059
+INFO 2025-05-08 12:04:20,614 okx_api 11525 6209155072 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:04:20,614 market_data_service 11525 6209155072 获取BTCUSDT的K线数据失败或数据不足
+DEBUG 2025-05-08 12:04:20,615 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:20,940 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.32秒, 数据大小: 355
+DEBUG 2025-05-08 12:04:20,941 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:04:21,269 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.33秒, 数据大小: 148
+DEBUG 2025-05-08 12:04:21,273 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:21,611 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.34秒, 数据大小: 356
+INFO 2025-05-08 12:04:21,615 okx_api 11525 6209155072 成功获取BTCUSDT价格: 99470.3
+INFO 2025-05-08 12:04:21,616 okx_api 11525 6209155072 获取历史K线数据: 原始符号=BTCUSDT, OKX符号=BTC-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:04:21,616 okx_api 11525 6209155072 尝试使用常规K线接口获取数据: BTC-USDT
+DEBUG 2025-05-08 12:04:21,616 okx_api 11525 6209155072 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'BTC-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:04:22,025 okx_api 11525 6209155072 OKX API响应成功: 耗时: 0.41秒, 数据大小: 12059
+INFO 2025-05-08 12:04:22,028 okx_api 11525 6209155072 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:04:22,028 market_data_service 11525 6209155072 无法获取BTCUSDT的足够历史K线数据来计算梅耶倍数
+INFO 2025-05-08 12:04:23,797 views 11525 6191755264 第 1 次尝试获取对话状态
+INFO 2025-05-08 12:04:23,999 views 11525 6191755264 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044458993795079","created_at":1746705864,"id":"7502044458993811463","status":"in_progress"},"detail":{"logid":"20250508120423A09FD2A56BF6F72D99FD"},"msg":""}
+INFO 2025-05-08 12:04:25,001 views 11525 6191755264 第 2 次尝试获取对话状态
+INFO 2025-05-08 12:04:25,168 views 11525 6191755264 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044458993795079","created_at":1746705864,"id":"7502044458993811463","status":"in_progress"},"detail":{"logid":"20250508120424A09FD2A56BF6F72D9B23"},"msg":""}
+INFO 2025-05-08 12:04:26,670 views 11525 6191755264 第 3 次尝试获取对话状态
+INFO 2025-05-08 12:04:26,840 views 11525 6191755264 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044458993795079","created_at":1746705864,"id":"7502044458993811463","status":"in_progress"},"detail":{"logid":"20250508120426A09FD2A56BF6F72D9CB6"},"msg":""}
+INFO 2025-05-08 12:04:29,091 views 11525 6191755264 第 4 次尝试获取对话状态
+INFO 2025-05-08 12:04:29,267 views 11525 6191755264 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044458993795079","created_at":1746705864,"id":"7502044458993811463","status":"in_progress"},"detail":{"logid":"20250508120428A09FD2A56BF6F72D9ED0"},"msg":""}
+INFO 2025-05-08 12:04:32,645 views 11525 6191755264 第 5 次尝试获取对话状态
+INFO 2025-05-08 12:04:32,840 views 11525 6191755264 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502044458993795079","created_at":1746705864,"id":"7502044458993811463","status":"in_progress"},"detail":{"logid":"20250508120432A09FD2A56BF6F72DA1C8"},"msg":""}
+INFO 2025-05-08 12:04:37,842 views 11525 6191755264 第 6 次尝试获取对话状态
+INFO 2025-05-08 12:04:38,079 views 11525 6191755264 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","completed_at":1746705875,"conversation_id":"7502044458993795079","created_at":1746705864,"id":"7502044458993811463","status":"completed","usage":{"input_count":678,"output_count":942,"token_count":1620}},"detail":{"logid":"20250508120437A09FD2A56BF6F72DA77D"},"msg":""}
+INFO 2025-05-08 12:04:38,279 views 11525 6191755264 消息列表响应: {"code":0,"data":[{"bot_id":"7494575252253720584","chat_id":"7502044458993811463","content":"```json\n{\n    \"trend_analysis\": {\n        \"probabilities\": {\n            \"up\": 70,\n            \"sideways\": 20,\n            \"down\": 10\n        },\n        \"summary\": \"当前市场趋势显示比特币价格有较高的上涨概率。技术指标整体支持上涨趋势，但需注意市场波动性。\"\n    },\n    \"indicators_analysis\": {\n        \"RSI\": {\n            \"value\": 67.92,\n            \"analysis\": \"RSI处于超买区间，表明市场可能会出现回调。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MACD\": {\n            \"value\": {\n                \"line\": 2913.51,\n                \"signal\": 2791.49,\n                \"histogram\": 122.01\n            },\n            \"analysis\": \"MACD线在信号线上方，且柱状图为正，表明市场有进一步上涨的动能。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"BollingerBands\": {\n            \"value\": {\n                \"upper\": 101459.71,\n                \"middle\": 93587.9,\n                \"lower\": 85884.67\n            },\n            \"analysis\": \"价格接近布林带上轨，表明市场处于高位，可能会面临回调压力。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"BIAS\": {\n            \"value\": 3.5,\n            \"analysis\": \"BIAS值较高，表明市场情绪偏向乐观，但需警惕过度乐观导致的回调风险。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"PSY\": {\n            \"value\": 50.0,\n            \"analysis\": \"PSY值为50，表明市场情绪中性。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"DMI\": {\n            \"value\": {\n                \"plus_di\": 25.2,\n                \"minus_di\": 12.9,\n                \"adx\": 60.2\n            },\n            \"analysis\": \"DMI显示多头力量明显强于空头，且ADX值较高，表明市场趋势强劲。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"VWAP\": {\n            \"value\": 88497.3,\n            \"analysis\": \"当前价格高于VWAP，表明市场处于强势状态。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"FundingRate\": {\n            \"value\": 7.2e-05,\n            \"analysis\": \"资金费率为正，表明市场看涨情绪较强。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"ExchangeNetflow\": {\n            \"value\": 10.63,\n            \"analysis\": \"交易所净流入较高，表明短期内可能会有卖压。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"NUPL\": {\n            \"value\": 12.51,\n            \"analysis\": \"NUPL值较高，表明市场处于获利状态，可能会有部分投资者选择获利了结。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"MayerMultiple\": {\n            \"value\": 1.11,\n            \"analysis\": \"Mayer Multiple值表明价格高于长期移动平均线，市场处于强势状态。\",\n            \"support_trend\": \"支持当前趋势\"\n        }\n    },\n    \"trading_advice\": {\n        \"action\": \"持有\",\n        \"reason\": \"虽然多数指标支持上涨趋势，但部分指标显示市场可能会出现回调。建议投资者持有现有仓位，密切关注市场动态。\",\n        \"entry_price\": 99470.4,\n        \"stop_loss\": 93587.9,\n        \"take_profit\": 101459.71\n    },\n    \"risk_assessment\": {\n        \"level\": \"中\",\n        \"score\": 60,\n        \"details\": [\"市场处于高位，存在回调风险\", \"部分指标显示市场情绪过于乐观\", \"交易所净流入较高，可能会有卖压\"]\n    }\n}\n```","content_type":"text","conversation_id":"7502044458993795079","created_at":1746705864,"id":"7502044511896338440","reasoning_content":"","role":"assistant","type":"answer","updated_at":1746705872},{"bot_id":"7494575252253720584","chat_id":"7502044458993811463","content":"{\"msg_type\":\"generate_answer_finish\",\"data\":\"{\\\"finish_reason\\\":0,\\\"FinData\\\":\\\"\\\"}\",\"from_module\":null,\"from_unit\":null}","content_type":"text","conversation_id":"7502044458993795079","created_at":1746705875,"id":"7502044511896469512","role":"assistant","type":"verbose","updated_at":1746705874},{"bot_id":"7494575252253720584","chat_id":"7502044458993811463","content":"Can you provide more details on the Bollinger Bands for BTCUSDT?","content_type":"text","conversation_id":"7502044458993795079","created_at":1746705875,"id":"7502044511896485896","role":"assistant","type":"follow_up","updated_at":1746705874},{"bot_id":"7494575252253720584","chat_id":"7502044458993811463","content":"What is the current trend analysis for the Bitcoin market based on the probabilities provided?","content_type":"text","conversation_id":"7502044458993795079","created_at":1746705875,"id":"7502044511896502280","role":"assistant","type":"follow_up","updated_at":1746705874},{"bot_id":"7494575252253720584","chat_id":"7502044458993811463","content":"How do the RSI and MACD indicators support or oppose the current market trend for BTCUSDT?","content_type":"text","conversation_id":"7502044458993795079","created_at":1746705875,"id":"7502044511896518664","role":"assistant","type":"follow_up","updated_at":1746705874}],"detail":{"logid":"20250508120437A09FD2A56BF6F72DA7C8"},"msg":""}
+INFO 2025-05-08 12:04:38,314 analysis_report_service 11525 6191755264 成功保存BTC的分析报告
+INFO 2025-05-08 12:04:38,330 okx_api 11525 6191755264 正在检查环境变量...
+INFO 2025-05-08 12:04:38,330 okx_api 11525 6191755264 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:04:38,330 okx_api 11525 6191755264 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:04:38,331 okx_api 11525 6191755264 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:04:38,331 okx_api 11525 6191755264 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:04:38,331 okx_api 11525 6191755264 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:04:38,331 okx_api 11525 6191755264 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:04:38,331 okx_api 11525 6191755264 成功加载 OKX API 密钥
+INFO 2025-05-08 12:04:38,331 okx_api 11525 6191755264 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:04:38,331 okx_api 11525 6191755264 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:04:38,641 okx_api 11525 6191755264 OKX API响应成功: 耗时: 0.31秒, 数据大小: 355
+INFO 2025-05-08 12:04:38,643 okx_api 11525 6191755264 成功获取BTCUSDT价格: 99470.8
+INFO 2025-05-08 12:04:38,647 signals 11525 6191755264 更新代币 BTC 的市场数据
+INFO 2025-05-08 12:04:38,649 basehttp 11525 6191755264 "GET /api/crypto/technical-indicators/BTCUSDT/?force_refresh=true HTTP/1.1" 200 2635
+INFO 2025-05-08 12:10:25,820 autoreload 11525 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-08 12:10:26,718 autoreload 12440 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 12:10:42,206 autoreload 12440 8462421120 /Users/liuzhao/Documents/Projects/Analyst/backend/CryptoAnalyst/views.py changed, reloading.
+INFO 2025-05-08 12:10:42,981 autoreload 12463 8462421120 Watching for file changes with StatReloader
+INFO 2025-05-08 12:16:38,411 views 12463 6209433600 查询 symbol: SOLUSDT, clean_symbol: SOL
+INFO 2025-05-08 12:16:38,416 views 12463 6209433600 未找到 token: SOL
+INFO 2025-05-08 12:16:38,416 okx_api 12463 6209433600 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:16:38,416 technical_analysis 12463 6209433600 技术分析服务初始化完成
+INFO 2025-05-08 12:16:38,416 views 12463 6209433600 延迟初始化: 技术分析服务
+INFO 2025-05-08 12:16:38,416 okx_api 12463 6209433600 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:16:38,417 views 12463 6209433600 延迟初始化: 市场数据服务
+INFO 2025-05-08 12:16:38,417 views 12463 6209433600 延迟初始化: 分析报告服务
+INFO 2025-05-08 12:16:38,417 okx_api 12463 6209433600 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:16:38,417 views 12463 6209433600 延迟初始化: OKX API服务
+INFO 2025-05-08 12:16:38,422 okx_api 12463 6209433600 正在检查环境变量...
+INFO 2025-05-08 12:16:38,422 okx_api 12463 6209433600 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:16:38,423 okx_api 12463 6209433600 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:16:38,423 okx_api 12463 6209433600 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:16:38,423 okx_api 12463 6209433600 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:16:38,423 okx_api 12463 6209433600 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:16:38,423 okx_api 12463 6209433600 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:16:38,423 okx_api 12463 6209433600 成功加载 OKX API 密钥
+INFO 2025-05-08 12:16:38,423 okx_api 12463 6209433600 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:16:38,423 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:16:38,768 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.34秒, 数据大小: 355
+INFO 2025-05-08 12:16:38,770 okx_api 12463 6209433600 成功获取SOLUSDT价格: 154.52
+INFO 2025-05-08 12:16:38,770 technical_analysis 12463 6209433600 成功获取SOLUSDT实时价格: 154.52，开始计算技术指标
+INFO 2025-05-08 12:16:38,771 okx_api 12463 6209433600 获取历史K线数据: 原始符号=SOLUSDT, OKX符号=SOL-USDT, 时间间隔=1d, 开始时间=100 days ago UTC
+INFO 2025-05-08 12:16:38,771 okx_api 12463 6209433600 尝试使用常规K线接口获取数据: SOL-USDT
+DEBUG 2025-05-08 12:16:38,771 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:16:39,079 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.31秒, 数据大小: 11563
+INFO 2025-05-08 12:16:39,082 okx_api 12463 6209433600 使用常规K线接口获取了 100 条K线数据
+INFO 2025-05-08 12:16:39,082 technical_analysis 12463 6209433600 获取到100条K线数据，开始计算指标
+WARNING 2025-05-08 12:16:39,110 technical_analysis 12463 6209433600 数据长度不足200天(100天)，某些高级指标可能不准确
+DEBUG 2025-05-08 12:16:39,122 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/public/funding-rate | 参数: {'instId': 'SOL-USDT-SWAP'} | 数据: None
+DEBUG 2025-05-08 12:16:39,480 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.36秒, 数据大小: 486
+INFO 2025-05-08 12:16:39,482 okx_api 12463 6209433600 成功获取 SOLUSDT 的资金费率: 8.14372893523e-05
+INFO 2025-05-08 12:16:39,483 technical_analysis 12463 6209433600 获取到 SOLUSDT 的资金费率: 8.14372893523e-05
+INFO 2025-05-08 12:16:39,486 technical_analysis 12463 6209433600 数据量不足200天，使用100天数据计算高级指标
+INFO 2025-05-08 12:16:39,486 technical_analysis 12463 6209433600 使用99天数据计算NUPL
+INFO 2025-05-08 12:16:39,490 technical_analysis 12463 6209433600 NUPL计算结果: 5.183897950385553
+INFO 2025-05-08 12:16:39,490 technical_analysis 12463 6209433600 使用99天数据计算梅耶倍数
+INFO 2025-05-08 12:16:39,490 technical_analysis 12463 6209433600 使用99日移动平均线: 150.48343434343434
+INFO 2025-05-08 12:16:39,490 technical_analysis 12463 6209433600 梅耶倍数计算结果: 1.026823986800789
+INFO 2025-05-08 12:16:39,490 technical_analysis 12463 6209433600 成功计算SOLUSDT的所有技术指标
+INFO 2025-05-08 12:16:39,495 okx_api 12463 6209433600 正在检查环境变量...
+INFO 2025-05-08 12:16:39,496 okx_api 12463 6209433600 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:16:39,496 okx_api 12463 6209433600 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:16:39,496 okx_api 12463 6209433600 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:16:39,496 okx_api 12463 6209433600 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:16:39,497 okx_api 12463 6209433600 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:16:39,497 okx_api 12463 6209433600 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:16:39,497 okx_api 12463 6209433600 成功加载 OKX API 密钥
+INFO 2025-05-08 12:16:39,497 okx_api 12463 6209433600 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:16:39,497 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:16:39,810 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.31秒, 数据大小: 355
+DEBUG 2025-05-08 12:16:39,813 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:16:40,108 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.30秒, 数据大小: 146
+INFO 2025-05-08 12:16:40,111 okx_api 12463 6209433600 获取历史K线数据: 原始符号=SOLUSDT, OKX符号=SOL-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:16:40,111 okx_api 12463 6209433600 尝试使用常规K线接口获取数据: SOL-USDT
+DEBUG 2025-05-08 12:16:40,111 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:16:40,457 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.35秒, 数据大小: 11563
+INFO 2025-05-08 12:16:40,459 okx_api 12463 6209433600 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:16:40,460 market_data_service 12463 6209433600 获取SOLUSDT的K线数据失败或数据不足
+DEBUG 2025-05-08 12:16:40,460 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:16:40,767 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.31秒, 数据大小: 352
+DEBUG 2025-05-08 12:16:40,769 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:16:41,079 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.31秒, 数据大小: 146
+DEBUG 2025-05-08 12:16:41,082 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:16:41,421 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.34秒, 数据大小: 354
+INFO 2025-05-08 12:16:41,425 okx_api 12463 6209433600 成功获取SOLUSDT价格: 154.53
+INFO 2025-05-08 12:16:41,425 okx_api 12463 6209433600 获取历史K线数据: 原始符号=SOLUSDT, OKX符号=SOL-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:16:41,425 okx_api 12463 6209433600 尝试使用常规K线接口获取数据: SOL-USDT
+DEBUG 2025-05-08 12:16:41,425 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:16:41,730 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.30秒, 数据大小: 11563
+INFO 2025-05-08 12:16:41,732 okx_api 12463 6209433600 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:16:41,732 market_data_service 12463 6209433600 无法获取SOLUSDT的足够历史K线数据来计算梅耶倍数
+INFO 2025-05-08 12:16:42,712 signals 12463 6209433600 更新代币 SOL 的技术分析数据
+INFO 2025-05-08 12:16:42,719 signals 12463 6209433600 更新代币 SOL 的市场数据
+INFO 2025-05-08 12:16:42,721 views 12463 6209433600 成功更新代币 SOL 的技术分析数据
+INFO 2025-05-08 12:16:42,721 views 12463 6209433600 准备获取Coze分析: SOLUSDT
+INFO 2025-05-08 12:16:43,161 views 12463 6209433600 === 测试认证响应详情 ===
+INFO 2025-05-08 12:16:43,161 views 12463 6209433600 响应状态码: 200
+INFO 2025-05-08 12:16:43,161 views 12463 6209433600 响应头: {'Content-Type': 'application/json; charset=utf-8', 'X-Tt-Logid': '20250508121642BA7956D895B9672F6D02', 'Server-Timing': 'inner; dur=105', 'x-tt-trace-host': '01d062bfccdbf70c161d191ffd72f7f97ddd11ddf21377bd153c5991a96219fe3b25117d75d4a674b8f4c4e5e5a5e790ede81d4f2a4e22618db74e2bab83d4b1ebb5aab029f6613d8a7b682cb29141e454b34528cdbdc40b32a6e8afab751e89fc', 'x-tt-trace-id': '00-250508121642BA7956D895B9672F6D02-347364DE6578EE50-00', 'Server': 'TLB', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'false', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'origin,content-type,authorization,X-Coze-Connector-ID,X-Coze-Client-User-Agent', 'Content-Encoding': 'gzip', 'Expires': 'Thu, 08 May 2025 12:16:43 GMT', 'Cache-Control': 'max-age=0, no-cache, no-store', 'Pragma': 'no-cache', 'Date': 'Thu, 08 May 2025 12:16:43 GMT', 'Content-Length': '164', 'X-Cache': 'TCP_MISS from a23-52-131-55.deploy.akamaitechnologies.com (AkamaiGHost/22.1.2-812cedcbf35ba002177d10138ee3fcd0) (-)', 'Connection': 'keep-alive', 'Vary': 'Accept-Encoding', 'Strict-Transport-Security': 'max-age=31536000 ; includeSubDomains', 'x-tt-trace-tag': 'id=16;cdn-cache=miss;type=dyn', 'X-Origin-Response-Time': '119,23.52.131.55', 'X-Akamai-Request-ID': '903ffe1'}
+INFO 2025-05-08 12:16:43,161 views 12463 6209433600 响应内容: {"data":{"id":"7502047626297262098","conversation_id":"7502047626297245714","bot_id":"7494575252253720584","created_at":1746706603,"last_error":{"code":0,"msg":""},"status":"in_progress"},"code":0,"msg":""}
+INFO 2025-05-08 12:16:43,162 views 12463 6209433600 Coze API认证成功，获取分析报告
+DEBUG 2025-05-08 12:16:43,162 okx_api 12463 6244233216 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:16:43,512 okx_api 12463 6244233216 OKX API响应成功: 耗时: 0.35秒, 数据大小: 354
+DEBUG 2025-05-08 12:16:43,517 okx_api 12463 6244233216 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:16:43,803 okx_api 12463 6244233216 OKX API响应成功: 耗时: 0.29秒, 数据大小: 146
+INFO 2025-05-08 12:16:43,806 okx_api 12463 6244233216 获取历史K线数据: 原始符号=SOLUSDT, OKX符号=SOL-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:16:43,806 okx_api 12463 6244233216 尝试使用常规K线接口获取数据: SOL-USDT
+DEBUG 2025-05-08 12:16:43,806 okx_api 12463 6244233216 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:16:44,123 okx_api 12463 6244233216 OKX API响应成功: 耗时: 0.32秒, 数据大小: 11562
+INFO 2025-05-08 12:16:44,127 okx_api 12463 6244233216 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:16:44,127 market_data_service 12463 6244233216 获取SOLUSDT的K线数据失败或数据不足
+DEBUG 2025-05-08 12:16:44,127 okx_api 12463 6244233216 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:16:44,414 okx_api 12463 6244233216 OKX API响应成功: 耗时: 0.29秒, 数据大小: 347
+DEBUG 2025-05-08 12:16:44,417 okx_api 12463 6244233216 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 1} | 数据: None
+DEBUG 2025-05-08 12:16:44,709 okx_api 12463 6244233216 OKX API响应成功: 耗时: 0.29秒, 数据大小: 146
+DEBUG 2025-05-08 12:16:44,711 okx_api 12463 6244233216 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:16:45,017 okx_api 12463 6244233216 OKX API响应成功: 耗时: 0.31秒, 数据大小: 355
+INFO 2025-05-08 12:16:45,019 okx_api 12463 6244233216 成功获取SOLUSDT价格: 154.55
+INFO 2025-05-08 12:16:45,020 okx_api 12463 6244233216 获取历史K线数据: 原始符号=SOLUSDT, OKX符号=SOL-USDT, 时间间隔=1d, 开始时间=200 days ago UTC
+INFO 2025-05-08 12:16:45,020 okx_api 12463 6244233216 尝试使用常规K线接口获取数据: SOL-USDT
+DEBUG 2025-05-08 12:16:45,020 okx_api 12463 6244233216 OKX API 请求: GET https://www.okx.com/api/v5/market/candles | 参数: {'instId': 'SOL-USDT', 'bar': '1D', 'limit': 100} | 数据: None
+DEBUG 2025-05-08 12:16:45,330 okx_api 12463 6244233216 OKX API响应成功: 耗时: 0.31秒, 数据大小: 11563
+INFO 2025-05-08 12:16:45,334 okx_api 12463 6244233216 使用常规K线接口获取了 100 条K线数据
+WARNING 2025-05-08 12:16:45,336 market_data_service 12463 6244233216 无法获取SOLUSDT的足够历史K线数据来计算梅耶倍数
+INFO 2025-05-08 12:16:46,748 views 12463 6209433600 第 1 次尝试获取对话状态
+INFO 2025-05-08 12:16:46,972 views 12463 6209433600 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502047641782534151","created_at":1746706607,"id":"7502047641782550535","status":"in_progress"},"detail":{"logid":"20250508121646BA7956D895B9672F7113"},"msg":""}
+INFO 2025-05-08 12:16:47,973 views 12463 6209433600 第 2 次尝试获取对话状态
+INFO 2025-05-08 12:16:48,215 views 12463 6209433600 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502047641782534151","created_at":1746706607,"id":"7502047641782550535","status":"in_progress"},"detail":{"logid":"20250508121647BA7956D895B9672F725A"},"msg":""}
+INFO 2025-05-08 12:16:49,718 views 12463 6209433600 第 3 次尝试获取对话状态
+INFO 2025-05-08 12:16:49,982 views 12463 6209433600 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502047641782534151","created_at":1746706607,"id":"7502047641782550535","status":"in_progress"},"detail":{"logid":"20250508121649C0C3338BF964BF2FF6F9"},"msg":""}
+INFO 2025-05-08 12:16:52,235 views 12463 6209433600 第 4 次尝试获取对话状态
+INFO 2025-05-08 12:16:52,416 views 12463 6209433600 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502047641782534151","created_at":1746706607,"id":"7502047641782550535","status":"in_progress"},"detail":{"logid":"20250508121651C0C3338BF964BF2FF8BF"},"msg":""}
+INFO 2025-05-08 12:16:55,792 views 12463 6209433600 第 5 次尝试获取对话状态
+INFO 2025-05-08 12:16:55,968 views 12463 6209433600 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","conversation_id":"7502047641782534151","created_at":1746706607,"id":"7502047641782550535","status":"in_progress"},"detail":{"logid":"20250508121655C0C3338BF964BF2FFBAF"},"msg":""}
+INFO 2025-05-08 12:17:00,970 views 12463 6209433600 第 6 次尝试获取对话状态
+INFO 2025-05-08 12:17:01,188 views 12463 6209433600 状态响应: {"code":0,"data":{"bot_id":"7494575252253720584","completed_at":1746706617,"conversation_id":"7502047641782534151","created_at":1746706607,"id":"7502047641782550535","status":"completed","usage":{"input_count":671,"output_count":865,"token_count":1536}},"detail":{"logid":"20250508121700C0C3338BF964BF2FFF32"},"msg":""}
+INFO 2025-05-08 12:17:01,428 views 12463 6209433600 消息列表响应: {"code":0,"data":[{"bot_id":"7494575252253720584","chat_id":"7502047641782550535","content":"{\n    \"trend_analysis\": {\n        \"probabilities\": {\n            \"up\": 40,\n            \"sideways\": 30,\n            \"down\": 30\n        },\n        \"summary\": \"当前市场趋势较为复杂，存在一定的上涨和横盘可能性，但下跌的风险也不可忽视。\"\n    },\n    \"indicators_analysis\": {\n        \"RSI\": {\n            \"value\": 55.48,\n            \"analysis\": \"RSI处于中性区域，显示市场没有明显的超买或超卖情况。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"MACD\": {\n            \"value\": {\n                \"line\": 4.08,\n                \"signal\": 4.42,\n                \"histogram\": -0.34\n            },\n            \"analysis\": \"MACD线低于信号线，且柱状图为负值，显示出市场可能有下行压力。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"BollingerBands\": {\n            \"value\": {\n                \"upper\": 157.61,\n                \"middle\": 146.57,\n                \"lower\": 136.6\n            },\n            \"analysis\": \"价格接近布林带上轨，显示出市场可能存在回调压力。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"BIAS\": {\n            \"value\": 5.05,\n            \"analysis\": \"BIAS显示市场有一定的超买情况，可能会面临回调压力。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"PSY\": {\n            \"value\": 33.3,\n            \"analysis\": \"PSY显示市场情绪较为悲观，可能会影响价格走势。\",\n            \"support_trend\": \"反对当前趋势\"\n        },\n        \"DMI\": {\n            \"value\": {\n                \"plus_di\": 19.5,\n                \"minus_di\": 16.0,\n                \"adx\": 45.1\n            },\n            \"analysis\": \"DMI显示市场趋势较强，但多头和空头力量相对均衡。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"VWAP\": {\n            \"value\": 147.37,\n            \"analysis\": \"当前价格高于VWAP，显示市场有一定的买盘力量。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"FundingRate\": {\n            \"value\": 8.1e-05,\n            \"analysis\": \"FundingRate较低，显示市场对未来价格走势没有明显的看涨或看跌预期。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"ExchangeNetflow\": {\n            \"value\": -1.76,\n            \"analysis\": \"负值显示资金流出交易所，可能支持价格上涨。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"NUPL\": {\n            \"value\": 5.18,\n            \"analysis\": \"NUPL显示市场处于盈利状态，但盈利水平不高。\",\n            \"support_trend\": \"支持当前趋势\"\n        },\n        \"MayerMultiple\": {\n            \"value\": 1.03,\n            \"analysis\": \"MayerMultiple显示市场价格略高于长期平均水平，存在一定的上涨潜力。\",\n            \"support_trend\": \"支持当前趋势\"\n        }\n    },\n    \"trading_advice\": {\n        \"action\": \"持有\",\n        \"reason\": \"市场趋势较为复杂，建议观望以等待更明确的信号。\",\n        \"entry_price\": 154.53,\n        \"stop_loss\": 146.57,\n        \"take_profit\": 157.61\n    },\n    \"risk_assessment\": {\n        \"level\": \"中\",\n        \"score\": 55,\n        \"details\": [\"市场情绪较为悲观\", \"价格接近布林带上轨\", \"MACD显示下行压力\"]\n    }\n}","content_type":"text","conversation_id":"7502047641782534151","created_at":1746706607,"id":"7502047641782583303","reasoning_content":"","role":"assistant","type":"answer","updated_at":1746706615},{"bot_id":"7494575252253720584","chat_id":"7502047641782550535","content":"{\"msg_type\":\"generate_answer_finish\",\"data\":\"{\\\"finish_reason\\\":0,\\\"FinData\\\":\\\"\\\"}\",\"from_module\":null,\"from_unit\":null}","content_type":"text","conversation_id":"7502047641782534151","created_at":1746706617,"id":"7502047641782763527","role":"assistant","type":"verbose","updated_at":1746706617},{"bot_id":"7494575252253720584","chat_id":"7502047641782550535","content":"Can you provide more insights on the Bollinger Bands for symbol SOLUSDT with a 1-day interval?","content_type":"text","conversation_id":"7502047641782534151","created_at":1746706617,"id":"7502047710610980871","role":"assistant","type":"follow_up","updated_at":1746706617},{"bot_id":"7494575252253720584","chat_id":"7502047641782550535","content":"What is the analysis of the DMI indicators for SOLUSDT in the current market scenario?","content_type":"text","conversation_id":"7502047641782534151","created_at":1746706617,"id":"7502047710610997255","role":"assistant","type":"follow_up","updated_at":1746706617},{"bot_id":"7494575252253720584","chat_id":"7502047641782550535","content":"How does the trend analysis suggest balancing the probabilities of upward, sideways, and downward movements for symbol SOLUSDT?","content_type":"text","conversation_id":"7502047641782534151","created_at":1746706617,"id":"7502047710611013639","role":"assistant","type":"follow_up","updated_at":1746706617}],"detail":{"logid":"20250508121700C0C3338BF964BF2FFF64"},"msg":""}
+INFO 2025-05-08 12:17:01,459 analysis_report_service 12463 6209433600 成功保存SOL的分析报告
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 正在检查环境变量...
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 成功加载 OKX API 密钥
+INFO 2025-05-08 12:17:01,506 okx_api 12463 6209433600 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:17:01,506 okx_api 12463 6209433600 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'SOL-USDT'} | 数据: None
+DEBUG 2025-05-08 12:17:01,849 okx_api 12463 6209433600 OKX API响应成功: 耗时: 0.34秒, 数据大小: 345
+INFO 2025-05-08 12:17:01,852 okx_api 12463 6209433600 成功获取SOLUSDT价格: 154.57
+INFO 2025-05-08 12:17:01,858 signals 12463 6209433600 更新代币 SOL 的市场数据
+INFO 2025-05-08 12:17:01,859 basehttp 12463 6209433600 "GET /api/crypto/technical-indicators/SOLUSDT/?force_refresh=true HTTP/1.1" 200 2445
+INFO 2025-05-08 12:52:53,016 views 12463 6226833408 查询 symbol: BTCUSDT, clean_symbol: BTC
+INFO 2025-05-08 12:52:53,021 views 12463 6226833408 找到 token: 8, BTC
+INFO 2025-05-08 12:52:53,063 okx_api 12463 6226833408 OKXAPI 实例创建，尚未初始化
+INFO 2025-05-08 12:52:53,073 okx_api 12463 6226833408 正在检查环境变量...
+INFO 2025-05-08 12:52:53,074 okx_api 12463 6226833408 尝试获取 OKX_API_KEY: 已设置
+INFO 2025-05-08 12:52:53,074 okx_api 12463 6226833408 尝试获取 OKX_API_SECRET: 已设置
+INFO 2025-05-08 12:52:53,076 okx_api 12463 6226833408 尝试获取 OKX_API_PASSPHRASE: 已设置
+INFO 2025-05-08 12:52:53,077 okx_api 12463 6226833408 尝试获取 OKEX_API_SECRET: 未设置
+INFO 2025-05-08 12:52:53,077 okx_api 12463 6226833408 尝试获取 OKX_SECRET: 未设置
+INFO 2025-05-08 12:52:53,078 okx_api 12463 6226833408 正在使用硬编码的API密钥进行测试...
+INFO 2025-05-08 12:52:53,084 okx_api 12463 6226833408 成功加载 OKX API 密钥
+INFO 2025-05-08 12:52:53,085 okx_api 12463 6226833408 OKXAPI 客户端初始化完成
+DEBUG 2025-05-08 12:52:53,085 okx_api 12463 6226833408 OKX API 请求: GET https://www.okx.com/api/v5/market/ticker | 参数: {'instId': 'BTC-USDT'} | 数据: None
+DEBUG 2025-05-08 12:52:53,327 okx_api 12463 6226833408 OKX API响应成功: 耗时: 0.24秒, 数据大小: 353
+INFO 2025-05-08 12:52:53,328 okx_api 12463 6226833408 成功获取BTCUSDT价格: 99416.0
+INFO 2025-05-08 12:52:53,342 signals 12463 6226833408 更新代币 BTC 的市场数据
+INFO 2025-05-08 12:52:53,342 basehttp 12463 6226833408 "GET /api/crypto/technical-indicators/BTCUSDT/ HTTP/1.1" 200 2635

@@ -97,6 +97,7 @@ class AnalysisReport(models.Model):
     token = models.ForeignKey(Token, on_delete=models.CASCADE, related_name='analysis_reports')
     timestamp = models.DateTimeField(default=timezone.now)
     technical_analysis = models.ForeignKey(TechnicalAnalysis, on_delete=models.CASCADE, related_name='analysis_reports')
+    snapshot_price = models.FloatField(default=0)  # 添加报告生成时的价格字段
     
     # 趋势分析
     trend_up_probability = models.IntegerField(default=0)  # 上涨概率
