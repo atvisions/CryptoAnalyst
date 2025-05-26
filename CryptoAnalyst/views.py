@@ -39,6 +39,7 @@ from django.shortcuts import render
 
 class TechnicalIndicatorsAPIView(APIView):
     """技术指标API视图"""
+    permission_classes = [AllowAny]  # 允许匿名访问
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -65,8 +66,12 @@ class TechnicalIndicatorsAPIView(APIView):
 
     def get(self, request, symbol: str):
         """同步入口点，调用异步处理"""
-        # 检查是否需要强制刷新
-        force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
+        # 检查是否需要强制刷新 - 支持查询参数和URL路径
+        force_refresh = (
+            request.query_params.get('force_refresh', 'false').lower() == 'true' or
+            'force-refresh' in request.path
+        )
+        logger.info(f"force_refresh: {force_refresh}, path: {request.path}")
 
         try:
             # 统一 symbol 格式，去除常见后缀
@@ -242,7 +247,7 @@ class TechnicalIndicatorsAPIView(APIView):
         try:
             # 初始化必要的服务
             self._lazy_init_services()
-            
+
             # 增加检查，确保服务已初始化
             if self.ta_service is None:
                 self.ta_service = TechnicalAnalysisService()
@@ -310,7 +315,16 @@ class TechnicalIndicatorsAPIView(APIView):
             try:
                 # 如果有Coze API配置，使用异步调用，但这里需要在同步环境中执行
                 analysis_data = None
-                
+
+                # 初始化Coze API配置
+                self._init_coze_api()
+
+                # 详细的调试信息
+                from django.conf import settings
+                settings_key = getattr(settings, 'COZE_API_KEY', 'NOT_SET')
+                logger.info(f"Django设置中的COZE_API_KEY: {settings_key[:20] if settings_key else 'None'}...")
+                logger.info(f"实例中的coze_api_key: {getattr(self, 'coze_api_key', 'None')[:20] if hasattr(self, 'coze_api_key') and self.coze_api_key else 'None'}...")
+
                 if hasattr(self, 'coze_api_key') and self.coze_api_key:
                     logger.info(f"准备获取Coze分析: {symbol}")
                     # 借助异步转同步执行
@@ -329,23 +343,23 @@ class TechnicalIndicatorsAPIView(APIView):
                             logger.warning("Coze API认证失败，使用默认分析报告")
                     finally:
                         loop.close()
-                
+
                 # 如果没有获取到Coze分析，使用默认分析报告
                 if not analysis_data:
                     logger.info("使用默认分析报告")
                     analysis_data = self._create_default_analysis(indicators, float(market_data['price']))
-                
+
                 # 保存分析报告
                 try:
                     # 使用 report_service 保存分析报告，不用 await
                     self.report_service.save_analysis_report(clean_symbol, analysis_data)
-                    
+
                     # 添加时间戳字段，使用当前时间
                     analysis_data['last_update_time'] = format_timestamp(timezone.now())
-                    
+
                     # 添加当前价格字段
                     analysis_data['current_price'] = float(market_data['price'])
-                    
+
                 except Exception as e:
                     logger.error(f"保存分析报告失败: {str(e)}")
                     return Response({
@@ -574,20 +588,22 @@ class TechnicalIndicatorsAPIView(APIView):
 
     def _init_coze_api(self):
         """初始化 Coze API 配置"""
+        from django.conf import settings
+
         if not hasattr(self, 'coze_api_key') or not self.coze_api_key:
-            self.coze_api_key = os.getenv('COZE_API_KEY')
+            self.coze_api_key = getattr(settings, 'COZE_API_KEY', None)
             if not self.coze_api_key:
-                logger.warning("COZE_API_KEY 环境变量未设置")
+                logger.warning("COZE_API_KEY 未设置")
 
         if not hasattr(self, 'coze_bot_id') or not self.coze_bot_id:
-            self.coze_bot_id = os.getenv('COZE_BOT_ID', '7494575252253720584')
+            self.coze_bot_id = getattr(settings, 'COZE_BOT_ID', '7494575252253720584')
             if not self.coze_bot_id:
-                logger.warning("COZE_BOT_ID 环境变量未设置，使用默认值")
+                logger.warning("COZE_BOT_ID 未设置，使用默认值")
 
         if not hasattr(self, 'coze_api_url') or not self.coze_api_url:
-            self.coze_api_url = os.getenv('COZE_API_URL', 'https://api.coze.com')
+            self.coze_api_url = getattr(settings, 'COZE_API_URL', 'https://api.coze.com')
             if not self.coze_api_url:
-                logger.warning("COZE_API_URL 环境变量未设置，使用默认值")
+                logger.warning("COZE_API_URL 未设置，使用默认值")
 
     def _create_default_analysis(self, indicators: Dict, current_price: float) -> Dict:
         """创建默认的分析报告"""
@@ -687,9 +703,9 @@ class TechnicalIndicatorsAPIView(APIView):
                 logger.error(f"获取市场数据失败: {symbol}")
                 return None
 
-            # 构建请求头
+            # 构建请求头 - 直接使用硬编码的API密钥进行测试
             headers = {
-                "Authorization": f"Bearer {self.coze_api_key}",
+                "Authorization": "Bearer pat_28kG42zV2cMrPOuJ3wxEAvS9FOgljtof9TeJLAQs2n6pQ1N2fT3Bv0uF1XVAWGhj",
                 "Content-Type": "application/json",
                 "Accept": "*/*",
                 "Connection": "keep-alive"
@@ -866,9 +882,9 @@ class TechnicalIndicatorsAPIView(APIView):
         try:
             url = f"{self.coze_api_url}/v3/chat"
 
-            # 设置请求头
+            # 设置请求头 - 直接使用硬编码的API密钥进行测试
             headers = {
-                "Authorization": f"Bearer {self.coze_api_key}",
+                "Authorization": "Bearer pat_28kG42zV2cMrPOuJ3wxEAvS9FOgljtof9TeJLAQs2n6pQ1N2fT3Bv0uF1XVAWGhj",
                 "Content-Type": "application/json",
                 "Accept": "*/*",
                 "Connection": "keep-alive"
@@ -897,7 +913,20 @@ class TechnicalIndicatorsAPIView(APIView):
                     logger.info(f"响应头: {dict(response.headers)}")
                     logger.info(f"响应内容: {response_text}")
 
-                    return response.status == 200
+                    # 检查HTTP状态码和响应内容
+                    if response.status != 200:
+                        return False
+
+                    # 解析响应内容，检查是否有错误代码
+                    try:
+                        response_data = json.loads(response_text)
+                        if 'code' in response_data and response_data['code'] != 0:
+                            logger.error(f"Coze API返回错误代码: {response_data.get('code')}, 消息: {response_data.get('msg')}")
+                            return False
+                        return True
+                    except json.JSONDecodeError:
+                        logger.error("无法解析Coze API响应")
+                        return False
 
         except Exception as e:
             logger.error(f"测试认证失败: {str(e)}")
@@ -908,7 +937,7 @@ class TechnicalIndicatorsAPIView(APIView):
         try:
             # 检查是否需要强制刷新
             force_refresh = request.query_params.get('force_refresh', 'false').lower() == 'true'
-            
+
             # 统一 symbol 格式，去除常见后缀 (移到最前面，确保所有分支都能使用)
             clean_symbol = symbol.upper().replace('USDT', '').replace('-PERP', '').replace('_PERP', '').replace('PERP', '')
             logger.info(f"异步处理请求: symbol={symbol}, clean_symbol={clean_symbol}, force_refresh={force_refresh}")
@@ -971,7 +1000,7 @@ class TechnicalIndicatorsAPIView(APIView):
                 try:
                     # 如果有Coze API配置，使用异步调用，但这里需要在同步环境中执行
                     analysis_data = None
-                    
+
                     if hasattr(self, 'coze_api_key') and self.coze_api_key:
                         logger.info(f"准备获取Coze分析: {symbol}")
                         # 借助异步转同步执行
@@ -990,23 +1019,23 @@ class TechnicalIndicatorsAPIView(APIView):
                                 logger.warning("Coze API认证失败，使用默认分析报告")
                         finally:
                             loop.close()
-                    
+
                     # 如果没有获取到Coze分析，使用默认分析报告
                     if not analysis_data:
                         logger.info("使用默认分析报告")
                         analysis_data = self._create_default_analysis(indicators, float(market_data['price']))
-                    
+
                     # 保存分析报告
                     try:
                         # 统一使用 clean_symbol
                         await sync_to_async(self.report_service.save_analysis_report)(clean_symbol, analysis_data)
-                        
+
                         # 添加时间戳字段，使用当前时间
                         analysis_data['last_update_time'] = format_timestamp(timezone.now())
-                        
+
                         # 添加当前价格字段
                         analysis_data['current_price'] = float(market_data['price'])
-                        
+
                     except Exception as e:
                         logger.error(f"保存分析报告失败: {str(e)}")
                         return Response({
@@ -1216,12 +1245,12 @@ class TokenDataAPIView(APIView):
 
     def _sanitize_float(self, value, min_val=-np.inf, max_val=np.inf):
         """将输入转换为有效的浮点数，并限制在指定范围内
-        
+
         Args:
             value: 要处理的输入值
             min_val: 最小有效值，默认为负无穷
             max_val: 最大有效值，默认为正无穷
-            
+
         Returns:
             float: 处理后的浮点数
         """
@@ -1235,16 +1264,21 @@ class TokenDataAPIView(APIView):
 
 class TechnicalIndicatorsDataAPIView(APIView):
     """技术指标数据API视图"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # 允许匿名访问
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.ta_service = None
         self.market_service = None
+        self.report_service = None
 
     async def async_get(self, request, symbol: str):
         """异步处理 GET 请求"""
         try:
+            # 统一 symbol 格式，去除常见后缀
+            clean_symbol = symbol.upper().replace('USDT', '').replace('-PERP', '').replace('_PERP', '').replace('PERP', '')
+            logger.info(f"TechnicalIndicatorsDataAPIView: 查询 symbol={symbol}, clean_symbol={clean_symbol}")
+
             # 确保服务已初始化
             if self.ta_service is None:
                 self.ta_service = TechnicalAnalysisService()
@@ -1252,7 +1286,10 @@ class TechnicalIndicatorsDataAPIView(APIView):
             if self.market_service is None:
                 self.market_service = MarketDataService()
                 logger.info("TechnicalIndicatorsDataAPIView: 初始化市场数据服务")
-                
+            if self.report_service is None:
+                self.report_service = AnalysisReportService()
+                logger.info("TechnicalIndicatorsDataAPIView: 初始化分析报告服务")
+
             # 获取技术指标
             technical_data = await sync_to_async(self.ta_service.get_all_indicators)(symbol)
             if technical_data['status'] == 'error':
@@ -1267,6 +1304,37 @@ class TechnicalIndicatorsDataAPIView(APIView):
                     'status': 'error',
                     'message': f"无法获取{symbol}的市场数据"
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # 获取或创建 Chain 记录
+            chain, _ = await sync_to_async(Chain.objects.get_or_create)(
+                chain='CRYPTO',
+                defaults={
+                    'is_active': True,
+                    'is_testnet': False
+                }
+            )
+
+            # 获取或创建 Token 记录
+            token_qs = await sync_to_async(CryptoToken.objects.filter)(symbol=clean_symbol)
+            token = await sync_to_async(token_qs.first)()
+            if not token:
+                token = await sync_to_async(CryptoToken.objects.create)(
+                    symbol=clean_symbol,
+                    chain=chain,
+                    name=clean_symbol,
+                    address='0x0000000000000000000000000000000000000000',
+                    decimals=18
+                )
+                logger.info(f"创建新的代币记录: {clean_symbol}")
+
+            # 保存技术分析数据到数据库
+            await sync_to_async(self._update_analysis_data)(token, indicators, market_data['price'])
+            logger.info(f"成功保存 {clean_symbol} 的技术分析数据到数据库")
+
+            # 生成并保存智能分析报告
+            analysis_data = self._create_default_analysis(indicators, float(market_data['price']))
+            await sync_to_async(self.report_service.save_analysis_report)(clean_symbol, analysis_data)
+            logger.info(f"成功保存 {clean_symbol} 的智能分析报告")
 
             # 格式化指标数据
             formatted_indicators = {
@@ -1304,6 +1372,238 @@ class TechnicalIndicatorsDataAPIView(APIView):
                 'status': 'error',
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def _update_analysis_data(self, token: CryptoToken, indicators: Dict, current_price: float) -> None:
+        """更新技术分析数据"""
+        try:
+            # 处理指标数据
+            indicators = sanitize_indicators(indicators)
+
+            # 删除旧的技术分析记录，创建新的
+            TechnicalAnalysis.objects.filter(token=token).delete()
+            technical_analysis = TechnicalAnalysis.objects.create(
+                token=token,
+                timestamp=timezone.now(),
+                rsi=indicators.get('RSI'),
+                macd_line=indicators.get('MACD', {}).get('line'),
+                macd_signal=indicators.get('MACD', {}).get('signal'),
+                macd_histogram=indicators.get('MACD', {}).get('histogram'),
+                bollinger_upper=indicators.get('BollingerBands', {}).get('upper'),
+                bollinger_middle=indicators.get('BollingerBands', {}).get('middle'),
+                bollinger_lower=indicators.get('BollingerBands', {}).get('lower'),
+                bias=indicators.get('BIAS'),
+                psy=indicators.get('PSY'),
+                dmi_plus=indicators.get('DMI', {}).get('plus_di'),
+                dmi_minus=indicators.get('DMI', {}).get('minus_di'),
+                dmi_adx=indicators.get('DMI', {}).get('adx'),
+                vwap=indicators.get('VWAP'),
+                funding_rate=indicators.get('FundingRate'),
+                exchange_netflow=indicators.get('ExchangeNetflow'),
+                nupl=indicators.get('NUPL'),
+                mayer_multiple=indicators.get('MayerMultiple')
+            )
+
+            # 删除旧的市场数据记录，创建新的
+            MarketData.objects.filter(token=token).delete()
+            MarketData.objects.create(
+                token=token,
+                timestamp=timezone.now(),
+                price=current_price,
+                volume=0.0,
+                price_change_24h=0.0,
+                price_change_percent_24h=0.0,
+                high_24h=0.0,
+                low_24h=0.0
+            )
+
+            logger.info(f"成功更新代币 {token.symbol} 的技术分析数据")
+
+        except Exception as e:
+            logger.error(f"更新代币技术分析数据失败: {str(e)}")
+            raise
+
+    def _create_default_analysis(self, indicators: Dict, current_price: float) -> Dict:
+        """创建基于技术指标的智能分析报告"""
+
+        # 获取技术指标值
+        rsi = indicators.get('RSI', 50)
+        macd = indicators.get('MACD', {})
+        macd_line = macd.get('line', 0) if isinstance(macd, dict) else 0
+        macd_signal = macd.get('signal', 0) if isinstance(macd, dict) else 0
+        bollinger = indicators.get('BollingerBands', {})
+        bias = indicators.get('BIAS', 0)
+        psy = indicators.get('PSY', 50)
+        dmi = indicators.get('DMI', {})
+        dmi_adx = dmi.get('adx', 0) if isinstance(dmi, dict) else 0
+        dmi_plus = dmi.get('plus_di', 0) if isinstance(dmi, dict) else 0
+        dmi_minus = dmi.get('minus_di', 0) if isinstance(dmi, dict) else 0
+        funding_rate = indicators.get('FundingRate', 0)
+        exchange_netflow = indicators.get('ExchangeNetflow', 0)
+        nupl = indicators.get('NUPL', 0)
+        mayer_multiple = indicators.get('MayerMultiple', 1)
+
+        # 分析各个指标
+        bullish_signals = 0
+        bearish_signals = 0
+
+        # RSI分析
+        if rsi < 30:
+            rsi_analysis = f"RSI为{rsi:.1f}，处于超卖区域，可能出现反弹"
+            rsi_trend = "bullish"
+            bullish_signals += 1
+        elif rsi > 70:
+            rsi_analysis = f"RSI为{rsi:.1f}，处于超买区域，注意回调风险"
+            rsi_trend = "bearish"
+            bearish_signals += 1
+        else:
+            rsi_analysis = f"RSI为{rsi:.1f}，处于正常区间，趋势相对平衡"
+            rsi_trend = "neutral"
+
+        # MACD分析
+        if macd_line > macd_signal and macd_line > 0:
+            macd_analysis = "MACD金叉且位于零轴上方，多头趋势较强"
+            macd_trend = "bullish"
+            bullish_signals += 1
+        elif macd_line < macd_signal and macd_line < 0:
+            macd_analysis = "MACD死叉且位于零轴下方，空头趋势较强"
+            macd_trend = "bearish"
+            bearish_signals += 1
+        else:
+            macd_analysis = "MACD信号相对中性，等待明确方向"
+            macd_trend = "neutral"
+
+        # 布林带分析
+        if isinstance(bollinger, dict):
+            upper = bollinger.get('upper', current_price * 1.02)
+            lower = bollinger.get('lower', current_price * 0.98)
+            if current_price > upper:
+                bollinger_analysis = "价格突破布林带上轨，可能存在超买"
+                bollinger_trend = "bearish"
+                bearish_signals += 1
+            elif current_price < lower:
+                bollinger_analysis = "价格跌破布林带下轨，可能存在超卖"
+                bollinger_trend = "bullish"
+                bullish_signals += 1
+            else:
+                bollinger_analysis = "价格在布林带中轨附近，波动相对正常"
+                bollinger_trend = "neutral"
+        else:
+            bollinger_analysis = "布林带数据不足，无法分析"
+            bollinger_trend = "neutral"
+
+        # DMI分析 - 重要的看涨信号
+        if dmi_adx > 25 and dmi_plus > dmi_minus:
+            bullish_signals += 1
+        elif dmi_adx > 25 and dmi_minus > dmi_plus:
+            bearish_signals += 1
+
+        # 交易所净流出分析 - 通常是看涨信号
+        if exchange_netflow < -10:
+            bullish_signals += 1
+        elif exchange_netflow > 10:
+            bearish_signals += 1
+
+        # NUPL分析 - 低位通常是看涨信号
+        if nupl < 25:
+            bullish_signals += 1
+        elif nupl > 75:
+            bearish_signals += 1
+
+        # 计算趋势概率
+        total_signals = bullish_signals + bearish_signals
+        if total_signals > 0:
+            up_prob = int((bullish_signals / max(total_signals, 1)) * 60 + 20)  # 20-80%
+            down_prob = int((bearish_signals / max(total_signals, 1)) * 60 + 20)  # 20-80%
+            sideways_prob = max(100 - up_prob - down_prob, 10)
+        else:
+            up_prob, sideways_prob, down_prob = 33, 34, 33
+
+        # 生成交易建议
+        if bullish_signals > bearish_signals + 1:
+            trading_action = "买入"
+            trading_reason = f"多个技术指标显示看涨信号({bullish_signals}个)，建议适量买入"
+            entry_price = current_price
+            stop_loss = current_price * 0.95
+            take_profit = current_price * 1.10
+            risk_level = "中"
+            risk_score = 40
+        elif bearish_signals > bullish_signals + 1:
+            trading_action = "卖出"
+            trading_reason = f"多个技术指标显示看跌信号({bearish_signals}个)，建议减仓或观望"
+            entry_price = current_price
+            stop_loss = current_price * 1.05
+            take_profit = current_price * 0.90
+            risk_level = "中高"
+            risk_score = 65
+        else:
+            trading_action = "观望"
+            trading_reason = "技术指标信号混合，建议等待更明确的方向"
+            entry_price = current_price
+            stop_loss = current_price * 0.95
+            take_profit = current_price * 1.05
+            risk_level = "中"
+            risk_score = 50
+
+        return {
+            'trend_up_probability': up_prob,
+            'trend_sideways_probability': sideways_prob,
+            'trend_down_probability': down_prob,
+            'trend_summary': f"基于技术指标分析，看涨信号{bullish_signals}个，看跌信号{bearish_signals}个",
+            'indicators_analysis': {
+                'RSI': {
+                    'analysis': rsi_analysis,
+                    'support_trend': rsi_trend
+                },
+                'MACD': {
+                    'analysis': macd_analysis,
+                    'support_trend': macd_trend
+                },
+                'BollingerBands': {
+                    'analysis': bollinger_analysis,
+                    'support_trend': bollinger_trend
+                },
+                'BIAS': {
+                    'analysis': f"BIAS为{bias:.2f}，反映价格偏离移动平均线程度",
+                    'support_trend': 'bullish' if bias > 2 else 'bearish' if bias < -2 else 'neutral'
+                },
+                'PSY': {
+                    'analysis': f"PSY为{psy:.1f}，反映市场心理状态",
+                    'support_trend': 'bullish' if psy > 60 else 'bearish' if psy < 40 else 'neutral'
+                },
+                'DMI': {
+                    'analysis': f"ADX为{dmi_adx:.1f}，趋势强度{'较强' if dmi_adx > 25 else '较弱'}",
+                    'support_trend': 'bullish' if dmi_plus > dmi_minus else 'bearish' if dmi_minus > dmi_plus else 'neutral'
+                },
+                'VWAP': {
+                    'analysis': "VWAP反映成交量加权平均价格",
+                    'support_trend': 'neutral'
+                },
+                'FundingRate': {
+                    'analysis': f"资金费率为{funding_rate:.4f}，反映市场情绪",
+                    'support_trend': 'bearish' if funding_rate > 0.0005 else 'bullish' if funding_rate < -0.0005 else 'neutral'
+                },
+                'ExchangeNetflow': {
+                    'analysis': f"交易所净流入为{exchange_netflow:.2f}，{'流入' if exchange_netflow > 0 else '流出' if exchange_netflow < 0 else '平衡'}",
+                    'support_trend': 'bearish' if exchange_netflow > 10 else 'bullish' if exchange_netflow < -10 else 'neutral'
+                },
+                'NUPL': {
+                    'analysis': f"NUPL为{nupl:.1f}，反映市场盈利状况",
+                    'support_trend': 'bearish' if nupl > 75 else 'bullish' if nupl < 25 else 'neutral'
+                },
+                'MayerMultiple': {
+                    'analysis': f"梅耶倍数为{mayer_multiple:.2f}，{'高估' if mayer_multiple > 2.4 else '低估' if mayer_multiple < 1.0 else '合理'}",
+                    'support_trend': 'bearish' if mayer_multiple > 2.4 else 'bullish' if mayer_multiple < 1.0 else 'neutral'
+                }
+            },
+            'trading_action': trading_action,
+            'trading_reason': trading_reason,
+            'entry_price': entry_price,
+            'stop_loss': stop_loss,
+            'take_profit': take_profit,
+            'risk_level': risk_level,
+            'risk_score': risk_score,
+            'risk_details': [f"基于{total_signals}个技术指标的综合分析"]
+        }
 
     def get(self, request, symbol: str):
         """同步入口点，调用异步处理"""
